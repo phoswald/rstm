@@ -1,5 +1,7 @@
 package com.github.phoswald.rstm.http;
 
+import java.nio.charset.StandardCharsets;
+
 import com.github.phoswald.record.builder.RecordBuilder;
 
 @RecordBuilder
@@ -13,7 +15,15 @@ public record HttpResponse( //
         return new HttpResponseBuilder();
     }
 
-    public static HttpResponse status(int status) {
+    public static HttpResponse empty(int status) {
         return builder().status(status).build();
+    }
+
+    public static HttpResponse text(int status, String text) {
+        return builder() //
+                .status(status) //
+                .contentType("text/plain") //
+                .body(text.getBytes(StandardCharsets.UTF_8)) //
+                .build();
     }
 }

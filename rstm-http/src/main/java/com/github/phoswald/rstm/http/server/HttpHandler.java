@@ -1,6 +1,11 @@
 package com.github.phoswald.rstm.http.server;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +27,8 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
     @Override
     public void handle(HttpExchange exchange) {
         try {
-            logger.info("Handling request: URI={}", exchange.getRequestURI());
+            logger.info("Handling request: URI={}, headers={}", exchange.getRequestURI(),
+                    exchange.getRequestHeaders().entrySet());
             HttpRequest request = readRequest(exchange);
             HttpResponse response = config.handler().handle(request.path(), request);
             writeResponse(exchange, response);
@@ -33,16 +39,46 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
         }
     }
 
-    private HttpRequest readRequest(HttpExchange exchange) {
+    private HttpRequest readRequest(HttpExchange exchange) throws IOException {
+        var pathParams = new HashMap<String, String>();
+        var queryParams = new HashMap<String, String>();
+        var formParams = new HashMap<String, String>();
+        decodeQueryString(queryParams, exchange.getRequestURI().getQuery());
+        if (Objects.equals(exchange.getRequestHeaders().getFirst("content-type"),
+                "application/x-www-form-urlencoded; charset=ISO-8859-1")) { // TODO: correctly parse content-type
+            try (var input = exchange.getRequestBody()) {
+                var buffer = new ByteArrayOutputStream();
+                input.transferTo(buffer);
+                decodeQueryString(formParams, new String(buffer.toByteArray(), StandardCharsets.UTF_8));
+            }
+        }
         return HttpRequest.builder() //
-                .method(HttpMethod.GET) //
+                .method(HttpMethod.valueOf(exchange.getRequestMethod())) //
                 .path(exchange.getRequestURI().getPath()) //
+                .pathParams(pathParams) //
+                .queryParams(queryParams) //
+                .formParams(formParams) //
                 .build();
+    }
+
+    private void decodeQueryString(Map<String, String> queryParams, String queryString) {
+        if (queryString != null) {
+            // TODO: correctly handle query string encoding (see URI.getQuery() vs.
+            // URI.getRawQuery())
+            for (String queryParam : queryString.split("&")) {
+                int sep = queryParam.indexOf("=");
+                if (sep > 0) {
+                    queryParams.put( //
+                            queryParam.substring(0, sep), //
+                            queryParam.substring(sep + 1).replace("+", " ").replace("%20", " "));
+                }
+            }
+        }
     }
 
     private void writeResponse(HttpExchange exchange, HttpResponse response) throws IOException {
         if (response == null) {
-            response = HttpResponse.status(404);
+            response = HttpResponse.empty(404);
         }
         if (response.contentType() != null) {
             exchange.getResponseHeaders().add("content-type", response.contentType());

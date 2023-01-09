@@ -16,20 +16,20 @@ class ResourcesHandler implements HttpFilter {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final String basePath;
 
-    public ResourcesHandler(String basePath) {
+    ResourcesHandler(String basePath) {
         this.basePath = Objects.requireNonNull(basePath);
     }
 
     @Override
     public HttpResponse handle(String path, HttpRequest request) throws IOException {
         if (path.contains("..")) {
-            return HttpResponse.status(400);
+            return HttpResponse.empty(400);
         }
         String resource = basePath + path;
         try (InputStream input = getClass().getResourceAsStream(resource)) {
             if (input == null) {
                 logger.warn("Not found: resource={}", resource);
-                return HttpResponse.status(404);
+                return HttpResponse.empty(404);
             }
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             input.transferTo(buffer);
