@@ -29,19 +29,8 @@ public record HttpServerConfig( //
         return new FilesystemHandler(basePath);
     }
 
-    public static HttpFilter all(HttpFilter... handlers) {
-        return (path, request) -> {
-            for (HttpFilter handler : handlers) {
-                HttpResponse resoponse = handler.handle(path, request);
-                if (resoponse != null) {
-                    return resoponse;
-                }
-            }
-            return null;
-        };
-    }
-
-    public static HttpFilter route(String route, HttpFilter handler) {
+    public static HttpFilter route(String route, HttpFilter... handlers) {
+        HttpFilter handler = combine(handlers);
         return (path, request) -> {
             if (path.startsWith(route)) {
                 return handler.handle(path.substring(route.length()), request);
@@ -51,8 +40,9 @@ public record HttpServerConfig( //
         };
     }
 
-    public static HttpFilter routePattern(String route, HttpFilter handler) {
+    public static HttpFilter routePattern(String route, HttpFilter... handlers) {
         // TODO: correctly handle pattern not covering whole path
+        HttpFilter handler = combine(handlers);
         Pattern pattern = Pattern.compile("^" + route + "$");
         return (path, request) -> {
             Matcher matcher = pattern.matcher(path);
@@ -81,13 +71,33 @@ public record HttpServerConfig( //
         return method(HttpMethod.PUT, handler);
     }
 
+    public static HttpFilter delete(ThrowingFunction<HttpRequest, HttpResponse> handler) {
+        return method(HttpMethod.DELETE, handler);
+    }
+
     private static HttpFilter method(HttpMethod method, ThrowingFunction<HttpRequest, HttpResponse> handler) {
         return (path, request) -> {
-            if (request.method() == method) {
+            if (request.method() == method) { // TODO: also check whether path is empty?
                 return handler.invoke(request);
             } else {
                 return null;
             }
         };
+    }
+
+    public static HttpFilter combine(HttpFilter... handlers) {
+        if(handlers.length == 1) {
+            return handlers[0];
+        } else {
+            return (path, request) -> {
+                for (HttpFilter handler : handlers) {
+                    HttpResponse resoponse = handler.handle(path, request);
+                    if (resoponse != null) {
+                        return resoponse;
+                    }
+                }
+                return null;
+            };
+        }
     }
 }

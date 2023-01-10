@@ -1,6 +1,7 @@
 package com.github.phoswald.rstm.http.server;
 
-import static com.github.phoswald.rstm.http.server.HttpServerConfig.all;
+import static com.github.phoswald.rstm.http.server.HttpServerConfig.combine;
+import static com.github.phoswald.rstm.http.server.HttpServerConfig.delete;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.filesystem;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.get;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.post;
@@ -25,22 +26,27 @@ class HttpServerTest {
 
     private final HttpServerConfig config = HttpServerConfig.builder() //
             .httpPort(8080) //
-            .handler(all( //
+            .handler(combine( //
                     route("/static/resources/", //
                             resources("/html/")), //
                     route("/static/files/", //
                             filesystem(Paths.get("src/test/resources/html/"))), //
                     route("/dynamic/sample", //
-                            get(request -> HttpResponse.text(200, "Sample String"))), //
+                            get(request -> HttpResponse.text(200, "Response for GET")), //
+                            post(request -> HttpResponse.text(200, "Response for POST of " + request.text())), //
+                            put(request -> HttpResponse.text(200, "Response for PUT of " + request.text())), //
+                            delete(request -> HttpResponse.text(200, "Response for DELETE"))), //
                     routePattern("/dynamic/param/([0-9]+)", //
-                            get(request -> HttpResponse.text(200, "Requested with p1=" + request.pathParam("1").orElse(null)))), //
+                            get(request -> HttpResponse.text(200, "Response for GET with p1=" + request.pathParam("1").orElse(null)))), //
                     route("/dynamic/query", //
-                            get(request -> HttpResponse.text(200, "Requested with q1=" + request.queryParam("q1").orElse(null) + " and q2=" + request.queryParam("q2").orElse(null)))), //
-                    route("/dynamic/form", all( //
-                            post(request -> HttpResponse.text(200, "Post form with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null))), //
-                            put(request -> HttpResponse.text(200, "Put form with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null))))) //
+                            get(request -> HttpResponse.text(200, "Response for GET with q1=" + request.queryParam("q1").orElse(null) + " and q2=" + request.queryParam("q2").orElse(null)))), //
+                    route("/dynamic/form", //
+                            post(request -> HttpResponse.text(200, "Response for POST with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null))), //
+                            put(request -> HttpResponse.text(200, "Response for PUT with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null)))), //
+                    route("/dynamic/redirect", get(request -> HttpResponse.redirect(302, "/dynamic/other"))) //
             )) //
             .build();
+
     private final HttpServer testee = new HttpServer(config);
 
     @AfterEach
@@ -141,7 +147,43 @@ class HttpServerTest {
         then().
             statusCode(200).
             contentType("text/plain").
-            body(equalTo("Sample String"));
+            body(equalTo("Response for GET"));
+    }
+
+    @Test
+    void post_dynamicExisting_success() {
+        given().
+            contentType("text/plain").
+            body("Sample Request").
+        when().
+            post("/dynamic/sample").
+        then().
+            statusCode(200).
+            contentType("text/plain").
+            body(equalTo("Response for POST of Sample Request"));
+    }
+
+    @Test
+    void put_dynamicExisting_success() {
+        given().
+            contentType("text/plain").
+            body("Sample Request").
+        when().
+            put("/dynamic/sample").
+        then().
+            statusCode(200).
+            contentType("text/plain").
+            body(equalTo("Response for PUT of Sample Request"));
+    }
+
+    @Test
+    void delete_dynamicExisting_success() {
+        when().
+            delete("/dynamic/sample").
+        then().
+            statusCode(200).
+            contentType("text/plain").
+            body(equalTo("Response for DELETE"));
     }
 
     @Test
@@ -150,7 +192,7 @@ class HttpServerTest {
             get("/dynamic/param/1234").
         then().
             statusCode(200).
-            body(equalTo("Requested with p1=1234"));
+            body(equalTo("Response for GET with p1=1234"));
     }
 
     @Test
@@ -162,7 +204,7 @@ class HttpServerTest {
             get("/dynamic/query").
         then().
             statusCode(200).
-            body(equalTo("Requested with q1=search and q2=more text"));
+            body(equalTo("Response for GET with q1=search and q2=more text"));
     }
 
     @Test
@@ -174,7 +216,7 @@ class HttpServerTest {
             post("/dynamic/form").
         then().
             statusCode(200).
-            body(equalTo("Post form with f1=search and f2=more text"));
+            body(equalTo("Response for POST with f1=search and f2=more text"));
     }
 
     @Test
@@ -186,6 +228,17 @@ class HttpServerTest {
             put("/dynamic/form").
         then().
             statusCode(200).
-            body(equalTo("Put form with f1=search and f2=more text"));
+            body(equalTo("Response for PUT with f1=search and f2=more text"));
+    }
+
+    @Test
+    void get_dynamicRedirect_success() {
+        given().
+            redirects().follow(false).
+        when().
+            get("/dynamic/redirect").
+        then().
+            statusCode(302).
+            header("location", "/dynamic/other");
     }
 }

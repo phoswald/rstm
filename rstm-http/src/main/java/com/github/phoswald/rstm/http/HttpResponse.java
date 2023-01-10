@@ -8,6 +8,7 @@ import com.github.phoswald.record.builder.RecordBuilder;
 public record HttpResponse( //
         int status, //
         String contentType, //
+        String location, //
         byte[] body //
 ) {
 
@@ -25,5 +26,9 @@ public record HttpResponse( //
                 .contentType("text/plain") //
                 .body(text.getBytes(StandardCharsets.UTF_8)) //
                 .build();
+    }
+
+    public static HttpResponse redirect(int status, String location) {
+        return builder().status(status).location(location).build();
     }
 }

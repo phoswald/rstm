@@ -1,5 +1,6 @@
 package com.github.phoswald.rstm.http;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 
@@ -11,7 +12,8 @@ public record HttpRequest( //
         String path, //
         Map<String,String> pathParams, //
         Map<String,String> queryParams, //
-        Map<String,String> formParams //
+        Map<String,String> formParams, //
+        byte[] body //
 ) {
 
     public static HttpRequestBuilder builder() {
@@ -32,5 +34,9 @@ public record HttpRequest( //
 
     public Optional<String> formParam(String name) {
         return Optional.ofNullable(formParams.get(name));
+    }
+
+    public String text() {
+        return body == null ? null : new String(body, StandardCharsets.UTF_8); // TODO use correct charset
     }
 }

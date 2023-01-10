@@ -22,7 +22,7 @@ class FilesystemHandler implements HttpFilter {
 
     @Override
     public HttpResponse handle(String path, HttpRequest request) throws IOException {
-        if (path.contains("..")) {
+        if (path.contains("..")) { // TODO more hardening: ensure path is relative
             return HttpResponse.empty(400);
         }
         Path file = basePath.resolve(path);

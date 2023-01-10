@@ -22,7 +22,7 @@ class ResourcesHandler implements HttpFilter {
 
     @Override
     public HttpResponse handle(String path, HttpRequest request) throws IOException {
-        if (path.contains("..")) {
+        if (path.contains("..")) { // TODO more hardening: ensure path is relative
             return HttpResponse.empty(400);
         }
         String resource = basePath + path;

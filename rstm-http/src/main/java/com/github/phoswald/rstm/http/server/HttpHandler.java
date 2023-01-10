@@ -40,9 +40,10 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
     }
 
     private HttpRequest readRequest(HttpExchange exchange) throws IOException {
-        var pathParams = new HashMap<String, String>();
-        var queryParams = new HashMap<String, String>();
-        var formParams = new HashMap<String, String>();
+        Map<String,String> pathParams = new HashMap<>();
+        Map<String,String> queryParams = new HashMap<>();
+        Map<String,String> formParams = new HashMap<>();
+        byte[] body = null;
         decodeQueryString(queryParams, exchange.getRequestURI().getQuery());
         if (Objects.equals(exchange.getRequestHeaders().getFirst("content-type"),
                 "application/x-www-form-urlencoded; charset=ISO-8859-1")) { // TODO: correctly parse content-type
@@ -51,6 +52,12 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
                 input.transferTo(buffer);
                 decodeQueryString(formParams, new String(buffer.toByteArray(), StandardCharsets.UTF_8));
             }
+        } else {
+            try (var input = exchange.getRequestBody()) {
+                var buffer = new ByteArrayOutputStream();
+                input.transferTo(buffer);
+                body = buffer.toByteArray();
+            }
         }
         return HttpRequest.builder() //
                 .method(HttpMethod.valueOf(exchange.getRequestMethod())) //
@@ -58,6 +65,7 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
                 .pathParams(pathParams) //
                 .queryParams(queryParams) //
                 .formParams(formParams) //
+                .body(body) //
                 .build();
     }
 
@@ -82,6 +90,9 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
         }
         if (response.contentType() != null) {
             exchange.getResponseHeaders().add("content-type", response.contentType());
+        }
+        if (response.location() != null) {
+            exchange.getResponseHeaders().add("location", response.location());
         }
         int responseStatus = response.status() != 0 ? response.status() : 200;
         if (response.body() != null) {
