@@ -8,7 +8,6 @@ import static com.github.phoswald.rstm.http.server.HttpServerConfig.post;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.put;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.resources;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.route;
-import static com.github.phoswald.rstm.http.server.HttpServerConfig.routePattern;
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.containsString;
@@ -26,24 +25,24 @@ class HttpServerTest {
 
     private final HttpServerConfig config = HttpServerConfig.builder() //
             .httpPort(8080) //
-            .handler(combine( //
-                    route("/static/resources/", //
+            .filter(combine( //
+                    route("static/resources/", //
                             resources("/html/")), //
-                    route("/static/files/", //
+                    route("static/files/", //
                             filesystem(Paths.get("src/test/resources/html/"))), //
-                    route("/dynamic/sample", //
+                    route("dynamic/sample", //
                             get(request -> HttpResponse.text(200, "Response for GET")), //
                             post(request -> HttpResponse.text(200, "Response for POST of " + request.text())), //
                             put(request -> HttpResponse.text(200, "Response for PUT of " + request.text())), //
                             delete(request -> HttpResponse.text(200, "Response for DELETE"))), //
-                    routePattern("/dynamic/param/([0-9]+)", //
-                            get(request -> HttpResponse.text(200, "Response for GET with p1=" + request.pathParam("1").orElse(null)))), //
-                    route("/dynamic/query", //
+                    route("dynamic/param/{name}", //
+                            get(request -> HttpResponse.text(200, "Response for GET with p1=" + request.pathParam("name").orElse(null)))), //
+                    route("dynamic/query", //
                             get(request -> HttpResponse.text(200, "Response for GET with q1=" + request.queryParam("q1").orElse(null) + " and q2=" + request.queryParam("q2").orElse(null)))), //
-                    route("/dynamic/form", //
+                    route("dynamic/form", //
                             post(request -> HttpResponse.text(200, "Response for POST with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null))), //
                             put(request -> HttpResponse.text(200, "Response for PUT with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null)))), //
-                    route("/dynamic/redirect", get(request -> HttpResponse.redirect(302, "/dynamic/other"))) //
+                    route("dynamic/redirect", get(request -> HttpResponse.redirect(302, "/dynamic/other"))) //
             )) //
             .build();
 

@@ -1,10 +1,7 @@
 package com.github.phoswald.rstm.http.server;
 
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Arrays;
 
 import com.github.phoswald.record.builder.RecordBuilder;
 import com.github.phoswald.rstm.http.HttpMethod;
@@ -14,7 +11,7 @@ import com.github.phoswald.rstm.http.HttpResponse;
 @RecordBuilder
 public record HttpServerConfig( //
         int httpPort, //
-        HttpFilter handler //
+        HttpFilter filter //
 ) {
 
     public static HttpServerConfigBuilder builder() {
@@ -22,82 +19,42 @@ public record HttpServerConfig( //
     }
 
     public static HttpFilter resources(String baseResource) {
-        return new ResourcesHandler(baseResource);
+        return new ResourcesFilter(baseResource);
     }
 
     public static HttpFilter filesystem(Path basePath) {
-        return new FilesystemHandler(basePath);
+        return new FilesystemFilter(basePath);
     }
 
-    public static HttpFilter route(String route, HttpFilter... handlers) {
-        HttpFilter handler = combine(handlers);
-        return (path, request) -> {
-            if (path.startsWith(route)) {
-                return handler.handle(path.substring(route.length()), request);
-            } else {
-                return null;
-            }
-        };
+    public static HttpFilter route(String route, HttpFilter... filters) {
+        return new RouteFilter(route, combine(filters));
     }
 
-    public static HttpFilter routePattern(String route, HttpFilter... handlers) {
-        // TODO: correctly handle pattern not covering whole path
-        HttpFilter handler = combine(handlers);
-        Pattern pattern = Pattern.compile("^" + route + "$");
-        return (path, request) -> {
-            Matcher matcher = pattern.matcher(path);
-            if (matcher.matches()) {
-                Map<String, String> params = new HashMap<>(request.pathParams());
-                for (int i = 1; i <= matcher.groupCount(); i++) {
-                    params.put(Integer.toString(params.size() + 1), matcher.group(i));
-                }
-                return handler.handle("", request.toBuilder().pathParams(params).build());
-            } else {
-                return null;
-            }
-        };
+    public static HttpFilter get(ThrowingFunction<HttpRequest, HttpResponse> filter) {
+        return method(HttpMethod.GET, filter);
     }
 
-    public static HttpFilter get(ThrowingFunction<HttpRequest, HttpResponse> handler) {
-        return method(HttpMethod.GET, handler);
+    public static HttpFilter post(ThrowingFunction<HttpRequest, HttpResponse> filter) {
+        return method(HttpMethod.POST, filter);
     }
 
-
-    public static HttpFilter post(ThrowingFunction<HttpRequest, HttpResponse> handler) {
-        return method(HttpMethod.POST, handler);
+    public static HttpFilter put(ThrowingFunction<HttpRequest, HttpResponse> filter) {
+        return method(HttpMethod.PUT, filter);
     }
 
-    public static HttpFilter put(ThrowingFunction<HttpRequest, HttpResponse> handler) {
-        return method(HttpMethod.PUT, handler);
+    public static HttpFilter delete(ThrowingFunction<HttpRequest, HttpResponse> filter) {
+        return method(HttpMethod.DELETE, filter);
     }
 
-    public static HttpFilter delete(ThrowingFunction<HttpRequest, HttpResponse> handler) {
-        return method(HttpMethod.DELETE, handler);
+    private static HttpFilter method(HttpMethod method, ThrowingFunction<HttpRequest, HttpResponse> filter) {
+        return new MethodFilter(method, filter);
     }
 
-    private static HttpFilter method(HttpMethod method, ThrowingFunction<HttpRequest, HttpResponse> handler) {
-        return (path, request) -> {
-            if (request.method() == method) { // TODO: also check whether path is empty?
-                return handler.invoke(request);
-            } else {
-                return null;
-            }
-        };
-    }
-
-    public static HttpFilter combine(HttpFilter... handlers) {
-        if(handlers.length == 1) {
-            return handlers[0];
+    public static HttpFilter combine(HttpFilter... filters) {
+        if(filters.length == 1) {
+            return filters[0];
         } else {
-            return (path, request) -> {
-                for (HttpFilter handler : handlers) {
-                    HttpResponse resoponse = handler.handle(path, request);
-                    if (resoponse != null) {
-                        return resoponse;
-                    }
-                }
-                return null;
-            };
+            return new CombineFilter(Arrays.asList(filters));
         }
     }
 }

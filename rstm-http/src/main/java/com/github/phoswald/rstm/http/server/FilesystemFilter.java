@@ -11,12 +11,12 @@ import org.slf4j.LoggerFactory;
 import com.github.phoswald.rstm.http.HttpRequest;
 import com.github.phoswald.rstm.http.HttpResponse;
 
-class FilesystemHandler implements HttpFilter {
+class FilesystemFilter implements HttpFilter {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final Path basePath;
 
-    FilesystemHandler(Path basePath) {
+    FilesystemFilter(Path basePath) {
         this.basePath = Objects.requireNonNull(basePath);
     }
 

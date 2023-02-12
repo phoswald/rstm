@@ -30,7 +30,7 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
             logger.info("Handling request: URI={}, headers={}", exchange.getRequestURI(),
                     exchange.getRequestHeaders().entrySet());
             HttpRequest request = readRequest(exchange);
-            HttpResponse response = config.handler().handle(request.path(), request);
+            HttpResponse response = config.filter().handle(request.path(), request);
             writeResponse(exchange, response);
         } catch (Exception e) {
             logger.error("Handling request failed: URI={}", exchange.getRequestURI(), e);
