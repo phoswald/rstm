@@ -26,23 +26,23 @@ class HttpServerTest {
     private final HttpServerConfig config = HttpServerConfig.builder() //
             .httpPort(8080) //
             .filter(combine( //
-                    route("static/resources/", //
+                    route("/static/resources/", //
                             resources("/html/")), //
-                    route("static/files/", //
+                    route("/static/files/", //
                             filesystem(Paths.get("src/test/resources/html/"))), //
-                    route("dynamic/sample", //
+                    route("/dynamic/sample", //
                             get(request -> HttpResponse.text(200, "Response for GET")), //
                             post(request -> HttpResponse.text(200, "Response for POST of " + request.text())), //
                             put(request -> HttpResponse.text(200, "Response for PUT of " + request.text())), //
                             delete(request -> HttpResponse.text(200, "Response for DELETE"))), //
-                    route("dynamic/param/{name}", //
+                    route("/dynamic/param/{name}", //
                             get(request -> HttpResponse.text(200, "Response for GET with p1=" + request.pathParam("name").orElse(null)))), //
-                    route("dynamic/query", //
+                    route("/dynamic/query", //
                             get(request -> HttpResponse.text(200, "Response for GET with q1=" + request.queryParam("q1").orElse(null) + " and q2=" + request.queryParam("q2").orElse(null)))), //
-                    route("dynamic/form", //
+                    route("/dynamic/form", //
                             post(request -> HttpResponse.text(200, "Response for POST with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null))), //
                             put(request -> HttpResponse.text(200, "Response for PUT with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null)))), //
-                    route("dynamic/redirect", get(request -> HttpResponse.redirect(302, "/dynamic/other"))) //
+                    route("/dynamic/redirect", get(request -> HttpResponse.redirect(302, "/dynamic/other"))) //
             )) //
             .build();
 
@@ -62,9 +62,48 @@ class HttpServerTest {
     }
 
     @Test
-    void get_resourceExistingHtml_success() {
+    void get_resourceExistingHtml_success() { // TODO: use parametrized tests
         when().
             get("/static/resources/index.html").
+        then().
+            statusCode(200).
+            contentType("text/html").
+            body(
+                startsWith("<!doctype html>"),
+                containsString("<title>Sample Page</title>"),
+                containsString("<h1>Sample Page</h1>"));
+    }
+
+    @Test
+    void get_resourceExistingHtml2_success() {
+        when().
+            get("/static/resources/").
+        then().
+            statusCode(200).
+            contentType("text/html").
+            body(
+                startsWith("<!doctype html>"),
+                containsString("<title>Sample Page</title>"),
+                containsString("<h1>Sample Page</h1>"));
+    }
+
+    @Test
+    void get_resourceExistingHtml3_success() {
+        when().
+            get("/static/resources/subdir/").
+        then().
+            statusCode(200).
+            contentType("text/html").
+            body(
+                startsWith("<!doctype html>"),
+                containsString("<title>Sample Page</title>"),
+                containsString("<h1>Sample Page</h1>"));
+    }
+
+    @Test
+    void get_resourceExistingHtml4_success() {
+        when().
+            get("/static/resources/subdir/index.html").
         then().
             statusCode(200).
             contentType("text/html").
@@ -104,6 +143,45 @@ class HttpServerTest {
     void get_fileExistingHtml_success() {
         when().
             get("/static/files/index.html").
+        then().
+            statusCode(200).
+            contentType("text/html").
+            body(
+                startsWith("<!doctype html>"),
+                containsString("<title>Sample Page</title>"),
+                containsString("<h1>Sample Page</h1>"));
+    }
+
+    @Test
+    void get_fileExistingHtml2_success() {
+        when().
+            get("/static/files/").
+        then().
+            statusCode(200).
+            contentType("text/html").
+            body(
+                startsWith("<!doctype html>"),
+                containsString("<title>Sample Page</title>"),
+                containsString("<h1>Sample Page</h1>"));
+    }
+
+    @Test
+    void get_fileExistingHtml3_success() {
+        when().
+            get("/static/files/subdir/").
+        then().
+            statusCode(200).
+            contentType("text/html").
+            body(
+                startsWith("<!doctype html>"),
+                containsString("<title>Sample Page</title>"),
+                containsString("<h1>Sample Page</h1>"));
+    }
+
+    @Test
+    void get_fileExistingHtml4_success() {
+        when().
+            get("/static/files/subdir/index.html").
         then().
             statusCode(200).
             contentType("text/html").

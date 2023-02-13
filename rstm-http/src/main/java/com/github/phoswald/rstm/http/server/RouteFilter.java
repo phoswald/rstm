@@ -1,10 +1,10 @@
 package com.github.phoswald.rstm.http.server;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.github.phoswald.rstm.http.HttpRequest;
 import com.github.phoswald.rstm.http.HttpResponse;
@@ -16,16 +16,15 @@ class RouteFilter implements HttpFilter {
     private final HttpFilter filter;
 
     RouteFilter(String route, HttpFilter filter) {
-        this.routeParts = Arrays.asList(route.split("/"));
-        this.routeIsDir = route.endsWith("/");
+        this.routeParts = parseParts(route);
+        this.routeIsDir = isDir(route);
         this.filter = filter;
     }
 
     @Override
     public HttpResponse handle(String path, HttpRequest request) throws Exception {
-        // TODO more hardening: review corner cases, cleanup
-        List<String> pathParts = new ArrayList<>(Arrays.asList(path.replaceAll("^/", "").split("/")));
-        boolean pathIsDir = path.endsWith("/");
+        List<String> pathParts = parseParts(path);
+        boolean pathIsDir = isDir(path);
         Map<String, String> params = new HashMap<>(request.pathParams());
         for(String routePart : routeParts) {
             if(pathParts.isEmpty()) {
@@ -41,10 +40,21 @@ class RouteFilter implements HttpFilter {
             }
             pathParts.remove(0);
         }
-        path = (routeIsDir ? "" :  "/") + String.join("/", pathParts) + (pathIsDir ? "/" : "");
         if(params.size() > request.pathParams().size()) {
             request = request.toBuilder().pathParams(params).build();
         }
-        return filter.handle(path, request);
+        return filter.handle(joinParts(pathParts, pathIsDir), request);
+    }
+
+    private static List<String> parseParts(String path) {
+        return Arrays.asList(path.split("/")).stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
+    }
+
+    private static boolean isDir(String path) {
+        return path.endsWith("/");
+    }
+
+    private static String joinParts(List<String> parts, boolean isDir) {
+        return String.join("/", parts) + (isDir ? "/" : "");
     }
 }

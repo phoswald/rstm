@@ -25,6 +25,12 @@ class FilesystemFilter implements HttpFilter {
         if (path.contains("..")) { // TODO more hardening: ensure path is relative
             return HttpResponse.empty(400);
         }
+        if(path.endsWith("/")) {
+            path = path + "index.html";
+        }
+        if(path.startsWith("/")) {
+            path = path.substring(1);
+        }
         Path file = basePath.resolve(path);
         if (!Files.isRegularFile(file)) {
             logger.warn("Not found: file={}", file);

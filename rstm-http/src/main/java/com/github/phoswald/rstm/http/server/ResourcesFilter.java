@@ -25,6 +25,12 @@ class ResourcesFilter implements HttpFilter {
         if (path.contains("..")) { // TODO more hardening: ensure path is relative
             return HttpResponse.empty(400);
         }
+        if(path.endsWith("/")) {
+            path = path + "index.html";
+        }
+        if(path.startsWith("/")) {
+            path = path.substring(1);
+        }
         String resource = basePath + path;
         try (InputStream input = getClass().getResourceAsStream(resource)) {
             if (input == null) {
