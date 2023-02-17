@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:t="https://github.com/phoswald/rstm/rstm-template">
+  <head>
+    <title>Sample Page</title>
+  </head>
+  <body>
+    <h1>Hello, <span t:text="name">???</span>!</h1>
+    <p>The current date is <span t:text="today">???</span>.</p>
+    <p t:if="optional">Optional: <span t:text="optional">???</span>.</p>
+    <ul>
+      <li t:each="list"><span t:text="key">???</span>=<span t:text="value">???</span></li>
+    </ul>
+    <!-- comment -->
+    <input type="text" name="date" t:attr="value=today"/>
+  </body>
+</html>
