@@ -36,6 +36,10 @@ public record HttpRequest( //
         return Optional.ofNullable(formParams.get(name));
     }
 
+    public <T> T body(HttpCodec codec, Class<T> clazz) {
+        return body == null ? null : codec.decode(clazz, body);
+    }
+
     public String text() {
         return body == null ? null : new String(body, StandardCharsets.UTF_8); // TODO: use correct charset
     }

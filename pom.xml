@@ -77,6 +77,8 @@
   <modules>
     <module>rstm-config</module>
     <module>rstm-http</module>
+    <module>rstm-http-codec-json</module>
+    <module>rstm-http-codec-xml</module>
     <module>rstm-template</module>
   </modules>
 

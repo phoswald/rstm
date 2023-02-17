@@ -20,6 +20,14 @@ public record HttpResponse( //
         return builder().status(status).build();
     }
 
+    public static HttpResponse body(int status, HttpCodec codec, Object body) {
+        return builder() //
+                .status(status) //
+                .contentType(codec.getContentType()) //
+                .body(codec.encode(body)) //
+                .build();
+    }
+
     public static HttpResponse text(int status, String text) {
         return builder() //
                 .status(status) //
