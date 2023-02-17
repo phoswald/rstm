@@ -87,7 +87,7 @@ public class TemplateEngine {
                         if(Objects.equals(reader.getAttributeNamespace(i), "https://github.com/phoswald/rstm/rstm-template")) {
                             if(Objects.equals(reader.getAttributeLocalName(i), "text")) {
                                 Property property = lookupProperty(argumentClass, reader.getAttributeValue(i));
-                                logger.info("ExprText: {}::{}", argumentClass.getName(), property.name());
+                                logger.trace("ExprText: {}::{}", argumentClass.getName(), property.name());
                                 postProcessing = htmlElement -> htmlElement.replaceChildren(new ExprText(property));
 
                             } else if(Objects.equals(reader.getAttributeLocalName(i), "attr")) {
@@ -95,7 +95,7 @@ public class TemplateEngine {
                                 Matcher m = p.matcher(reader.getAttributeValue(i));
                                 if(m.matches()) {
                                     Property property = lookupProperty(argumentClass, m.group(2));
-                                    logger.info("ExprAttr: {}::{}", argumentClass.getName(), property.name());
+                                    logger.trace("ExprAttr: {}::{}", argumentClass.getName(), property.name());
                                     postProcessing = htmlElement -> new ExprAttr(property, m.group(1), htmlElement);
                                 } else {
                                     throw new IllegalArgumentException("Invalid attribute value: " + reader.getAttributeValue(i));
@@ -103,7 +103,7 @@ public class TemplateEngine {
 
                             } else if(Objects.equals(reader.getAttributeLocalName(i), "if")) {
                                 Property property = lookupProperty(argumentClass, reader.getAttributeValue(i));
-                                logger.info("ExprIf:   {}::{}", argumentClass.getName(), property.name());
+                                logger.trace("ExprIf:   {}::{}", argumentClass.getName(), property.name());
                                 postProcessing = htmlElement -> new ExprIf(property, htmlElement);
 
                             } else if(Objects.equals(reader.getAttributeLocalName(i), "each")) {
@@ -113,7 +113,7 @@ public class TemplateEngine {
                                 } else {
                                     throw new IllegalArgumentException("Invalid type: " + property.type());
                                 }
-                                logger.info("ExprEach: {}::{} -> {}", argumentClass.getName(), property.name(), nestedArgumentClass.getName());
+                                logger.trace("ExprEach: {}::{} -> {}", argumentClass.getName(), property.name(), nestedArgumentClass.getName());
                                 postProcessing = htmlElement -> new ExprEach(property, htmlElement);
 
                             } else {
@@ -172,13 +172,13 @@ public class TemplateEngine {
     }
 
     private <T> String evaluateTemplate(Template<T> template, T argument) {
-        logger.info("Evaluating template '{}' for {}.", template.name(), template.argumentClass());
+        logger.debug("Evaluating template '{}' for {}.", template.name(), template.argumentClass());
 
         StringBuilder buffer = new StringBuilder();
         evaluateNode(buffer, template.documentNode(), argument);
 
         String result = buffer.toString();
-        logger.info("Generated HTML output:\n{}", result);
+        logger.debug("Generated HTML output:\n{}", result);
         return result;
     }
 
