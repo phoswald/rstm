@@ -16,25 +16,29 @@ import static org.hamcrest.Matchers.startsWith;
 
 import java.nio.file.Paths;
 
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.github.phoswald.rstm.http.HttpResponse;
 
 class HttpServerTest {
 
-    private final HttpServerConfig config = HttpServerConfig.builder() //
+    private static final HttpServerConfig config = HttpServerConfig.builder() //
             .httpPort(8080) //
             .filter(combine( //
                     route("/static/resources/", //
                             resources("/html/")), //
                     route("/static/files/", //
                             filesystem(Paths.get("src/test/resources/html/"))), //
-                    route("/dynamic/sample", //
+                    route("/dynamic/text", //
                             get(request -> HttpResponse.text(200, "Response for GET")), //
                             post(request -> HttpResponse.text(200, "Response for POST of " + request.text())), //
                             put(request -> HttpResponse.text(200, "Response for PUT of " + request.text())), //
                             delete(request -> HttpResponse.text(200, "Response for DELETE"))), //
+                    route("/dynamic/html", //
+                            get(request -> HttpResponse.html(200, "<!doctype html><html><head><title>T</title></head><body>B</body></html>"))), //
                     route("/dynamic/param/{name}", //
                             get(request -> HttpResponse.text(200, "Response for GET with p1=" + request.pathParam("name").orElse(null)))), //
                     route("/dynamic/query", //
@@ -42,14 +46,15 @@ class HttpServerTest {
                     route("/dynamic/form", //
                             post(request -> HttpResponse.text(200, "Response for POST with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null))), //
                             put(request -> HttpResponse.text(200, "Response for PUT with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null)))), //
-                    route("/dynamic/redirect", get(request -> HttpResponse.redirect(302, "/dynamic/other"))) //
+                    route("/dynamic/redirect", get(request -> HttpResponse.redirect(302, "/dynamic/other"))), //
+                    route("/dynamic/failure", get(request -> { throw new IllegalStateException(""); })) //
             )) //
             .build();
 
-    private final HttpServer testee = new HttpServer(config);
+    private static final HttpServer testee = new HttpServer(config);
 
-    @AfterEach
-    void cleanup() {
+    @AfterAll
+    static void cleanup() {
         testee.close();
     }
 
@@ -61,49 +66,16 @@ class HttpServerTest {
             statusCode(404);
     }
 
-    @Test
-    void get_resourceExistingHtml_success() { // TODO: use parametrized tests
+    @ParameterizedTest
+    @ValueSource(strings = { //
+            "/static/resources/index.html", //
+            "/static/resources/", //
+            "/static/resources/subdir/index.html", //
+            "/static/resources/subdir/" //
+    })
+    void get_resourceExistingHtml_success(String path) {
         when().
-            get("/static/resources/index.html").
-        then().
-            statusCode(200).
-            contentType("text/html").
-            body(
-                startsWith("<!doctype html>"),
-                containsString("<title>Sample Page</title>"),
-                containsString("<h1>Sample Page</h1>"));
-    }
-
-    @Test
-    void get_resourceExistingHtml2_success() {
-        when().
-            get("/static/resources/").
-        then().
-            statusCode(200).
-            contentType("text/html").
-            body(
-                startsWith("<!doctype html>"),
-                containsString("<title>Sample Page</title>"),
-                containsString("<h1>Sample Page</h1>"));
-    }
-
-    @Test
-    void get_resourceExistingHtml3_success() {
-        when().
-            get("/static/resources/subdir/").
-        then().
-            statusCode(200).
-            contentType("text/html").
-            body(
-                startsWith("<!doctype html>"),
-                containsString("<title>Sample Page</title>"),
-                containsString("<h1>Sample Page</h1>"));
-    }
-
-    @Test
-    void get_resourceExistingHtml4_success() {
-        when().
-            get("/static/resources/subdir/index.html").
+            get(path).
         then().
             statusCode(200).
             contentType("text/html").
@@ -131,57 +103,29 @@ class HttpServerTest {
             statusCode(404);
     }
 
-    @Test
-    void get_resourceEscapedPath_badRequest() {
+    @ParameterizedTest
+    @ValueSource(strings = { //
+            "/static/resources/../simplelogger.properties", //
+            "/static/resources/../", //
+            "/static/resources/.." //
+    })
+    void get_resourceInvalidPath_badRequest(String path) {
         when().
-            get("/static/resources/../simplelogger.properties").
+            get(path).
         then().
             statusCode(400);
     }
 
-    @Test
-    void get_fileExistingHtml_success() {
+    @ParameterizedTest
+    @ValueSource(strings = { //
+            "/static/files/index.html", //
+            "/static/files/", //
+            "/static/files/subdir/index.html", //
+            "/static/files/subdir/" //
+    })
+    void get_fileExistingHtml_success(String path) {
         when().
-            get("/static/files/index.html").
-        then().
-            statusCode(200).
-            contentType("text/html").
-            body(
-                startsWith("<!doctype html>"),
-                containsString("<title>Sample Page</title>"),
-                containsString("<h1>Sample Page</h1>"));
-    }
-
-    @Test
-    void get_fileExistingHtml2_success() {
-        when().
-            get("/static/files/").
-        then().
-            statusCode(200).
-            contentType("text/html").
-            body(
-                startsWith("<!doctype html>"),
-                containsString("<title>Sample Page</title>"),
-                containsString("<h1>Sample Page</h1>"));
-    }
-
-    @Test
-    void get_fileExistingHtml3_success() {
-        when().
-            get("/static/files/subdir/").
-        then().
-            statusCode(200).
-            contentType("text/html").
-            body(
-                startsWith("<!doctype html>"),
-                containsString("<title>Sample Page</title>"),
-                containsString("<h1>Sample Page</h1>"));
-    }
-
-    @Test
-    void get_fileExistingHtml4_success() {
-        when().
-            get("/static/files/subdir/index.html").
+            get(path).
         then().
             statusCode(200).
             contentType("text/html").
@@ -209,10 +153,15 @@ class HttpServerTest {
             statusCode(404);
     }
 
-    @Test
-    void get_fileEscapedPath_badRequest() {
+    @ParameterizedTest
+    @ValueSource(strings = { //
+            "/static/files/../simplelogger.properties", //
+            "/static/files/../", //
+            "/static/files/..", //
+    })
+    void get_fileInvalidPath_badRequest(String path) {
         when().
-            get("/static/files/../simplelogger.properties").
+            get(path).
         then().
             statusCode(400);
     }
@@ -220,7 +169,7 @@ class HttpServerTest {
     @Test
     void get_dynamicExisting_success() {
         when().
-            get("/dynamic/sample").
+            get("/dynamic/text").
         then().
             statusCode(200).
             contentType("text/plain").
@@ -233,7 +182,7 @@ class HttpServerTest {
             contentType("text/plain").
             body("Sample Request").
         when().
-            post("/dynamic/sample").
+            post("/dynamic/text").
         then().
             statusCode(200).
             contentType("text/plain").
@@ -246,7 +195,7 @@ class HttpServerTest {
             contentType("text/plain").
             body("Sample Request").
         when().
-            put("/dynamic/sample").
+            put("/dynamic/text").
         then().
             statusCode(200).
             contentType("text/plain").
@@ -256,11 +205,21 @@ class HttpServerTest {
     @Test
     void delete_dynamicExisting_success() {
         when().
-            delete("/dynamic/sample").
+            delete("/dynamic/text").
         then().
             statusCode(200).
             contentType("text/plain").
             body(equalTo("Response for DELETE"));
+    }
+
+    @Test
+    void get_dynamicHtmlExisting_success() {
+        when().
+            get("/dynamic/html").
+        then().
+            statusCode(200).
+            contentType("text/html").
+            body("html.head.title", equalTo("T"), "html.body", equalTo("B"));
     }
 
     @Test
@@ -317,5 +276,13 @@ class HttpServerTest {
         then().
             statusCode(302).
             header("location", "/dynamic/other");
+    }
+
+    @Test
+    void get_dynamicException_caught() {
+        when().
+            get("/dynamic/failure").
+        then().
+            statusCode(500);
     }
 }

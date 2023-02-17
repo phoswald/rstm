@@ -33,11 +33,11 @@ class FilesystemFilter implements HttpFilter {
         }
         Path file = basePath.resolve(path);
         if (!Files.isRegularFile(file)) {
-            logger.warn("Not found: file={}", file);
-            return HttpResponse.empty(404);
+            logger.debug("Not found: file={}", file);
+            return null;
         }
         byte[] buffer = Files.readAllBytes(file);
-        logger.info("Sending: file={}, size={}", file, buffer.length);
+        logger.debug("Sending: file={}, size={}", file, buffer.length);
         return HttpResponse.builder() //
                 .status(200) //
                 .contentType(ContentTypes.getContentType(path)) //

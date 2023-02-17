@@ -27,13 +27,12 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
     @Override
     public void handle(HttpExchange exchange) {
         try {
-            logger.info("Handling request: URI={}, headers={}", exchange.getRequestURI(),
-                    exchange.getRequestHeaders().entrySet());
+            logger.info("Handling {} {}", exchange.getRequestMethod(), exchange.getRequestURI());
             HttpRequest request = readRequest(exchange);
-            HttpResponse response = config.filter().handle(request.path(), request);
+            HttpResponse response = processRequest(request);
             writeResponse(exchange, response);
         } catch (Exception e) {
-            logger.error("Handling request failed: URI={}", exchange.getRequestURI(), e);
+            logger.error("Handling {} {} failed:", exchange.getRequestMethod(), exchange.getRequestURI(), e);
         } finally {
             exchange.close();
         }
@@ -81,6 +80,15 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
                             queryParam.substring(sep + 1).replace("+", " ").replace("%20", " "));
                 }
             }
+        }
+    }
+
+    private HttpResponse processRequest(HttpRequest request) {
+        try {
+            return config.filter().handle(request.path(), request);
+        } catch(Exception e) {
+            logger.warn("Processing {} {} failed:", request.method(), request.path(), e);
+            return HttpResponse.empty(500);
         }
     }
 

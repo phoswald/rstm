@@ -28,6 +28,14 @@ public record HttpResponse( //
                 .build();
     }
 
+    public static HttpResponse html(int status, String html) {
+        return builder() //
+                .status(status) //
+                .contentType("text/html") //
+                .body(html.getBytes(StandardCharsets.UTF_8)) //
+                .build();
+    }
+
     public static HttpResponse redirect(int status, String location) {
         return builder().status(status).location(location).build();
     }

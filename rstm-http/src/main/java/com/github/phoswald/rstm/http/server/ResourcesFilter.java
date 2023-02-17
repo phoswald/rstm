@@ -34,12 +34,12 @@ class ResourcesFilter implements HttpFilter {
         String resource = basePath + path;
         try (InputStream input = getClass().getResourceAsStream(resource)) {
             if (input == null) {
-                logger.warn("Not found: resource={}", resource);
-                return HttpResponse.empty(404);
+                logger.debug("Not found: resource={}", resource);
+                return null;
             }
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             input.transferTo(buffer);
-            logger.info("Sending: resource={}, size={}", resource, buffer.size());
+            logger.debug("Sending: resource={}, size={}", resource, buffer.size());
             return HttpResponse.builder() //
                     .status(200) //
                     .contentType(ContentTypes.getContentType(path)) //

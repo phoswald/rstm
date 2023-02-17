@@ -1,6 +1,5 @@
 package com.github.phoswald.rstm.http.server;
 
-import static com.github.phoswald.rstm.http.server.HttpServerConfig.combine;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.filesystem;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.route;
 import static io.restassured.RestAssured.when;
@@ -9,69 +8,35 @@ import static org.hamcrest.Matchers.startsWith;
 
 import java.nio.file.Paths;
 
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class HttpServerWithRootFilesTest {
 
-    private final HttpServerConfig config = HttpServerConfig.builder() //
+    private static final HttpServerConfig config = HttpServerConfig.builder() //
             .httpPort(8080) //
-            .filter(combine( //
-                    route("/", //
-                            filesystem(Paths.get("src/test/resources/html/"))) //
-            )) //
+            .filter(route("/", filesystem(Paths.get("src/test/resources/html/")))) //
             .build();
 
-    private final HttpServer testee = new HttpServer(config);
+    private static final HttpServer testee = new HttpServer(config);
 
-    @AfterEach
-    void cleanup() {
+    @AfterAll
+    static void cleanup() {
         testee.close();
     }
 
-    @Test
-    void get_fileExistingHtml_success() {
+    @ParameterizedTest
+    @ValueSource(strings = { //
+            "/index.html", //
+            "/", //
+            "/subdir/index.html", //
+            "/subdir/" //
+    })
+    void get_fileExistingHtml_success(String path) {
         when().
-            get("/index.html").
-        then().
-            statusCode(200).
-            contentType("text/html").
-            body(
-                startsWith("<!doctype html>"),
-                containsString("<title>Sample Page</title>"),
-                containsString("<h1>Sample Page</h1>"));
-    }
-
-    @Test
-    void get_fileExistingHtml2_success() {
-        when().
-            get("/").
-        then().
-            statusCode(200).
-            contentType("text/html").
-            body(
-                startsWith("<!doctype html>"),
-                containsString("<title>Sample Page</title>"),
-                containsString("<h1>Sample Page</h1>"));
-    }
-
-    @Test
-    void get_fileExistingHtml3_success() {
-        when().
-            get("/subdir/").
-        then().
-            statusCode(200).
-            contentType("text/html").
-            body(
-                startsWith("<!doctype html>"),
-                containsString("<title>Sample Page</title>"),
-                containsString("<h1>Sample Page</h1>"));
-    }
-
-    @Test
-    void get_fileExistingHtml4_success() {
-        when().
-            get("/subdir/index.html").
+            get(path).
         then().
             statusCode(200).
             contentType("text/html").
@@ -100,7 +65,7 @@ class HttpServerWithRootFilesTest {
     }
 
     @Test
-    void get_fileEscapedPath_badRequest() {
+    void get_fileInvalidPath_badRequest() {
         when().
             get("/../simplelogger.properties").
         then().
