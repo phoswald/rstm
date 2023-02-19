@@ -1,7 +1,5 @@
 package com.github.phoswald.rstm.template;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static javax.xml.stream.XMLStreamConstants.CHARACTERS;
 import static javax.xml.stream.XMLStreamConstants.COMMENT;
@@ -16,8 +14,12 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,13 +110,25 @@ public class TemplateEngine {
 
                             } else if(Objects.equals(reader.getAttributeLocalName(i), "each")) {
                                 Property property = lookupProperty(argumentClass, reader.getAttributeValue(i));
-                                if(property.type().isArray()) {
-                                    nestedArgumentClass = property.type().getComponentType();
+                                Function<Object, Collection<?>> accessor;
+                                if(property.type() instanceof Class<?> typeClass
+                                        && typeClass.isArray()) {
+                                    nestedArgumentClass = typeClass.getComponentType();
+                                    accessor = argument -> Arrays.asList((Object[]) property.accessor().apply(argument));
+                                    logger.trace("ExprEach: Array of {}", nestedArgumentClass);
+                                } else if(property.type() instanceof ParameterizedType paramType
+                                        && paramType.getRawType() instanceof Class<?> typeClass
+                                        && Collection.class.isAssignableFrom(typeClass)
+                                        && paramType.getActualTypeArguments().length == 1
+                                        && paramType.getActualTypeArguments()[0] instanceof Class<?> collectionArgumentClass) {
+                                    logger.trace("ExprEach: Collection of {}", collectionArgumentClass);
+                                    nestedArgumentClass = collectionArgumentClass;
+                                    accessor = argument -> (Collection<?>) property.accessor.apply(argument);
                                 } else {
                                     throw new IllegalArgumentException("Invalid type: " + property.type());
                                 }
                                 logger.trace("ExprEach: {}::{} -> {}", argumentClass.getName(), property.name(), nestedArgumentClass.getName());
-                                postProcessing = htmlElement -> new ExprEach(property, htmlElement);
+                                postProcessing = htmlElement -> new ExprEach(accessor, htmlElement);
 
                             } else {
                                 throw new IllegalArgumentException("Unsupported attribute: " + reader.getAttributeLocalName(i));
@@ -153,7 +167,7 @@ public class TemplateEngine {
         try {
             Method method = clazz.getMethod(name);
             Function<Object, Object> accessor = instance -> invokeAccessor(clazz, name, method, instance);
-            return new Property(name, method.getReturnType(), accessor);
+            return new Property(name, method.getGenericReturnType(), accessor);
         } catch (NoSuchMethodException | SecurityException e) {
             throw new IllegalArgumentException("Failed to lookup method: " + clazz.getName() + "::" + name, e);
         }
@@ -204,7 +218,7 @@ public class TemplateEngine {
                 }
 
             } else if(exprNode instanceof ExprEach exprEach) {
-                List<Object> nestedArguments = exprEach.lookup(argument);
+                Collection<?> nestedArguments = exprEach.lookup(argument);
                 for(Object nestedArgument : nestedArguments) {
                     evaluateNode(buffer, exprEach.nestedNode(), nestedArgument);
                 }
@@ -230,7 +244,7 @@ public class TemplateEngine {
         }
     }
 
-    record Property(String name, Class<?> type, Function<Object, Object> accessor) { }
+    record Property(String name, Type type, Function<Object, Object> accessor) { }
 
     record Template<T>( //
             String name, //
@@ -276,13 +290,12 @@ public class TemplateEngine {
     }
 
     record ExprEach( //
-            Property property, //
+            Function<Object, Collection<?>> accessor, //
             HtmlElement nestedNode //
     ) implements ExprNode {
 
-        List<Object> lookup(Object argument) {
-            Object[] result = (Object[]) property.accessor().apply(argument);
-            return result == null ? emptyList() : asList(result);
+        Collection<?> lookup(Object argument) {
+            return accessor.apply(argument);
         }
     }
 
