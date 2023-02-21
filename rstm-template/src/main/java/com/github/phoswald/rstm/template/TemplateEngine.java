@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,7 +115,7 @@ public class TemplateEngine {
                                 if(property.type() instanceof Class<?> typeClass
                                         && typeClass.isArray()) {
                                     nestedArgumentClass = typeClass.getComponentType();
-                                    accessor = argument -> Arrays.asList((Object[]) property.accessor().apply(argument));
+                                    accessor = argument -> Arrays.asList(isNull((Object[]) property.accessor().apply(argument), new Object[0]));
                                     logger.trace("ExprEach: Array of {}", nestedArgumentClass);
                                 } else if(property.type() instanceof ParameterizedType paramType
                                         && paramType.getRawType() instanceof Class<?> typeClass
@@ -123,7 +124,7 @@ public class TemplateEngine {
                                         && paramType.getActualTypeArguments()[0] instanceof Class<?> collectionArgumentClass) {
                                     logger.trace("ExprEach: Collection of {}", collectionArgumentClass);
                                     nestedArgumentClass = collectionArgumentClass;
-                                    accessor = argument -> (Collection<?>) property.accessor.apply(argument);
+                                    accessor = argument -> isNull((Collection<?>) property.accessor.apply(argument), Collections.emptyList());
                                 } else {
                                     throw new IllegalArgumentException("Invalid type: " + property.type());
                                 }
@@ -242,6 +243,10 @@ public class TemplateEngine {
                 htmlUtil.generateComment(buffer, htmlComment.comment());
             }
         }
+    }
+
+    private static <T> T isNull(T obj, T dflt) {
+        return obj != null ? obj : dflt;
     }
 
     record Property(String name, Type type, Function<Object, Object> accessor) { }

@@ -8,7 +8,6 @@ import static org.hamcrest.Matchers.startsWith;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
@@ -66,8 +65,7 @@ class TemplateEngineTest {
 
     @Test
     void compileAndExecute_validArrayObjectEmpty_success() {
-        SampleArrayArguments arguments = new SampleArrayArguments( //
-                new SamplePair[] { });
+        SampleArrayArguments arguments = new SampleArrayArguments(null);
 
         Function<SampleArrayArguments, String> template = testee.compile(SampleArrayArguments.class, "sample-collection");
         String html = template.apply(arguments);
@@ -95,7 +93,7 @@ class TemplateEngineTest {
 
     @Test
     void compileAndExecute_validListObjectEmpty_success() {
-        SampleListArguments arguments = new SampleListArguments(Collections.emptyList());
+        SampleListArguments arguments = new SampleListArguments(null);
 
         Function<SampleListArguments, String> template = testee.compile(SampleListArguments.class, "sample-collection");
         String html = template.apply(arguments);
