@@ -8,6 +8,8 @@ import static org.hamcrest.Matchers.startsWith;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,7 @@ class TemplateEngineTest {
 
         Function<SampleArguments, String> template = testee.compile(SampleArguments.class, "sample");
         String html = template.apply(arguments);
+
         assertThat(html, startsWith("<!doctype html>\n<html lang=\"en\">\n"));
         assertThat(html, containsString("\n    <title>Sample Page</title>\n"));
         assertThat(html, containsString("\n    <h1>Hello, <span>world</span>!</h1>\n"));
@@ -38,6 +41,7 @@ class TemplateEngineTest {
 
         Function<SampleArguments, String> template = testee.compile(SampleArguments.class, "sample");
         String html = template.apply(arguments);
+
         assertThat(html, startsWith("<!doctype html>\n<html lang=\"en\">\n"));
         assertThat(html, containsString("\n    <title>Sample Page</title>\n"));
         assertThat(html, containsString("\n    <h1>Hello, <span></span>!</h1>\n"));
@@ -55,12 +59,8 @@ class TemplateEngineTest {
 
         Function<SampleArrayArguments, String> template = testee.compile(SampleArrayArguments.class, "sample-collection");
         String html = template.apply(arguments);
-        assertThat(html, startsWith("<!doctype html>\n<html lang=\"en\">\n"));
-        assertThat(html, containsString("\n    <ul>\n"));
-        assertThat(html, containsString("<li><span>foo</span>=<span>bar</span></li>")); // TOOD fix indent
-        assertThat(html, containsString("<li><span>bar</span>=<span>baz</span></li>"));
-        assertThat(html, endsWith("\n</html>\n"));
-        assertThat(html, not(containsString("???")));
+
+        assertHtmlCollection(html);
     }
 
     @Test
@@ -69,11 +69,8 @@ class TemplateEngineTest {
 
         Function<SampleArrayArguments, String> template = testee.compile(SampleArrayArguments.class, "sample-collection");
         String html = template.apply(arguments);
-        assertThat(html, startsWith("<!doctype html>\n<html lang=\"en\">\n"));
-        assertThat(html, containsString("\n    <ul>\n"));
-        assertThat(html, endsWith("\n</html>\n"));
-        assertThat(html, not(containsString("<li>")));
-        assertThat(html, not(containsString("???")));
+
+        assertHtmlCollectionEmpty(html);
     }
 
     @Test
@@ -83,12 +80,8 @@ class TemplateEngineTest {
 
         Function<SampleListArguments, String> template = testee.compile(SampleListArguments.class, "sample-collection");
         String html = template.apply(arguments);
-        assertThat(html, startsWith("<!doctype html>\n<html lang=\"en\">\n"));
-        assertThat(html, containsString("\n    <ul>\n"));
-        assertThat(html, containsString("<li><span>foo</span>=<span>bar</span></li>")); // TOOD fix indent
-        assertThat(html, containsString("<li><span>bar</span>=<span>baz</span></li>"));
-        assertThat(html, endsWith("\n</html>\n"));
-        assertThat(html, not(containsString("???")));
+
+        assertHtmlCollection(html);
     }
 
     @Test
@@ -97,6 +90,43 @@ class TemplateEngineTest {
 
         Function<SampleListArguments, String> template = testee.compile(SampleListArguments.class, "sample-collection");
         String html = template.apply(arguments);
+
+        assertHtmlCollectionEmpty(html);
+    }
+
+    @Test
+    void compileAndExecute_validMapString_success() {
+        Map<String, String> collection = new LinkedHashMap<>();
+        collection.put("foo", "bar");
+        collection.put("bar", "baz");
+        SampleMapArguments arguments = new SampleMapArguments(collection);
+
+        Function<SampleMapArguments, String> template = testee.compile(SampleMapArguments.class, "sample-collection");
+        String html = template.apply(arguments);
+
+        assertHtmlCollection(html);
+    }
+
+    @Test
+    void compileAndExecute_validMapEmpty_success() {
+        SampleMapArguments arguments = new SampleMapArguments(null);
+
+        Function<SampleMapArguments, String> template = testee.compile(SampleMapArguments.class, "sample-collection");
+        String html = template.apply(arguments);
+
+        assertHtmlCollectionEmpty(html);
+    }
+
+    private void assertHtmlCollection(String html) {
+        assertThat(html, startsWith("<!doctype html>\n<html lang=\"en\">\n"));
+        assertThat(html, containsString("\n    <ul>\n"));
+        assertThat(html, containsString("<li><span>foo</span>=<span>bar</span></li>")); // TOOD fix indent
+        assertThat(html, containsString("<li><span>bar</span>=<span>baz</span></li>"));
+        assertThat(html, endsWith("\n</html>\n"));
+        assertThat(html, not(containsString("???")));
+    }
+
+    private void assertHtmlCollectionEmpty(String html) {
         assertThat(html, startsWith("<!doctype html>\n<html lang=\"en\">\n"));
         assertThat(html, containsString("\n    <ul>\n"));
         assertThat(html, endsWith("\n</html>\n"));

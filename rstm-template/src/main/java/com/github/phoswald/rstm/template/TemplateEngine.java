@@ -125,6 +125,12 @@ public class TemplateEngine {
                                     logger.trace("ExprEach: Collection of {}", collectionArgumentClass);
                                     nestedArgumentClass = collectionArgumentClass;
                                     accessor = argument -> isNull((Collection<?>) property.accessor.apply(argument), Collections.emptyList());
+                                } else if(property.type() instanceof ParameterizedType paramType
+                                        && paramType.getRawType() instanceof Class<?> typeClass
+                                        && Map.class.isAssignableFrom(typeClass)) {
+                                    logger.trace("ExprEach: Map");
+                                    nestedArgumentClass = Map.Entry.class;
+                                    accessor = argument -> isNull((Map<?,?>) property.accessor.apply(argument), Collections.emptyMap()).entrySet();
                                 } else {
                                     throw new IllegalArgumentException("Invalid type: " + property.type());
                                 }
@@ -170,7 +176,13 @@ public class TemplateEngine {
             Function<Object, Object> accessor = instance -> invokeAccessor(clazz, name, method, instance);
             return new Property(name, method.getGenericReturnType(), accessor);
         } catch (NoSuchMethodException | SecurityException e) {
-            throw new IllegalArgumentException("Failed to lookup method: " + clazz.getName() + "::" + name, e);
+            try {
+                Method method = clazz.getMethod("get" + name.substring(0, 1).toUpperCase() + name.substring(1));
+                Function<Object, Object> accessor = instance -> invokeAccessor(clazz, name, method, instance);
+                return new Property(name, method.getGenericReturnType(), accessor);
+            } catch (NoSuchMethodException | SecurityException e2) {
+                throw new IllegalArgumentException("Failed to lookup method: " + clazz.getName() + "::" + name, e);
+            }
         }
     }
 
