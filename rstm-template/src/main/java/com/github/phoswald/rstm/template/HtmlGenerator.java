@@ -3,19 +3,25 @@ package com.github.phoswald.rstm.template;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-class HtmlUtil {
+class HtmlGenerator {
 
-    private final Pattern namePattern = Pattern.compile("[a-z][a-z0-9-]*");
+    private static final Pattern NAME_PATTERN = Pattern.compile("[a-z][a-z0-9-]*");
 
-    void generateDocmentStart(StringBuilder buffer) {
+    private final StringBuilder buffer = new StringBuilder();
+
+    String getOutput() {
+        return buffer.toString();
+    }
+
+    void generateDocmentStart() {
         buffer.append("<!doctype html>\n");
     }
 
-    void generateDocmentEnd(StringBuilder buffer) {
+    void generateDocmentEnd() {
         buffer.append("\n");
     }
 
-    void generateElementStart(StringBuilder buffer, String name, Map<String, String> attributes) {
+    void generateElementStart(String name, Map<String, String> attributes) {
         buffer.append("<");
         buffer.append(verifyElementName(name));
         for(Map.Entry<String, String> e : attributes.entrySet()) {
@@ -41,27 +47,27 @@ class HtmlUtil {
         buffer.append(">");
     }
 
-    void generateElementEnd(StringBuilder buffer, String name) {
+    void generateElementEnd(String name) {
         buffer.append("</");
         buffer.append(verifyElementName(name));
         buffer.append(">");
     }
 
     private String verifyElementName(String name) {
-        if(name == null || !namePattern.matcher(name).matches()) {
+        if(name == null || !NAME_PATTERN.matcher(name).matches()) {
             throw new IllegalArgumentException("Invalid element name: " + name);
         }
         return name;
     }
 
     private String verifyAttributeName(String name) {
-        if(name == null || !namePattern.matcher(name).matches()) {
+        if(name == null || !NAME_PATTERN.matcher(name).matches()) {
             throw new IllegalArgumentException("Invalid attribute name: " + name);
         }
         return name;
     }
 
-    void generateText(StringBuilder buffer, String text) {
+    void generateText(String text) {
         if(text != null) {
             for(int i = 0; i < text.length(); i++) {
                 char c = text.charAt(i);
@@ -75,7 +81,7 @@ class HtmlUtil {
         }
     }
 
-    void generateComment(StringBuilder buffer, String comment) {
+    void generateComment(String comment) {
         buffer.append("<!--");
         if(comment != null) {
             if(comment.contains("--")) {
