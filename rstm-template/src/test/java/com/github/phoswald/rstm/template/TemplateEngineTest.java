@@ -9,8 +9,8 @@ import static org.hamcrest.Matchers.startsWith;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
-import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
@@ -22,8 +22,8 @@ class TemplateEngineTest {
     void compileAndExecute_validObject_success() {
         SampleArguments arguments = new SampleArguments("world", LocalDate.of(2023, 2, 16), "message");
 
-        Function<SampleArguments, String> template = testee.compile(SampleArguments.class, "sample");
-        String html = template.apply(arguments);
+        Template<SampleArguments> template = testee.compile(SampleArguments.class, "sample");
+        String html = template.evaluate(arguments);
 
         assertThat(html, startsWith("<!doctype html>\n<html lang=\"en\">\n"));
         assertThat(html, containsString("\n    <title>Sample Page</title>\n"));
@@ -39,8 +39,8 @@ class TemplateEngineTest {
     void compileAndExecute_validObjectEmpty_success() {
         SampleArguments arguments = new SampleArguments("", null, null);
 
-        Function<SampleArguments, String> template = testee.compile(SampleArguments.class, "sample");
-        String html = template.apply(arguments);
+        Template<SampleArguments> template = testee.compile(SampleArguments.class, "sample");
+        String html = template.evaluate(arguments);
 
         assertThat(html, startsWith("<!doctype html>\n<html lang=\"en\">\n"));
         assertThat(html, containsString("\n    <title>Sample Page</title>\n"));
@@ -53,12 +53,25 @@ class TemplateEngineTest {
     }
 
     @Test
+    void compileAndExecute_validObjectWithLocale_success() {
+        SampleArguments arguments = new SampleArguments("", null, null);
+
+        Template<SampleArguments> template = testee.compile(SampleArguments.class, "sample");
+        String html = template.evaluate(arguments, Locale.GERMANY);
+
+        assertThat(html, startsWith("<!doctype html>\n<html lang=\"en\">\n"));
+        assertThat(html, containsString("\n    <title>Beispiel Seite</title>\n"));
+        assertThat(html, endsWith("\n</html>\n"));
+        assertThat(html, not(containsString("???")));
+    }
+
+    @Test
     void compileAndExecute_validArrayObject_success() {
         SampleArrayArguments arguments = new SampleArrayArguments( //
                 new SamplePair[] { new SamplePair("foo", "bar"), new SamplePair("bar", "baz") });
 
-        Function<SampleArrayArguments, String> template = testee.compile(SampleArrayArguments.class, "sample-collection");
-        String html = template.apply(arguments);
+        Template<SampleArrayArguments> template = testee.compile(SampleArrayArguments.class, "sample-collection");
+        String html = template.evaluate(arguments);
 
         assertHtmlCollection(html);
     }
@@ -67,8 +80,8 @@ class TemplateEngineTest {
     void compileAndExecute_validArrayObjectEmpty_success() {
         SampleArrayArguments arguments = new SampleArrayArguments(null);
 
-        Function<SampleArrayArguments, String> template = testee.compile(SampleArrayArguments.class, "sample-collection");
-        String html = template.apply(arguments);
+        Template<SampleArrayArguments> template = testee.compile(SampleArrayArguments.class, "sample-collection");
+        String html = template.evaluate(arguments);
 
         assertHtmlCollectionEmpty(html);
     }
@@ -78,8 +91,8 @@ class TemplateEngineTest {
         SampleListArguments arguments = new SampleListArguments( //
                 Arrays.asList(new SamplePair("foo", "bar"), new SamplePair("bar", "baz")));
 
-        Function<SampleListArguments, String> template = testee.compile(SampleListArguments.class, "sample-collection");
-        String html = template.apply(arguments);
+        Template<SampleListArguments> template = testee.compile(SampleListArguments.class, "sample-collection");
+        String html = template.evaluate(arguments);
 
         assertHtmlCollection(html);
     }
@@ -88,8 +101,8 @@ class TemplateEngineTest {
     void compileAndExecute_validListObjectEmpty_success() {
         SampleListArguments arguments = new SampleListArguments(null);
 
-        Function<SampleListArguments, String> template = testee.compile(SampleListArguments.class, "sample-collection");
-        String html = template.apply(arguments);
+        Template<SampleListArguments> template = testee.compile(SampleListArguments.class, "sample-collection");
+        String html = template.evaluate(arguments);
 
         assertHtmlCollectionEmpty(html);
     }
@@ -101,8 +114,8 @@ class TemplateEngineTest {
         collection.put("bar", "baz");
         SampleMapArguments arguments = new SampleMapArguments(collection);
 
-        Function<SampleMapArguments, String> template = testee.compile(SampleMapArguments.class, "sample-collection");
-        String html = template.apply(arguments);
+        Template<SampleMapArguments> template = testee.compile(SampleMapArguments.class, "sample-collection");
+        String html = template.evaluate(arguments);
 
         assertHtmlCollection(html);
     }
@@ -111,8 +124,8 @@ class TemplateEngineTest {
     void compileAndExecute_validMapEmpty_success() {
         SampleMapArguments arguments = new SampleMapArguments(null);
 
-        Function<SampleMapArguments, String> template = testee.compile(SampleMapArguments.class, "sample-collection");
-        String html = template.apply(arguments);
+        Template<SampleMapArguments> template = testee.compile(SampleMapArguments.class, "sample-collection");
+        String html = template.evaluate(arguments);
 
         assertHtmlCollectionEmpty(html);
     }
