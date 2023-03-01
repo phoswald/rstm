@@ -27,10 +27,10 @@ class HtmlGenerator {
         for(Map.Entry<String, String> e : attributes.entrySet()) {
             String attribute = e.getKey();
             String value = e.getValue();
-            buffer.append(" ");
-            buffer.append(verifyAttributeName(attribute));
-            buffer.append("=\"");
-            if(value != null) {
+            if(value != null) { // TODO (html): null: empty vs. omitted attribute?
+                buffer.append(" ");
+                buffer.append(verifyAttributeName(attribute));
+                buffer.append("=\"");
                 for(int i = 0; i < value.length(); i++) {
                     char c = value.charAt(i);
                     switch(c) {

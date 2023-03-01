@@ -45,7 +45,9 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
         byte[] body = null;
         decodeQueryString(queryParams, exchange.getRequestURI().getQuery());
         if (Objects.equals(exchange.getRequestHeaders().getFirst("content-type"),
-                "application/x-www-form-urlencoded; charset=ISO-8859-1")) { // TODO: correctly parse content-type
+                "application/x-www-form-urlencoded; charset=ISO-8859-1") //
+                || Objects.equals(exchange.getRequestHeaders().getFirst("content-type"),
+                        "application/x-www-form-urlencoded")) { // TODO (form): correctly parse content-type
             try (var input = exchange.getRequestBody()) {
                 var buffer = new ByteArrayOutputStream();
                 input.transferTo(buffer);
@@ -70,7 +72,7 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
 
     private void decodeQueryString(Map<String, String> queryParams, String queryString) {
         if (queryString != null) {
-            // TODO: correctly handle query string encoding (see URI.getQuery() vs.
+            // TODO (form): correctly handle query string encoding (see URI.getQuery() vs.
             // URI.getRawQuery())
             for (String queryParam : queryString.split("&")) {
                 int sep = queryParam.indexOf("=");

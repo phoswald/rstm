@@ -16,7 +16,7 @@ class MethodFilter implements HttpFilter {
 
     @Override
     public HttpResponse handle(String path, HttpRequest request) throws Exception {
-        if (request.method() == method) { // TODO: also check whether path is empty?
+        if (request.method() == method && path.isEmpty()) { // TODO (route): remaining path must be empty
             return handler.invoke(request);
         } else {
             return null;

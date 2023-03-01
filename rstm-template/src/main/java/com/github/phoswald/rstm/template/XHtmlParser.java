@@ -22,7 +22,7 @@ import javax.xml.stream.XMLStreamReader;
 class XHtmlParser {
 
     private static final String NAMESPACE = "https://github.com/phoswald/rstm/rstm-template";
-    private static final Pattern ATTR_PATTERN = Pattern.compile("([a-z][a-z0-9-]*)=([a-z][a-z0-9-]*)");
+    private static final Pattern ATTR_PATTERN = Pattern.compile("([a-z][a-z0-9-]*)=([a-zA-Z][a-zA-Z0-9-]*)");
     private static final XMLInputFactory FACTORY = XMLInputFactory.newInstance();
 
     private final XMLStreamReader reader;

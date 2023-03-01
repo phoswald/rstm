@@ -41,6 +41,6 @@ public record HttpRequest( //
     }
 
     public String text() {
-        return body == null ? null : new String(body, StandardCharsets.UTF_8); // TODO: use correct charset
+        return body == null ? null : new String(body, StandardCharsets.UTF_8); // TODO (http): use correct charset
     }
 }

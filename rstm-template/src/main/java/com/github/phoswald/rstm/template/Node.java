@@ -74,9 +74,9 @@ record HtmlElement(String name, Map<String, String> attributes, List<Node> child
         return new HtmlElement(name, attributes, Collections.singletonList(child));
     }
 
-    HtmlElement addAttribute(String name, String value) {
+    HtmlElement addAttribute(String attributeName, String attributeValue) {
         Map<String, String> newAttributes = new LinkedHashMap<>(attributes);
-        newAttributes.put(name, value);
+        newAttributes.put(attributeName, attributeValue);
         return new HtmlElement(name, newAttributes, children);
     }
 }
