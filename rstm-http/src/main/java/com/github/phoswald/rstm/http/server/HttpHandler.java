@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.phoswald.rstm.http.HttpHeaderValue;
 import com.github.phoswald.rstm.http.HttpMethod;
 import com.github.phoswald.rstm.http.HttpRequest;
 import com.github.phoswald.rstm.http.HttpResponse;
@@ -44,10 +44,9 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
         Map<String,String> formParams = new HashMap<>();
         byte[] body = null;
         decodeQueryString(queryParams, exchange.getRequestURI().getQuery());
-        if (Objects.equals(exchange.getRequestHeaders().getFirst("content-type"),
-                "application/x-www-form-urlencoded; charset=ISO-8859-1") //
-                || Objects.equals(exchange.getRequestHeaders().getFirst("content-type"),
-                        "application/x-www-form-urlencoded")) { // TODO (form): correctly parse content-type
+        String contentType = exchange.getRequestHeaders().getFirst("content-type");
+        if (contentType != null && HttpHeaderValue.parse(contentType).valueOnly()
+                .equalsIgnoreCase("application/x-www-form-urlencoded")) {
             try (var input = exchange.getRequestBody()) {
                 var buffer = new ByteArrayOutputStream();
                 input.transferTo(buffer);
@@ -72,7 +71,7 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
 
     private void decodeQueryString(Map<String, String> queryParams, String queryString) {
         if (queryString != null) {
-            // TODO (form): correctly handle query string encoding (see URI.getQuery() vs.
+            // TODO: correctly handle query string encoding (see URI.getQuery() vs.
             // URI.getRawQuery())
             for (String queryParam : queryString.split("&")) {
                 int sep = queryParam.indexOf("=");

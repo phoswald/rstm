@@ -23,7 +23,12 @@ record ExprAttr(Property<String> property, String attribute, HtmlElement nestedN
 
     @Override
     public void evaluateNode(HtmlGenerator generator, TemplateArgument<?> argument) {
-        nestedNode.addAttribute(attribute, property.getValue(argument)).evaluateNode(generator, argument);
+        String value = property.getValue(argument);
+        HtmlElement node = nestedNode;
+        if(value != null) {
+            node = nestedNode.addAttribute(attribute, value);
+        }
+        node.evaluateNode(generator, argument);
     }
 }
 
@@ -31,7 +36,7 @@ record ExprIf(Property<Boolean> property, HtmlElement nestedNode) implements Nod
 
     @Override
     public void evaluateNode(HtmlGenerator generator, TemplateArgument<?> argument) {
-        if (property.getValue(argument)) {
+        if (property.getValue(argument).booleanValue()) {
             nestedNode.evaluateNode(generator, argument);
         }
     }

@@ -22,9 +22,9 @@ public record HttpResponse( //
 
     public static HttpResponse body(int status, HttpCodec codec, Object body) {
         return builder() //
-                .status(body != null ? status : 404) // TODO (http): handle null response: 404
+                .status(status) //
                 .contentType(codec.getContentType()) //
-                .body(body != null ? codec.encode(body) : new byte[0]) // TODO (http): handle null response: ""
+                .body(codec.encode(body)) //
                 .build();
     }
 
