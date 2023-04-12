@@ -71,8 +71,7 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
 
     private void decodeQueryString(Map<String, String> queryParams, String queryString) {
         if (queryString != null) {
-            // TODO: correctly handle query string encoding (see URI.getQuery() vs.
-            // URI.getRawQuery())
+            // TODO: correctly handle query string encoding (see URI.getQuery() vs. URI.getRawQuery())
             for (String queryParam : queryString.split("&")) {
                 int sep = queryParam.indexOf("=");
                 if (sep > 0) {

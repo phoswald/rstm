@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 
 import com.github.phoswald.record.builder.RecordBuilder;
+import com.github.phoswald.rstm.http.HttpCodec;
 import com.github.phoswald.rstm.http.HttpMethod;
 import com.github.phoswald.rstm.http.HttpRequest;
 import com.github.phoswald.rstm.http.HttpResponse;
@@ -44,6 +45,47 @@ public record HttpServerConfig( //
 
     public static HttpFilter delete(ThrowingFunction<HttpRequest, HttpResponse> filter) {
         return method(HttpMethod.DELETE, filter);
+    }
+
+    public static <T> HttpFilter getRest(HttpCodec codec, ThrowingFunction<HttpRequest, T> handler) {
+        return get(request -> {
+            T responseObj = handler.invoke(request);
+            return responseObj == null ? HttpResponse.empty(404) : HttpResponse.body(200, codec, responseObj);
+        });
+    }
+
+    public static <A, B> HttpFilter postRest(HttpCodec codec, Class<A> clazzA, ThrowingBiFunction<HttpRequest, A, B> handler) {
+        return post(request -> {
+            A requestObj = request.body(codec, clazzA);
+            B responseObj = handler.invoke(request, requestObj);
+            return responseObj == null ? HttpResponse.empty(404) : HttpResponse.body(200, codec, responseObj);
+        });
+    }
+
+    public static <A, B> HttpFilter putRest(HttpCodec codec, Class<A> clazzA, ThrowingBiFunction<HttpRequest, A, B> handler) {
+        return put(request -> {
+            A requestObj = request.body(codec, clazzA);
+            B responseObj = handler.invoke(request, requestObj);
+            return responseObj == null ? HttpResponse.empty(404) : HttpResponse.body(200, codec, responseObj);
+        });
+    }
+
+    public static HttpFilter getHtml(ThrowingFunction<HttpRequest, Object> handler) {
+        return get(request -> {
+            Object response = handler.invoke(request);
+            return HttpResponse.html(200, response.toString());
+        });
+    }
+
+    public static HttpFilter postHtml(ThrowingFunction<HttpRequest, Object> handler) {
+        return post(request -> {
+           Object response = handler.invoke(request);
+           if(response instanceof Path location) {
+               return HttpResponse.redirect(302, location.toString());
+           } else {
+               return HttpResponse.html(200, response.toString());
+           }
+        });
     }
 
     private static HttpFilter method(HttpMethod method, ThrowingFunction<HttpRequest, HttpResponse> filter) {
