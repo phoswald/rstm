@@ -65,6 +65,8 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
                 .pathParams(pathParams) //
                 .queryParams(queryParams) //
                 .formParams(formParams) //
+                .authorization(exchange.getRequestHeaders().getFirst("authorization")) //
+                .session(getSessionCookie(exchange)) //
                 .body(body) //
                 .build();
     }
@@ -82,10 +84,27 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
             }
         }
     }
+    
+    private String getSessionCookie(HttpExchange exchange) {
+        String cookieList = exchange.getRequestHeaders().getFirst("cookie");
+        if(cookieList != null) {
+            for(String cookiePair : cookieList.split("; ")) {
+                int separatorOffset = cookiePair.indexOf('=');
+                if(separatorOffset != -1) {
+                    String cookieName = cookiePair.substring(0, separatorOffset).trim();
+                    String cookieValue = cookiePair.substring(separatorOffset + 1).trim();
+                    if(cookieName.equals("session")) {
+                        return cookieValue;
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
     private HttpResponse processRequest(HttpRequest request) {
         try {
-            return config.filter().handle(request.path(), request);
+            return config.filter().handle(request.path(), request, config);
         } catch(Exception e) {
             logger.warn("Processing {} {} failed:", request.method(), request.path(), e);
             return HttpResponse.empty(500);
@@ -101,6 +120,9 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
         }
         if (response.location() != null) {
             exchange.getResponseHeaders().add("location", response.location());
+        }
+        if (response.session() != null) {
+            exchange.getResponseHeaders().add("set-cookie", "session=" + response.session() + "; path=/; httponly; samesite=strict");
         }
         int responseStatus = response.status() != 0 ? response.status() : 200;
         if (response.body() != null) {

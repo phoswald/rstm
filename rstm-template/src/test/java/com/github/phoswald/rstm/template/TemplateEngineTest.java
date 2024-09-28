@@ -7,8 +7,8 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -89,7 +89,7 @@ class TemplateEngineTest {
     @Test
     void compileAndExecute_validListObject_success() {
         SampleListArguments arguments = new SampleListArguments( //
-                Arrays.asList(new SamplePair("foo", "bar"), new SamplePair("bar", "baz")));
+                List.of(new SamplePair("foo", "bar"), new SamplePair("bar", "baz")));
 
         Template<SampleListArguments> template = testee.compile(SampleListArguments.class, "sample-collection");
         String html = template.evaluate(arguments);

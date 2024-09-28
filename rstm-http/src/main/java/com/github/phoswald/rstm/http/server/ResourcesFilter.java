@@ -21,7 +21,7 @@ class ResourcesFilter implements HttpFilter {
     }
 
     @Override
-    public HttpResponse handle(String path, HttpRequest request) throws IOException {
+    public HttpResponse handle(String path, HttpRequest request, HttpServerConfig config) throws IOException {
         if (path.contains("..")) { // TODO more hardening: ensure path is relative
             return HttpResponse.empty(400);
         }

@@ -1,18 +1,20 @@
 package com.github.phoswald.rstm.http.server;
 
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.List;
 
 import com.github.phoswald.record.builder.RecordBuilder;
 import com.github.phoswald.rstm.http.HttpCodec;
 import com.github.phoswald.rstm.http.HttpMethod;
 import com.github.phoswald.rstm.http.HttpRequest;
 import com.github.phoswald.rstm.http.HttpResponse;
-
+import com.github.phoswald.rstm.security.IdentityProvider;
+ 
 @RecordBuilder
 public record HttpServerConfig( //
         int httpPort, //
-        HttpFilter filter //
+        HttpFilter filter, //
+        IdentityProvider identityProvider //
 ) {
 
     public static HttpServerConfigBuilder builder() {
@@ -29,6 +31,14 @@ public record HttpServerConfig( //
 
     public static HttpFilter route(String route, HttpFilter... filters) {
         return new RouteFilter(route, combine(filters));
+    }
+    
+    public static HttpFilter auth(String role, HttpFilter... filters) {
+        return new AuthFilter(List.of(role), combine(filters));
+    }
+    
+    public static HttpFilter login() {
+        return new LoginFilter();
     }
 
     public static HttpFilter get(ThrowingFunction<HttpRequest, HttpResponse> filter) {
@@ -96,7 +106,7 @@ public record HttpServerConfig( //
         if(filters.length == 1) {
             return filters[0];
         } else {
-            return new CombineFilter(Arrays.asList(filters));
+            return new CombineFilter(List.of(filters));
         }
     }
 }

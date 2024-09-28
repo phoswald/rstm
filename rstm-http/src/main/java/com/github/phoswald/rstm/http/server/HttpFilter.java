@@ -5,5 +5,5 @@ import com.github.phoswald.rstm.http.HttpResponse;
 
 public interface HttpFilter {
 
-    public HttpResponse handle(String path, HttpRequest request) throws Exception;
+    public HttpResponse handle(String path, HttpRequest request, HttpServerConfig config) throws Exception;
 }

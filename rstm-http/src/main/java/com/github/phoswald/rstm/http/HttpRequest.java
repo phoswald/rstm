@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.github.phoswald.record.builder.RecordBuilder;
+import com.github.phoswald.rstm.security.Principal;
 
 @RecordBuilder
 public record HttpRequest( //
@@ -13,6 +14,9 @@ public record HttpRequest( //
         Map<String,String> pathParams, //
         Map<String,String> queryParams, //
         Map<String,String> formParams, //
+        String authorization, //
+        String session, //
+        Principal principal, //
         byte[] body //
 ) {
 

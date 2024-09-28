@@ -10,15 +10,10 @@
     <version>0.1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>rstm-http</artifactId>
+  <artifactId>rstm-security</artifactId>
 
   <dependencies>
     <!-- Provided -->
-    <dependency>
-      <groupId>com.github.phoswald</groupId>
-      <artifactId>rstm-security</artifactId>
-      <version>${project.version}</version>
-    </dependency>
     <dependency>
       <groupId>com.github.phoswald</groupId>
       <artifactId>record-builder</artifactId>
@@ -29,6 +24,11 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>at.favre.lib</groupId>
+      <artifactId>bcrypt</artifactId>
+      <version>0.10.2</version>
     </dependency>
 
     <!-- Testing -->
@@ -43,13 +43,13 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>io.rest-assured</groupId>
-      <artifactId>rest-assured</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

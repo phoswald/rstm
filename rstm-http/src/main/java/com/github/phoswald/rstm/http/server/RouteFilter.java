@@ -1,6 +1,7 @@
 package com.github.phoswald.rstm.http.server;
 
-import java.util.Arrays;
+import static java.util.function.Predicate.not;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ class RouteFilter implements HttpFilter {
     }
 
     @Override
-    public HttpResponse handle(String path, HttpRequest request) throws Exception {
+    public HttpResponse handle(String path, HttpRequest request, HttpServerConfig config) throws Exception {
         List<String> pathParts = parseParts(path);
         boolean pathIsDir = isDir(path);
         Map<String, String> params = new HashMap<>(request.pathParams());
@@ -43,11 +44,13 @@ class RouteFilter implements HttpFilter {
         if(params.size() > request.pathParams().size()) {
             request = request.toBuilder().pathParams(params).build();
         }
-        return filter.handle(joinParts(pathParts, pathIsDir), request);
+        return filter.handle(joinParts(pathParts, pathIsDir), request, config);
     }
 
     private static List<String> parseParts(String path) {
-        return Arrays.asList(path.split("/")).stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
+        return List.of(path.split("/")).stream() //
+                .filter(not(String::isEmpty)) //
+                .collect(Collectors.toList()); // cannot use toList(), must be modifiable!
     }
 
     private static boolean isDir(String path) {

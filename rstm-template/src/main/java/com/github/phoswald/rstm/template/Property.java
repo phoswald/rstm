@@ -3,9 +3,8 @@ package com.github.phoswald.rstm.template;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Function;
@@ -35,7 +34,7 @@ record Property<T> (String name, Type type, Function<TemplateArgument<?>, T> acc
     }
 
     private static Method getPropertyAccessor(Class<?> clazz, String name) {
-        for (String methodName : Arrays.asList(name, "get" + name.substring(0, 1).toUpperCase() + name.substring(1))) {
+        for (String methodName : List.of(name, "get" + name.substring(0, 1).toUpperCase() + name.substring(1))) {
             try {
                 return clazz.getMethod(methodName);
             } catch (NoSuchMethodException | SecurityException e) {
@@ -66,16 +65,16 @@ record Property<T> (String name, Type type, Function<TemplateArgument<?>, T> acc
 
     Property<Collection<?>> toArrayProperty() {
         return new Property<>(name, type, accessor.andThen( //
-                result -> result == null ? Collections.emptyList() : Arrays.asList((Object[]) result)));
+                result -> result == null ? List.of() : List.of((Object[]) result)));
     }
 
     Property<Collection<?>> toCollectionProperty() {
         return new Property<>(name, type, accessor.andThen( //
-                result -> result == null ? Collections.emptyList() : (Collection<?>) result));
+                result -> result == null ? List.of() : (Collection<?>) result));
     }
 
     Property<Collection<?>> toMapProperty() {
         return new Property<>(name, type, accessor.andThen( //
-                result -> (result == null ? Collections.emptyMap() : (Map<?, ?>) result).entrySet()));
+                result -> (result == null ? Map.of() : (Map<?, ?>) result).entrySet()));
     }
 }

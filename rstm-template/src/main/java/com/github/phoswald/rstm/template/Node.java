@@ -1,7 +1,6 @@
 package com.github.phoswald.rstm.template;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +75,7 @@ record HtmlElement(String name, Map<String, String> attributes, List<Node> child
     }
 
     HtmlElement replaceChildren(Node child) {
-        return new HtmlElement(name, attributes, Collections.singletonList(child));
+        return new HtmlElement(name, attributes, List.of(child));
     }
 
     HtmlElement addAttribute(String attributeName, String attributeValue) {

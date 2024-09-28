@@ -9,6 +9,7 @@ public record HttpResponse( //
         int status, //
         String contentType, //
         String location, //
+        String session, //
         byte[] body //
 ) {
 
