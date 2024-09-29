@@ -13,7 +13,7 @@ record JdbcUser(String username, String hashedPassword, String roles) {
         return List.of(roles.split(",")).stream().map(String::trim).filter(not(String::isBlank)).toList();
     }
 
-    static UserBuilder builder() {
-        return new UserBuilder();
+    static JdbcUserBuilder builder() {
+        return new JdbcUserBuilder();
     }
 }
