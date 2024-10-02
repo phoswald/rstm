@@ -24,7 +24,7 @@ class AuthFilter implements HttpFilter {
     public HttpResponse handle(String path, HttpRequest request, HttpServerConfig config) throws Exception {
         Optional<Principal> principal = authenticate(request, config.identityProvider());
         if (principal.isEmpty()) {
-            return HttpResponse.builder().status(302).location("/login.html").build();
+            return HttpResponse.builder().status(302).location(request.relativizePath("/login.html")).build();
         }
         if(!authorize(principal.get())) {
             return HttpResponse.builder().status(401).build();

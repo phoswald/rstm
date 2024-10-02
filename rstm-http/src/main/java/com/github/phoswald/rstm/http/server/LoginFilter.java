@@ -14,9 +14,9 @@ class LoginFilter implements HttpFilter {
         char[] password = request.formParam("password").orElse("").toCharArray();
         Optional<Principal> principal = config.identityProvider().authenticate(username, password);
         if (principal.isPresent()) {
-            return HttpResponse.builder().status(302).location("/").session(principal.get().token()).build();
+            return HttpResponse.builder().status(302).location(request.relativizePath("/")).session(principal.get().token()).build();
         } else {
-            return HttpResponse.builder().status(302).location("/error.html").build();
+            return HttpResponse.builder().status(302).location(request.relativizePath("/login-error.html")).build();
         }
     }
 }

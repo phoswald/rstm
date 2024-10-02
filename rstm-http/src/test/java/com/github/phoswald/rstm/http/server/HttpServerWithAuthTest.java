@@ -62,7 +62,7 @@ class HttpServerWithAuthTest {
             post("/login").
         then().
             statusCode(302).
-            header("location", "/").
+            header("location", ".").
             cookie("session", username1.token());
     }
     
@@ -74,7 +74,7 @@ class HttpServerWithAuthTest {
             post("/login").
         then().
             statusCode(302).
-            header("location", "/error.html").
+            header("location", "login-error.html").
             cookies(Map.of());
     }
 
@@ -86,7 +86,7 @@ class HttpServerWithAuthTest {
             get("/secured/resource").
         then().
             statusCode(302).
-            header("location", "/login.html");
+            header("location", "../login.html");
     }
 
     @Test
@@ -119,7 +119,7 @@ class HttpServerWithAuthTest {
             get("/secured/resource").
         then().
             statusCode(302).
-            header("location", "/login.html");
+            header("location", "../login.html");
     }
 
     @Test
@@ -152,7 +152,7 @@ class HttpServerWithAuthTest {
             get("/secured/resource").
         then().
             statusCode(302).
-            header("location", "/login.html");
+            header("location", "../login.html");
     }
 
     @Test
@@ -185,6 +185,6 @@ class HttpServerWithAuthTest {
             get("/secured/resource").
         then().
             statusCode(302).
-            header("location", "/login.html");
+            header("location", "../login.html");
     }
 }
