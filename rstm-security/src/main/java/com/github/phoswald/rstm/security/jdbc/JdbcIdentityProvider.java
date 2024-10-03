@@ -1,4 +1,4 @@
-package com.github.phoswald.rstm.security;
+package com.github.phoswald.rstm.security.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,6 +11,10 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.phoswald.rstm.security.IdentityProvider;
+import com.github.phoswald.rstm.security.Principal;
+import com.github.phoswald.rstm.security.TokenProvider;
+
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import at.favre.lib.crypto.bcrypt.BCrypt.Version;
 
@@ -22,7 +26,8 @@ public class JdbcIdentityProvider extends IdentityProvider {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final Supplier<Connection> connectionFactory;
 
-    public JdbcIdentityProvider(Supplier<Connection> connectionFactory) {
+    public JdbcIdentityProvider(TokenProvider tokenProvider, Supplier<Connection> connectionFactory) {
+        super(tokenProvider);
         this.connectionFactory = connectionFactory;
     }
 

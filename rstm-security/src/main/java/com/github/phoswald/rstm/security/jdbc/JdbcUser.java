@@ -1,4 +1,4 @@
-package com.github.phoswald.rstm.security;
+package com.github.phoswald.rstm.security.jdbc;
 
 import static java.util.function.Predicate.not;
 

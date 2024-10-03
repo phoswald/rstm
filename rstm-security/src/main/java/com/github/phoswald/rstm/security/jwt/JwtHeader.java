@@ -1,4 +1,4 @@
-package com.github.phoswald.rstm.security;
+package com.github.phoswald.rstm.security.jwt;
 
 /*
  * See https://datatracker.ietf.org/doc/html/rfc7519

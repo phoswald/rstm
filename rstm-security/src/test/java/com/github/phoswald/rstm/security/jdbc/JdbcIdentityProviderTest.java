@@ -1,4 +1,4 @@
-package com.github.phoswald.rstm.security;
+package com.github.phoswald.rstm.security.jdbc;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.matchesRegex;
@@ -13,9 +13,13 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.phoswald.rstm.security.IdentityProvider;
+import com.github.phoswald.rstm.security.Principal;
+import com.github.phoswald.rstm.security.SimpleTokenProvider;
+
 class JdbcIdentityProviderTest {
 
-    private final IdentityProvider testee = new JdbcIdentityProvider(this::getConnection);
+    private final IdentityProvider testee = new JdbcIdentityProvider(new SimpleTokenProvider(), this::getConnection);
 
     @Test
     void authenticate_valid_success() {

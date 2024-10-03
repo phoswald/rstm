@@ -15,6 +15,10 @@ public class SimpleIdentityProvider extends IdentityProvider {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final Map<String, char[]> passwords = new HashMap<>();
     private final Map<String, Principal> principals = new HashMap<>();
+
+    public SimpleIdentityProvider() {
+        super(new SimpleTokenProvider());
+    }
     
     public SimpleIdentityProvider add(String username, String password, List<String> roles) {
         Objects.requireNonNull(username);

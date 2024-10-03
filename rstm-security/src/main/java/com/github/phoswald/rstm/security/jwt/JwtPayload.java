@@ -1,4 +1,4 @@
-package com.github.phoswald.rstm.security;
+package com.github.phoswald.rstm.security.jwt;
 
 import java.util.List;
 
