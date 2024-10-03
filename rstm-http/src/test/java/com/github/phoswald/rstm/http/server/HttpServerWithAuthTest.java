@@ -24,8 +24,8 @@ import com.github.phoswald.rstm.security.SimpleIdentityProvider;
 class HttpServerWithAuthTest {
     
     private static final IdentityProvider identityProvider = new SimpleIdentityProvider() //
-            .add("username1", "password1".toCharArray(), List.of("role1", "role3")) //
-            .add("username2", "password2".toCharArray(), List.of("role2"));
+            .add("username1", "password1", List.of("role1", "role3")) //
+            .add("username2", "password2", List.of("role2"));
 
     private final Principal username1 = identityProvider.authenticate("username1", "password1".toCharArray()).get();
     private final Principal username2 = identityProvider.authenticate("username2", "password2".toCharArray()).get();

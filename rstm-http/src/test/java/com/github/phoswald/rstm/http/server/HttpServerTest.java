@@ -24,6 +24,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import com.github.phoswald.rstm.http.HttpResponse;
 
 class HttpServerTest {
+    
+    // Basic Latin characters (0x20..0x7F, in order): ! " # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \ ] ^ _ ` { | } ~
+    private static final String ASCII = "! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ \t \r \n"; 
+    private static final String UNICODE = "€ äöü αβγδ กขฃ";
 
     private static final HttpServerConfig config = HttpServerConfig.builder() //
             .httpPort(8080) //
@@ -42,10 +46,10 @@ class HttpServerTest {
                     route("/dynamic/param/{name}", //
                             get(request -> HttpResponse.text(200, "Response for GET with p1=" + request.pathParam("name").orElse(null)))), //
                     route("/dynamic/query", //
-                            get(request -> HttpResponse.text(200, "Response for GET with q1=" + request.queryParam("q1").orElse(null) + " and q2=" + request.queryParam("q2").orElse(null)))), //
+                            get(request -> HttpResponse.text(200, "Response for GET with q1=" + request.queryParam("q1").orElse(null) + " and q2=" + request.queryParam("q2").orElse(null) + " and q3=" + request.queryParam("q3").orElse(null)))), //
                     route("/dynamic/form", //
-                            post(request -> HttpResponse.text(200, "Response for POST with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null))), //
-                            put(request -> HttpResponse.text(200, "Response for PUT with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null)))), //
+                            post(request -> HttpResponse.text(200, "Response for POST with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null) + " and f3=" + request.formParam("f3").orElse(null))), //
+                            put(request -> HttpResponse.text(200, "Response for PUT with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null) + " and f3=" + request.formParam("f3").orElse(null)))), //
                     route("/dynamic/redirect", get(request -> HttpResponse.redirect(302, "/dynamic/other"))), //
                     route("/dynamic/failure", get(request -> { throw new IllegalStateException(""); })) //
             )) //
@@ -230,41 +234,46 @@ class HttpServerTest {
             statusCode(200).
             body(equalTo("Response for GET with p1=1234"));
     }
-
+    
     @Test
     void get_dynamicQueryParam_success() {
         given().
             queryParam("q1", "search").
-            queryParam("q2", "more text").
+            queryParam("q2", ASCII).
+            queryParam("q3", UNICODE).
         when().
             get("/dynamic/query").
         then().
             statusCode(200).
-            body(equalTo("Response for GET with q1=search and q2=more text"));
+            body(equalTo("Response for GET with q1=search and q2=" + ASCII + " and q3=" + UNICODE));
     }
 
     @Test
     void post_dynamicFormParam_success() {
         given().
+            contentType("application/x-www-form-urlencoded; charset=utf-8").
             formParam("f1", "search").
-            formParam("f2", "more text").
+            formParam("f2", ASCII).
+            formParam("f3", UNICODE).
         when().
             post("/dynamic/form").
         then().
             statusCode(200).
-            body(equalTo("Response for POST with f1=search and f2=more text"));
+            body(equalTo("Response for POST with f1=search and f2=" + ASCII + " and f3=" + UNICODE));
     }
 
     @Test
     void put_dynamicFormParam_success() {
         given().
+            contentType("application/x-www-form-urlencoded; charset=utf-8").
             formParam("f1", "search").
-            formParam("f2", "more text").
+            formParam("f2", ASCII).
+            formParam("f3", UNICODE).
         when().
             put("/dynamic/form").
         then().
             statusCode(200).
-            body(equalTo("Response for PUT with f1=search and f2=more text"));
+            body(equalTo("Response for PUT with f1=search and f2=" + ASCII + " and f3=" + UNICODE));
     }
 
     @Test

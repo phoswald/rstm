@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 class SimpleIdentityProviderTest {
 
     private final IdentityProvider testee = new SimpleIdentityProvider() //
-            .add("username1", "password1".toCharArray(), List.of("role1", "role3")) //
-            .add("username2", "password2".toCharArray(), List.of("role2"));
+            .add("username1", "password1", List.of("role1", "role3")) //
+            .add("username2", "password2", List.of("role2"));
 
     @Test
     void authenticate_valid_success() {

@@ -91,7 +91,7 @@ public record HttpServerConfig( //
         return post(request -> {
            Object response = handler.invoke(request);
            if(response instanceof Path location) {
-               return HttpResponse.redirect(302, location.toString());
+               return HttpResponse.redirect(302, request.relativizePath(location.toString()));
            } else {
                return HttpResponse.html(200, response.toString());
            }

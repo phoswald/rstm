@@ -1,8 +1,10 @@
 package com.github.phoswald.rstm.http.server;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,14 +45,14 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
         Map<String,String> queryParams = new HashMap<>();
         Map<String,String> formParams = new HashMap<>();
         byte[] body = null;
-        decodeQueryString(queryParams, exchange.getRequestURI().getQuery());
+        decodeQueryString(queryParams, exchange.getRequestURI().getRawQuery());
         String contentType = exchange.getRequestHeaders().getFirst("content-type");
         if (contentType != null && HttpHeaderValue.parse(contentType).valueOnly()
                 .equalsIgnoreCase("application/x-www-form-urlencoded")) {
             try (var input = exchange.getRequestBody()) {
                 var buffer = new ByteArrayOutputStream();
                 input.transferTo(buffer);
-                decodeQueryString(formParams, new String(buffer.toByteArray(), StandardCharsets.UTF_8));
+                decodeQueryString(formParams, new String(buffer.toByteArray(), UTF_8));
             }
         } else {
             try (var input = exchange.getRequestBody()) {
@@ -73,13 +75,11 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
 
     private void decodeQueryString(Map<String, String> queryParams, String queryString) {
         if (queryString != null) {
-            // TODO: correctly handle query string encoding (see URI.getQuery() vs. URI.getRawQuery())
             for (String queryParam : queryString.split("&")) {
-                int sep = queryParam.indexOf("=");
-                if (sep > 0) {
-                    queryParams.put( //
-                            queryParam.substring(0, sep), //
-                            queryParam.substring(sep + 1).replace("+", " ").replace("%20", " "));
+                int index = queryParam.indexOf("=");
+                if (index > 0) {
+                    queryParams.put(queryParam.substring(0, index), //
+                            URLDecoder.decode(queryParam.substring(index + 1), UTF_8));
                 }
             }
         }

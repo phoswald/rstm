@@ -16,11 +16,11 @@ public class SimpleIdentityProvider extends IdentityProvider {
     private final Map<String, char[]> passwords = new HashMap<>();
     private final Map<String, Principal> principals = new HashMap<>();
     
-    public SimpleIdentityProvider add(String username, char[] password, List<String> roles) {
+    public SimpleIdentityProvider add(String username, String password, List<String> roles) {
         Objects.requireNonNull(username);
         Objects.requireNonNull(password);
         Principal principal = createPrincipal(username, roles);
-        passwords.put(username, password.clone());
+        passwords.put(username, password.toCharArray());
         principals.put(username, principal);
         return this;
     }
