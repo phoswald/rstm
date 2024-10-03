@@ -30,6 +30,17 @@
       <artifactId>bcrypt</artifactId>
       <version>0.10.2</version>
     </dependency>
+    <dependency>
+      <groupId>jakarta.json.bind</groupId>
+      <artifactId>jakarta.json.bind-api</artifactId>
+    </dependency>
+
+    <!-- Runtime -->
+    <dependency>
+      <groupId>org.eclipse</groupId>
+      <artifactId>yasson</artifactId>
+      <scope>runtime</scope>
+    </dependency>
 
     <!-- Testing -->
     <dependency>

@@ -23,11 +23,29 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Java / Jakarta EE APIs and Implementation -->
       <dependency>
-        <groupId>com.github.phoswald</groupId>
-        <artifactId>record-builder</artifactId>
-        <version>0.1.0</version>
+        <groupId>jakarta.xml.bind</groupId>
+        <artifactId>jakarta.xml.bind-api</artifactId>
+        <version>4.0.2</version>
       </dependency>
+      <dependency>
+        <groupId>org.glassfish.jaxb</groupId>
+        <artifactId>jaxb-runtime</artifactId>
+        <version>4.0.5</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.json.bind</groupId>
+        <artifactId>jakarta.json.bind-api</artifactId>
+        <version>3.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse</groupId>
+        <artifactId>yasson</artifactId>
+        <version>3.0.3</version>
+      </dependency>
+      
+      <!-- Slf4j -->
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
@@ -38,6 +56,15 @@
         <artifactId>slf4j-simple</artifactId>
         <version>${slf4j.version}</version>
       </dependency>
+      
+      <!-- Annotation Processors -->
+      <dependency>
+        <groupId>com.github.phoswald</groupId>
+        <artifactId>record-builder</artifactId>
+        <version>0.1.0</version>
+      </dependency>
+
+      <!-- Testing -->
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>

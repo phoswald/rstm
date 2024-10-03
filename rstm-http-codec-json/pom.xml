@@ -22,14 +22,12 @@
     <dependency>
       <groupId>jakarta.json.bind</groupId>
       <artifactId>jakarta.json.bind-api</artifactId>
-      <version>3.0.1</version>
     </dependency>
 
     <!-- Runtime -->
     <dependency>
       <groupId>org.eclipse</groupId>
       <artifactId>yasson</artifactId>
-      <version>3.0.3</version>
       <scope>runtime</scope>
     </dependency>
 
