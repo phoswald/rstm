@@ -9,6 +9,7 @@ import com.github.phoswald.rstm.http.HttpMethod;
 import com.github.phoswald.rstm.http.HttpRequest;
 import com.github.phoswald.rstm.http.HttpResponse;
 import com.github.phoswald.rstm.security.IdentityProvider;
+import com.github.phoswald.rstm.security.oidc.OidcUtil;
  
 @RecordBuilder
 public record HttpServerConfig( //
@@ -39,6 +40,10 @@ public record HttpServerConfig( //
     
     public static HttpFilter login() {
         return new LoginFilter();
+    }
+    
+    public static HttpFilter oauth(OidcUtil util) {
+        return new OAuthFilter(util);
     }
 
     public static HttpFilter get(ThrowingFunction<HttpRequest, HttpResponse> filter) {
