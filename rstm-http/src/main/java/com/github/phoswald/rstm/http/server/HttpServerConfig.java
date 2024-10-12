@@ -40,6 +40,10 @@ public record HttpServerConfig( //
     public static HttpFilter login() {
         return new LoginFilter();
     }
+    
+    public static HttpFilter oidc() {
+        return new OidcFilter();
+    }
 
     public static HttpFilter get(ThrowingFunction<HttpRequest, HttpResponse> filter) {
         return method(HttpMethod.GET, filter);

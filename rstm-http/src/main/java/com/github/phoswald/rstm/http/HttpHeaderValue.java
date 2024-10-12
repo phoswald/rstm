@@ -8,7 +8,7 @@ import java.util.Optional;
  * Implements a subset of RFC 9110 (HTTP Semantics), section 5.6.6. (Parameters)
  * See: https://httpwg.org/specs/rfc9110.html#rule.parameter
  *
- * TODO: support quoted parameters in HTTP header values
+ * TODO (correctness): support quoted parameters in HTTP header values
  */
 public record HttpHeaderValue(String valueOnly, Map<String, String> parameters) {
 

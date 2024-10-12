@@ -19,30 +19,38 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import at.favre.lib.crypto.bcrypt.BCrypt.Version;
 
 /**
+ * A local IDP that stores users, hashed passwords and roles in a SQL database.
+ * 
  * See https://github.com/patrickfav/bcrypt
  */
-public class JdbcIdentityProvider extends IdentityProvider {
+public class JdbcIdentityProvider implements IdentityProvider {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final TokenProvider tokenProvider;
     private final Supplier<Connection> connectionFactory;
 
     public JdbcIdentityProvider(TokenProvider tokenProvider, Supplier<Connection> connectionFactory) {
-        super(tokenProvider);
-        this.connectionFactory = connectionFactory;
+        this.tokenProvider = Objects.requireNonNull(tokenProvider);
+        this.connectionFactory = Objects.requireNonNull(connectionFactory);
     }
 
     @Override
-    public Optional<Principal> authenticate(String username, char[] password) {
+    public Optional<Principal> authenticateWithPassword(String username, char[] password) {
         Objects.requireNonNull(username);
         Objects.requireNonNull(password);
         JdbcUser userEntity = selectUser(username);
         if(userEntity != null && checkPassword(password, userEntity.hashedPassword())) {
             logger.info("Login successful for username={}", username);
-            return Optional.of(createPrincipal(userEntity.username(), userEntity.rolesAsList()));
+            return Optional.of(tokenProvider.createPrincipal(userEntity.username(), userEntity.rolesAsList()));
         } else {
             logger.warn("Login failed for username={}", username);
             return Optional.empty();
         }
+    }
+    
+    @Override
+    public Optional<Principal> authenticateWithToken(String token) {
+        return tokenProvider.authenticateWithToken(token);
     }
     
     private JdbcUser selectUser(String username) {

@@ -1,6 +1,7 @@
 package com.github.phoswald.rstm.http.server;
 
-import java.nio.charset.StandardCharsets;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +11,9 @@ import com.github.phoswald.rstm.http.HttpResponse;
 import com.github.phoswald.rstm.security.IdentityProvider;
 import com.github.phoswald.rstm.security.Principal;
 
+/**
+ * Guards access to protected resources and enforces authentication and authorization.
+ */
 class AuthFilter implements HttpFilter {
 
     private final List<String> roles;
@@ -41,15 +45,15 @@ class AuthFilter implements HttpFilter {
                 if(separatorOffset != -1) {
                     String username = authParams.substring(0, separatorOffset);
                     char[] password = authParams.substring(separatorOffset + 1).toCharArray();
-                    return identityProvider.authenticate(username, password);
+                    return identityProvider.authenticateWithPassword(username, password);
                 }
             }
             if (request.authorization().toLowerCase().startsWith("bearer ")) {
-                return identityProvider.authenticate(request.authorization().substring(6).trim());
+                return identityProvider.authenticateWithToken(request.authorization().substring(6).trim());
             }
         }
         if (request.session() != null) {
-            return identityProvider.authenticate(request.session());
+            return identityProvider.authenticateWithToken(request.session());
         }
         return Optional.empty();
     }
@@ -65,7 +69,7 @@ class AuthFilter implements HttpFilter {
     
     private String decodeBase64(String s) {
         try {
-            return new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8);
+            return new String(Base64.getDecoder().decode(s), UTF_8);
         } catch(IllegalArgumentException e) {
             return "";
         }
