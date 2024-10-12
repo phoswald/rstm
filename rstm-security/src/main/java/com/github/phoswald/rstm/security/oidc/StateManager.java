@@ -10,16 +10,17 @@ import com.github.phoswald.rstm.security.jwt.JwtKeySet;
 class StateManager {
 
     private final SecureRandom random = new SecureRandom();
-    private final Map<String, StateInfo> states = new ConcurrentHashMap<>();
+    private final Map<String, State> states = new ConcurrentHashMap<>();
 
-    String create(ProviderInfo providerInfo, ConfigurationResponse config, JwtKeySet keySet) {
-        // TODO: evict expired items
-        String state = createState();
-        states.put(state, new StateInfo(providerInfo, config, keySet));
-        return state;
+    String create(Provider provider, Configuration config, JwtKeySet keySet) {
+        // TODO (optimize): evict expired items
+        String stateId = createState();
+        states.put(stateId, new State(provider, config, keySet));
+        return stateId;
     }
 
-    StateInfo consume(String state) {
+    State consume(String state) {
+        // TODO (correctness): check expired items
         return states.remove(state);
     }
 

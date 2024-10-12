@@ -10,6 +10,9 @@ import com.github.phoswald.rstm.http.HttpResponse;
 import com.github.phoswald.rstm.security.IdentityProvider;
 import com.github.phoswald.rstm.security.Principal;
 
+/**
+ * Guards access to protected resources and enforces authentication and authorization.
+ */
 class AuthFilter implements HttpFilter {
 
     private final List<String> roles;

@@ -34,16 +34,15 @@ public class OidcUtil {
     private final Jsonb json = JsonbBuilder.create();
 
     private final String redirectUri;
-
-    private final Map<String, ProviderInfo> providers = new HashMap<>();
+    private final Map<String, Provider> providers = new HashMap<>();
     
     public OidcUtil(String redirectUri) {
         this.redirectUri = redirectUri;
     }
     
     public OidcUtil addDex(String clientId, String clientSecret, String baseUri) {
-        providers.put("dex", ProviderInfo.builder() //
-                .configurationEndpoint(baseUri + "/.well-known/openid-configuration") //
+        providers.put("dex", Provider.builder() //
+                .configurationUri(baseUri + "/.well-known/openid-configuration") //
                 .clientId(clientId) //
                 .clientSecret(clientSecret) //
                 .scopes("openid profile email offline_access") //
@@ -52,8 +51,8 @@ public class OidcUtil {
     }
     
     public OidcUtil addGoogle(String clientId, String clientSecret) {
-        providers.put("google", ProviderInfo.builder() //
-                .configurationEndpoint("https://accounts.google.com/.well-known/openid-configuration") //
+        providers.put("google", Provider.builder() //
+                .configurationUri("https://accounts.google.com/.well-known/openid-configuration") //
                 .clientId(clientId) //
                 .clientSecret(clientSecret) //
                 .scopes("openid profile email") //
@@ -61,55 +60,57 @@ public class OidcUtil {
         return this;
     }
     
-    public Optional<String> authorize(String provider) {
-        logger.info("Handling authorize for provider={}", provider);
+    public Optional<String> authorize(String providerId) {
+        logger.info("Handling authorize for provider={}", providerId);
 
-        ProviderInfo providerInfo = providers.get(provider);
-        if (providerInfo == null) {
-            logger.warn("Provider not found: {}", provider);
+        Provider provider = providers.get(providerId);
+        if (provider == null) {
+            logger.warn("Provider not found: {}", providerId);
             return Optional.empty();
         }
 
-        ConfigurationResponse config = request(providerInfo.configurationEndpoint(), ConfigurationResponse.class, null);
+        // TODO (optimize): query configurationUri when provider is created
+        Configuration config = request(provider.configurationUri(), Configuration.class, null);
         if (config == null) {
             return Optional.empty();
         }
         
+        // TODO (optimize): query jwks_uri when provider is created
         JwtKeySet keySet = request(config.jwks_uri(), JwtKeySet.class, null);
         if (keySet == null) {
             return Optional.empty();
         }
         
-        String state = stateManager.create(providerInfo, config, keySet);
+        String stateId = stateManager.create(provider, config, keySet);
         String query = query(List.of( //
                 Map.entry("response_type", "code"), //
-                Map.entry("client_id", providerInfo.clientId()), //
+                Map.entry("client_id", provider.clientId()), //
                 Map.entry("redirect_uri", this.redirectUri), //
-                Map.entry("scope", providerInfo.scopes()), //
-                Map.entry("state", state)));
+                Map.entry("scope", provider.scopes()), //
+                Map.entry("state", stateId)));
         return Optional.of(config.authorization_endpoint() + "?" + query);
     }
 
-    public Optional<Principal> callback(String code, String state) {
-        logger.info("Handling callback for code={}, state={}", code, state);
+    public Optional<Principal> callback(String code, String stateId) {
+        logger.info("Handling callback for code={}, state={}", code, stateId);
         
-        StateInfo stateInfo = stateManager.consume(state);
-        if (stateInfo == null) {
-            logger.warn("State invalid or already consumed: {}", state);
+        State state = stateManager.consume(stateId);
+        if (state == null) {
+            logger.warn("State invalid or already consumed: {}", stateId);
             return Optional.empty();
         }
         
-        TokenResponse token = getTokenFromCode(code, stateInfo.providerInfo(), stateInfo.config());
+        Token token = getTokenFromCode(code, state.provider(), state.config());
         if (token == null) {
             return Optional.empty();
         }
         if (token.error() != null) {
-            logger.info("Token endpoint returned error={}, error_description={}", token.error(), token.error_description());
+            logger.info("Token endpoint failed: error={}, error_description={}", token.error(), token.error_description());
             return Optional.empty();
         }
         
         Optional<JwtPayload> payload = jwtUtil.validateTokenWithSignature(token.id_token(), // 
-                stateInfo.config().issuer(), stateInfo.providerInfo().clientId(), stateInfo.keySet());
+                state.config().issuer(), state.provider().clientId(), state.keySet());
         if(payload.isEmpty()) {
             logger.warn("ID token not valid: {}", token.id_token());
             return Optional.empty();
@@ -119,15 +120,48 @@ public class OidcUtil {
         logger.info("Login successful for {}, token={}", principal.name(), principal.token());
         return Optional.of(principal);
     }
+    
+    public Optional<Principal> authenticate(String token) {
+        String providerId = "dex";
+        
+        Provider provider = providers.get(providerId);
+        if (provider == null) {
+            logger.warn("Provider not found: {}", providerId);
+            return Optional.empty();
+        }
 
-    private TokenResponse getTokenFromCode(String code, ProviderInfo providerInfo, ConfigurationResponse config) {
+        // TODO (optimize): query configurationUri when provider is created
+        Configuration config = request(provider.configurationUri(), Configuration.class, null);
+        if (config == null) {
+            return Optional.empty();
+        }
+        
+        // TODO (optimize): query jwks_uri when provider is created
+        JwtKeySet keySet = request(config.jwks_uri(), JwtKeySet.class, null);
+        if (keySet == null) {
+            return Optional.empty();
+        }
+        
+        Optional<JwtPayload> payload = jwtUtil.validateTokenWithSignature(token, // 
+                config.issuer(), provider.clientId(), keySet);
+        if(payload.isEmpty()) {
+            logger.warn("ID token not valid: {}", token);
+            return Optional.empty();
+        }
+        
+        Principal principal = new Principal(payload.get().determineUser(), List.of("user") /* payload.get().determineRoles() */, token); // XXX 
+        logger.info("Authentication successful for {}, token={}", principal.name(), principal.token());
+        return Optional.of(principal);
+    }
+
+    private Token getTokenFromCode(String code, Provider providerInfo, Configuration config) {
         String query = query(List.of( //
                 Map.entry("grant_type", "authorization_code"), //
                 Map.entry("code", code), //
                 Map.entry("client_id", providerInfo.clientId()), //
                 Map.entry("client_secret", providerInfo.clientSecret()), //
                 Map.entry("redirect_uri", this.redirectUri)));
-        return request(config.token_endpoint(), TokenResponse.class, query);
+        return request(config.token_endpoint(), Token.class, query);
     }
 
     private String query(List<Map.Entry<String, String>> params) {

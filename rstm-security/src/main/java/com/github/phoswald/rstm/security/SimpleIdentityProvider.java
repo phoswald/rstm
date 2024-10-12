@@ -16,8 +16,12 @@ public class SimpleIdentityProvider extends IdentityProvider {
     private final Map<String, char[]> passwords = new HashMap<>();
     private final Map<String, Principal> principals = new HashMap<>();
 
-    public SimpleIdentityProvider() {
-        super(new SimpleTokenProvider());
+    public SimpleIdentityProvider() { // XXX
+        this(new SimpleTokenProvider());
+    }
+
+    public SimpleIdentityProvider(TokenProvider tokenProvider) {
+        super(tokenProvider);
     }
     
     public SimpleIdentityProvider add(String username, String password, List<String> roles) {

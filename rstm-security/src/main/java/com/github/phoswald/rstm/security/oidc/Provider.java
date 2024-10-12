@@ -3,14 +3,14 @@ package com.github.phoswald.rstm.security.oidc;
 import com.github.phoswald.record.builder.RecordBuilder;
 
 @RecordBuilder
-record ProviderInfo( //
-        String configurationEndpoint, //
+record Provider( //
+        String configurationUri, //
         String clientId, //
         String clientSecret, //
         String scopes //
 ) {
     
-    static ProviderInfoBuilder builder() {
-        return new ProviderInfoBuilder();
+    static ProviderBuilder builder() {
+        return new ProviderBuilder();
     }
 }

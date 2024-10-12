@@ -20,4 +20,13 @@ public abstract class IdentityProvider {
     public Optional<Principal> authenticate(String token) {
         return tokenProvider.authenticate(token);
     }
+    
+    
+    public Optional<String> authorize(String provider) {
+        return tokenProvider.authorize(provider);
+    }
+    
+    public Optional<Principal> callback(String code, String state) {
+        return tokenProvider.callback(code, state);
+    }
 }
