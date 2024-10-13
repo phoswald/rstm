@@ -15,7 +15,7 @@ class OAuthFilter implements HttpFilter {
     public HttpResponse handle(String path, HttpRequest request, HttpServerConfig config) throws Exception {
         String code = request.queryParam("code").orElse("");
         String state = request.queryParam("state").orElse("");
-        Optional<Principal> principal = config.identityProvider().callback(code, state);
+        Optional<Principal> principal = config.identityProvider().authenticateCallback(code, state);
         if (principal.isPresent()) {
             return HttpResponse.builder().status(302).location(request.relativizePath("/")).session(principal.get().token()).build();
         }

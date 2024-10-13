@@ -15,7 +15,7 @@ class LoginFilter implements HttpFilter {
     public HttpResponse handle(String path, HttpRequest request, HttpServerConfig config) throws Exception {
         String provider = request.queryParam("provider").orElse("");
         if(!provider.isEmpty()) {
-            Optional<String> location = config.identityProvider().authorize(provider);
+            Optional<String> location = config.identityProvider().authenticateExtern(provider);
             if(location.isPresent()) {
                 return HttpResponse.builder().status(302).location(location.get()).build();
             }

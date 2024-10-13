@@ -1,6 +1,7 @@
 package com.github.phoswald.rstm.http.server;
 
-import java.nio.charset.StandardCharsets;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -68,7 +69,7 @@ class AuthFilter implements HttpFilter {
     
     private String decodeBase64(String s) {
         try {
-            return new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8);
+            return new String(Base64.getDecoder().decode(s), UTF_8);
         } catch(IllegalArgumentException e) {
             return "";
         }

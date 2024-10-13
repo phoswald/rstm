@@ -20,21 +20,21 @@ public class OidcTokenProvider implements TokenProvider {
 
     @Override
     public Principal createPrincipal(String username, List<String> roles) {
-        throw new UnsupportedOperationException(); // XXX createPrincipal() for OIDC ???
-    }
-
-    @Override
-    public Optional<String> authorize(String provider) {
-        return oidcUtil.authorize(provider);
-    }
-    
-    @Override
-    public Optional<Principal> callback(String code, String state) {
-        return oidcUtil.callback(code, state);
+        throw new UnsupportedOperationException(); // XXX Cannot implement createPrincipal(), refactor !!!
     }
 
     @Override
     public Optional<Principal> authenticate(String token) {
         return oidcUtil.authenticate(token);
+    }
+
+    @Override
+    public Optional<String> authenticateExtern(String provider) {
+        return oidcUtil.authorize(provider);
+    }
+    
+    @Override
+    public Optional<Principal> authenticateCallback(String code, String state) {
+        return oidcUtil.callback(code, state);
     }
 }
