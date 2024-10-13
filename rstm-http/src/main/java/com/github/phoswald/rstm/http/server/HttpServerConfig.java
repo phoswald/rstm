@@ -41,8 +41,8 @@ public record HttpServerConfig( //
         return new LoginFilter();
     }
     
-    public static HttpFilter oauth() {
-        return new OAuthFilter();
+    public static HttpFilter oidc() {
+        return new OidcFilter();
     }
 
     public static HttpFilter get(ThrowingFunction<HttpRequest, HttpResponse> filter) {

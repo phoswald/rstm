@@ -10,10 +10,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.time.Instant;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
@@ -21,47 +22,41 @@ import jakarta.json.bind.JsonbBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.phoswald.rstm.security.Principal;
 import com.github.phoswald.rstm.security.jwt.JwtKeySet;
 import com.github.phoswald.rstm.security.jwt.JwtPayload;
 import com.github.phoswald.rstm.security.jwt.JwtUtil;
 
-public class OidcUtil {
+class OidcUtil {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    private final StateManager stateManager = new StateManager(); 
-    private final JwtUtil jwtUtil = new JwtUtil(Instant::now);
+    private final StateManager stateManager = new StateManager();
+    private final JwtUtil jwtUtil;
     private final Jsonb json = JsonbBuilder.create();
 
     private final String redirectUri;
-    private final Map<String, Provider> providers = new HashMap<>();
-    
-    public OidcUtil(String redirectUri) {
+    private final Map<String, Provider> providers = new LinkedHashMap<>();
+
+    OidcUtil(String redirectUri, Supplier<Instant> clock) {
         this.redirectUri = redirectUri;
+        this.jwtUtil = new JwtUtil(clock);
     }
-    
-    public OidcUtil addDex(String clientId, String clientSecret, String baseUri) {
-        providers.put("dex", Provider.builder() //
-                .configurationUri(baseUri + "/.well-known/openid-configuration") //
-                .clientId(clientId) //
-                .clientSecret(clientSecret) //
-                .scopes("openid profile email offline_access") //
-                .build());
-        return this;
+
+    void addProvider(String providerId, Provider provider) {
+        Configuration config = request(provider.configurationUri(), Configuration.class, null);
+        if (config == null) {
+            throw new IllegalArgumentException("Failed to load " + provider.configurationUri()); // TODO (observability) propagate case
+        }
+
+        JwtKeySet keySet = request(config.jwks_uri(), JwtKeySet.class, null);
+        if (keySet == null) {
+            throw new IllegalArgumentException("Failed to load " + config.jwks_uri()); // TODO (observability) propagate case
+        }
+        
+        providers.put(providerId, provider.toBuilder().config(config).keySet(keySet).build());
     }
-    
-    public OidcUtil addGoogle(String clientId, String clientSecret) {
-        providers.put("google", Provider.builder() //
-                .configurationUri("https://accounts.google.com/.well-known/openid-configuration") //
-                .clientId(clientId) //
-                .clientSecret(clientSecret) //
-                .scopes("openid profile email") //
-                .build());
-        return this;
-    }
-    
-    public Optional<String> authorize(String providerId) {
-        logger.info("Handling authorize for provider={}", providerId);
+
+    Optional<String> authenticateWithRedirect(String providerId) {
+        logger.info("Starting athentication with redirect for provider={}", providerId);
 
         Provider provider = providers.get(providerId);
         if (provider == null) {
@@ -69,99 +64,61 @@ public class OidcUtil {
             return Optional.empty();
         }
 
-        // TODO (optimize): query configurationUri when provider is created
-        Configuration config = request(provider.configurationUri(), Configuration.class, null);
-        if (config == null) {
-            return Optional.empty();
-        }
-        
-        // TODO (optimize): query jwks_uri when provider is created
-        JwtKeySet keySet = request(config.jwks_uri(), JwtKeySet.class, null);
-        if (keySet == null) {
-            return Optional.empty();
-        }
-        
-        String stateId = stateManager.create(provider, config, keySet);
+        String state = stateManager.create(provider);
         String query = query(List.of( //
                 Map.entry("response_type", "code"), //
                 Map.entry("client_id", provider.clientId()), //
                 Map.entry("redirect_uri", this.redirectUri), //
                 Map.entry("scope", provider.scopes()), //
-                Map.entry("state", stateId)));
-        return Optional.of(config.authorization_endpoint() + "?" + query);
+                Map.entry("state", state)));
+        return Optional.of(provider.config().authorization_endpoint() + "?" + query);
     }
 
-    public Optional<Principal> callback(String code, String stateId) {
-        logger.info("Handling callback for code={}, state={}", code, stateId);
-        
-        State state = stateManager.consume(stateId);
-        if (state == null) {
-            logger.warn("State invalid or already consumed: {}", stateId);
+    Optional<TokenAndPayload> authenticateWithCallback(String code, String state) {
+        logger.info("Completing authentication with callback for code={}, state={}", code, state);
+
+        State stateObj = stateManager.consume(state);
+        if (stateObj == null) {
+            logger.warn("State invalid or already consumed: {}", state);
             return Optional.empty();
         }
-        
-        Token token = getTokenFromCode(code, state.provider(), state.config());
+
+        Provider provider = stateObj.provider();
+        Token token = getTokenFromCode(code, provider);
         if (token == null) {
             return Optional.empty();
         }
         if (token.error() != null) {
-            logger.info("Token endpoint failed: error={}, error_description={}", token.error(), token.error_description());
-            return Optional.empty();
-        }
-        
-        Optional<JwtPayload> payload = jwtUtil.validateTokenWithSignature(token.id_token(), // 
-                state.config().issuer(), state.provider().clientId(), state.keySet());
-        if(payload.isEmpty()) {
-            logger.warn("ID token not valid: {}", token.id_token());
-            return Optional.empty();
-        }
-        
-        Principal principal = new Principal(payload.get().determineUser(), payload.get().determineRoles(), token.id_token()); 
-        logger.info("Login successful for {}, token={}", principal.name(), principal.token());
-        return Optional.of(principal);
-    }
-    
-    public Optional<Principal> authenticate(String token) {
-        String providerId = "dex";
-        
-        Provider provider = providers.get(providerId);
-        if (provider == null) {
-            logger.warn("Provider not found: {}", providerId);
+            logger.info("Token endpoint failed: error={}, error_description={}", token.error(),
+                    token.error_description());
             return Optional.empty();
         }
 
-        // TODO (optimize): query configurationUri when provider is created
-        Configuration config = request(provider.configurationUri(), Configuration.class, null);
-        if (config == null) {
-            return Optional.empty();
-        }
-        
-        // TODO (optimize): query jwks_uri when provider is created
-        JwtKeySet keySet = request(config.jwks_uri(), JwtKeySet.class, null);
-        if (keySet == null) {
-            return Optional.empty();
-        }
-        
-        Optional<JwtPayload> payload = jwtUtil.validateTokenWithSignature(token, // 
-                config.issuer(), provider.clientId(), keySet);
-        if(payload.isEmpty()) {
-            logger.warn("ID token not valid: {}", token);
-            return Optional.empty();
-        }
-        
-        Principal principal = new Principal(payload.get().determineUser(), List.of("user") /* payload.get().determineRoles() */, token); // XXX 
-        logger.info("Authentication successful for {}, token={}", principal.name(), principal.token());
-        return Optional.of(principal);
+        return jwtUtil.validateTokenWithSignature(
+                token.id_token(), provider.config().issuer(), provider.clientId(), provider.keySet()) //
+                .map(payload -> new TokenAndPayload(token.id_token(), payload));
     }
 
-    private Token getTokenFromCode(String code, Provider providerInfo, Configuration config) {
+    Optional<JwtPayload> validateTokenWithSignature(String token) {
+        for(Provider provider : providers.values()) {
+            // TODO (optimize): decode token only once!
+            Optional<JwtPayload> payload = jwtUtil.validateTokenWithSignature(
+                    token, provider.config().issuer(), provider.clientId(), provider.keySet());
+            if(payload.isPresent()) {
+                return payload;
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Token getTokenFromCode(String code, Provider provider) {
         String query = query(List.of( //
                 Map.entry("grant_type", "authorization_code"), //
                 Map.entry("code", code), //
-                Map.entry("client_id", providerInfo.clientId()), //
-                Map.entry("client_secret", providerInfo.clientSecret()), //
+                Map.entry("client_id", provider.clientId()), //
+                Map.entry("client_secret", provider.clientSecret()), //
                 Map.entry("redirect_uri", this.redirectUri)));
-        return request(config.token_endpoint(), Token.class, query);
+        return request(provider.config().token_endpoint(), Token.class, query);
     }
 
     private String query(List<Map.Entry<String, String>> params) {
@@ -188,7 +145,7 @@ public class OidcUtil {
             if (responseCode < 200 || responseCode >= 300) {
                 logger.warn("{} {} failed: {}", method, uri, responseCode);
                 logger.debug(requestBody);
-                return null;
+                return null; // TODO (observability) propagate case as IOException
             }
             try (InputStream responseStream = connection.getInputStream()) {
                 responseBody = new String(responseStream.readAllBytes(), UTF_8);
@@ -207,4 +164,6 @@ public class OidcUtil {
             return null;
         }
     }
+
+    static record TokenAndPayload(String token, JwtPayload payload) { }
 }

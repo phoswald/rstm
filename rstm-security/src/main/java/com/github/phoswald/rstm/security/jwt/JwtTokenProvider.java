@@ -31,7 +31,7 @@ public class JwtTokenProvider implements TokenProvider {
     }
 
     @Override
-    public Optional<Principal> authenticate(String token) {
+    public Optional<Principal> authenticateWithToken(String token) {
         Optional<JwtPayload> payload = jwtUtil.validateTokenWithHmac(token, issuer, secret);
         if (payload.isPresent()) {
             return Optional.of(new Principal(payload.get().determineUser(), payload.get().determineRoles(), token));

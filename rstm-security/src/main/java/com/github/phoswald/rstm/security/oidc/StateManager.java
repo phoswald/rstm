@@ -5,17 +5,15 @@ import java.util.HexFormat;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.github.phoswald.rstm.security.jwt.JwtKeySet;
-
 class StateManager {
 
     private final SecureRandom random = new SecureRandom();
     private final Map<String, State> states = new ConcurrentHashMap<>();
 
-    String create(Provider provider, Configuration config, JwtKeySet keySet) {
+    String create(Provider provider) {
         // TODO (optimize): evict expired items
         String stateId = createState();
-        states.put(stateId, new State(provider, config, keySet));
+        states.put(stateId, new State(provider));
         return stateId;
     }
 

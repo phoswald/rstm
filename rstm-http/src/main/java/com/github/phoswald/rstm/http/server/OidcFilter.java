@@ -7,15 +7,15 @@ import com.github.phoswald.rstm.http.HttpResponse;
 import com.github.phoswald.rstm.security.Principal;
 
 /**
- * Handles the redirect URI of OAuth2 flows 
+ * Handles the redirect URI of the OAuth2 authorization code flow for OIDC login 
  */
-class OAuthFilter implements HttpFilter {
+class OidcFilter implements HttpFilter { // TODO (cleanup): should be handler, not a filter
 
     @Override
     public HttpResponse handle(String path, HttpRequest request, HttpServerConfig config) throws Exception {
         String code = request.queryParam("code").orElse("");
         String state = request.queryParam("state").orElse("");
-        Optional<Principal> principal = config.identityProvider().authenticateCallback(code, state);
+        Optional<Principal> principal = config.identityProvider().authenticateWithOidcCallback(code, state);
         if (principal.isPresent()) {
             return HttpResponse.builder().status(302).location(request.relativizePath("/")).session(principal.get().token()).build();
         }

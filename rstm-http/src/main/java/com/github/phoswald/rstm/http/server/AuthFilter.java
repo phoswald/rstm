@@ -45,15 +45,15 @@ class AuthFilter implements HttpFilter {
                 if(separatorOffset != -1) {
                     String username = authParams.substring(0, separatorOffset);
                     char[] password = authParams.substring(separatorOffset + 1).toCharArray();
-                    return identityProvider.authenticate(username, password);
+                    return identityProvider.authenticateWithPassword(username, password);
                 }
             }
             if (request.authorization().toLowerCase().startsWith("bearer ")) {
-                return identityProvider.authenticate(request.authorization().substring(6).trim());
+                return identityProvider.authenticateWithToken(request.authorization().substring(6).trim());
             }
         }
         if (request.session() != null) {
-            return identityProvider.authenticate(request.session());
+            return identityProvider.authenticateWithToken(request.session());
         }
         return Optional.empty();
     }

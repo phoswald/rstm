@@ -30,15 +30,16 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    void authenticate_validToken_success() {
-        Optional<Principal> principal = testee.authenticate(TOKEN);
+    void authenticateWithToken_valid_success() {
+        Optional<Principal> principal = testee.authenticateWithToken(TOKEN);
         assertTrue(principal.isPresent());
         assertEquals("username1", principal.get().name());
         assertEquals(List.of("role1", "role3"), principal.get().roles());
+        assertEquals(TOKEN, principal.get().token());
     }
     
     @Test
-    void authenticate_invalidToken_failure() {
-        assertFalse(testee.authenticate("bad").isPresent());
+    void authenticateWithToken_invalid_failure() {
+        assertFalse(testee.authenticateWithToken("bad").isPresent());
     }
 }

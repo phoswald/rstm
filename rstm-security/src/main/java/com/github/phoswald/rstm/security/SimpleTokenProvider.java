@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * A simple token provider that generates random opaque tokens.
+ */
 public class SimpleTokenProvider implements TokenProvider {
     
     private final SecureRandom random = new SecureRandom();
@@ -27,7 +30,7 @@ public class SimpleTokenProvider implements TokenProvider {
     }
     
     @Override
-    public Optional<Principal> authenticate(String token) {
+    public Optional<Principal> authenticateWithToken(String token) {
         Principal principal = tokens.get(token);
         if(principal != null) {
             return Optional.of(principal);
