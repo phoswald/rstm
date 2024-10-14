@@ -1,3 +1,5 @@
 package com.github.phoswald.rstm.security.oidc;
 
-record State(Provider provider) { }
+import java.time.Instant;
+
+record State(Provider provider, Instant expiry) { }

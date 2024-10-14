@@ -27,8 +27,8 @@ public class SimpleIdentityProvider implements IdentityProvider {
     public SimpleIdentityProvider(TokenProvider tokenProvider) {
         this.tokenProvider = Objects.requireNonNull(tokenProvider);
     }
-    
-    public SimpleIdentityProvider registerUser(String username, String password, List<String> roles) {
+
+    public SimpleIdentityProvider withUser(String username, String password, List<String> roles) {
         Objects.requireNonNull(username);
         Objects.requireNonNull(password);
         principals.put(username, tokenProvider.createPrincipal(username, roles));
@@ -48,7 +48,7 @@ public class SimpleIdentityProvider implements IdentityProvider {
             return Optional.empty();
         }
     }
-    
+
     @Override
     public Optional<Principal> authenticateWithToken(String token) {
         return tokenProvider.authenticateWithToken(token);
