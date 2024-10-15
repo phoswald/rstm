@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.random.RandomGenerator;
@@ -49,6 +50,11 @@ class OidcUtil {
         try {
             Configuration config = request(provider.configurationUri(), Configuration.class, null);
             JwtKeySet keySet = request(config.jwks_uri(), JwtKeySet.class, null);
+            if(Objects.equals(providerId, "facebook")) {
+                config = config.toBuilder() //
+                        .token_endpoint("https://graph.facebook.com/v11.0/oauth/access_token") //
+                        .build();
+            }
             providers.put(providerId, provider.toBuilder().config(config).keySet(keySet).build());
         } catch(IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);

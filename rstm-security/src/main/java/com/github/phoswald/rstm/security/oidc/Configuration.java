@@ -11,4 +11,9 @@ public record Configuration( //
         String authorization_endpoint, //
         String token_endpoint, //
         String jwks_uri //
-)  { }
+) {
+
+    public ConfigurationBuilder toBuilder() {
+        return new ConfigurationBuilder(this);
+    }
+}

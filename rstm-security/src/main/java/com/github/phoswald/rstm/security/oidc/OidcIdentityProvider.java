@@ -62,6 +62,16 @@ public class OidcIdentityProvider implements IdentityProvider {
         return this;
     }
 
+    public OidcIdentityProvider withFacebook(String clientId, String clientSecret) {
+        oidcUtil.addProvider("facebook", Provider.builder() //
+                .configurationUri("https://www.facebook.com/.well-known/openid-configuration") //
+                .clientId(clientId) //
+                .clientSecret(clientSecret) //
+                .scopes("email public_profile") //
+                .build());
+        return this;
+    }
+
     @Override
     public Optional<Principal> authenticateWithPassword(String username, char[] password) {
         return upstream.authenticateWithPassword(username, password);
