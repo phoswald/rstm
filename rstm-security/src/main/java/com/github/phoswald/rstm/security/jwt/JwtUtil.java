@@ -115,7 +115,7 @@ public class JwtUtil {
         String payloadStr = decodeBase64toString(matcher.group(2));
         byte[] signature = decodeBase64(matcher.group(3));
         JwtHeader header = json.fromJson(headerStr, JwtHeader.class);
-        if (/* !Objects.equals(header.typ(), TYP_JWT) || */ !Objects.equals(header.alg(), ALG_RS256)) {
+        if (/*!Objects.equals(header.typ(), TYP_JWT) || */ !Objects.equals(header.alg(), ALG_RS256)) { // not set by Dex
             logger.warn("Token header unsupported: typ={}, alg={}", header.typ(), header.alg());
             return Optional.empty();
         }
@@ -163,7 +163,7 @@ public class JwtUtil {
                 .filter(k -> Objects.equals(k.use(), "sig")) //
                 .filter(k -> Objects.equals(k.kty(), "RSA")) //
                 .filter(k -> Objects.equals(k.kid(), kid)) //
-                .filter(k -> Objects.equals(k.alg(), ALG_RS256)) //
+                // .filter(k -> Objects.equals(k.alg(), ALG_RS256)) // not set by Microsoft
                 .findFirst().orElse(null);
     }
 

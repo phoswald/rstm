@@ -6,7 +6,7 @@ import com.github.phoswald.record.builder.RecordBuilder;
 
 /**
  * The second of the three parts of a JSON Web Token
- * 
+ *
  * See https://datatracker.ietf.org/doc/html/rfc7519
  */
 @RecordBuilder
@@ -40,7 +40,7 @@ public record JwtPayload(
          */
         String email,
         /**
-         * Set by Google and Dex
+         * Set by Google and Dex, not set by Microsoft
          */
         Boolean email_verified,
         /**
@@ -50,7 +50,7 @@ public record JwtPayload(
         /**
          * Set by Goolge to a image URL (PNG)
          */
-        String picture, 
+        String picture,
         /**
          * Set by RSTM from IDP (roles)
          */
@@ -70,8 +70,8 @@ public record JwtPayload(
     }
 
     public String determineUser() {
-        if (email != null && email_verified != null && email_verified.booleanValue()) {
-            return email;
+        if (email != null /* && email_verified != null && email_verified.booleanValue() */) {
+            return email; // TODO (security hardening): how can be determine unique name (by provider)
         } else {
             return sub;
         }

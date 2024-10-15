@@ -52,6 +52,16 @@ public class OidcIdentityProvider implements IdentityProvider {
         return this;
     }
 
+    public OidcIdentityProvider withMicrosoft(String clientId, String clientSecret, String tenantId) {
+        oidcUtil.addProvider("microsoft", Provider.builder() //
+                .configurationUri("https://login.microsoftonline.com/" + tenantId + "/v2.0/.well-known/openid-configuration") //
+                .clientId(clientId) //
+                .clientSecret(clientSecret) //
+                .scopes("openid profile email") //
+                .build());
+        return this;
+    }
+
     @Override
     public Optional<Principal> authenticateWithPassword(String username, char[] password) {
         return upstream.authenticateWithPassword(username, password);
