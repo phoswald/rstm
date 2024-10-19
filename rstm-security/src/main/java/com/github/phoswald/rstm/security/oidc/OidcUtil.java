@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.random.RandomGenerator;
@@ -46,16 +45,16 @@ class OidcUtil {
         this.jwtUtil = new JwtUtil(clock);
     }
 
-    void addProvider(String providerId, Provider provider) {
+    void addProvider(Provider provider) {
         try {
             Configuration config = request(provider.configurationUri(), Configuration.class, null);
             JwtKeySet keySet = request(config.jwks_uri(), JwtKeySet.class, null);
-            if(Objects.equals(providerId, "facebook")) {
+            if(provider.id().equals("facebook")) {
                 config = config.toBuilder() //
                         .token_endpoint("https://graph.facebook.com/v21.0/oauth/access_token") //
                         .build();
             }
-            providers.put(providerId, provider.toBuilder().config(config).keySet(keySet).build());
+            providers.put(provider.id(), provider.toBuilder().config(config).keySet(keySet).build());
         } catch(IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
@@ -109,14 +108,14 @@ class OidcUtil {
         }
 
         return jwtUtil.validateTokenWithRsa(
-                token.id_token(), provider.config().issuer(), provider.clientId(), provider.keySet());
+                token.id_token(), provider.config().issuer(), provider.clientId(), provider.id(), provider.keySet());
     }
 
     Optional<JwtValidToken> validateToken(String token) {
         // TODO (optimize): decode token only once!
         for(Provider provider : providers.values()) {
             Optional<JwtValidToken> validToken = jwtUtil.validateTokenWithRsa(
-                    token, provider.config().issuer(), provider.clientId(), provider.keySet());
+                    token, provider.config().issuer(), provider.clientId(), provider.id(), provider.keySet());
             if(validToken.isPresent()) {
                 return validToken;
             }

@@ -1,5 +1,6 @@
 package com.github.phoswald.rstm.security;
 
+import static com.github.phoswald.rstm.security.Principal.LOCAL_PROVIDER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.matchesRegex;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,6 +21,7 @@ class SimpleIdentityProviderTest {
         Principal principal = testee.authenticateWithPassword("username1", "password1".toCharArray()).get();
         assertEquals("username1", principal.name());
         assertEquals(List.of("role1", "role3"), principal.roles());
+        assertEquals(LOCAL_PROVIDER, principal.provider());
         assertThat(principal.token(), matchesRegex("[0-9a-f]{32}"));
     }
 
@@ -40,6 +42,7 @@ class SimpleIdentityProviderTest {
         Principal principal = testee.authenticateWithToken(token).get();
         assertEquals("username1", principal.name());
         assertEquals(List.of("role1", "role3"), principal.roles());
+        assertEquals(LOCAL_PROVIDER, principal.provider());
         assertThat(principal.token(), matchesRegex("[0-9a-f]{32}"));
     }
 

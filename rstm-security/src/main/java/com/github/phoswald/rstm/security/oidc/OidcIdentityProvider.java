@@ -33,7 +33,8 @@ public class OidcIdentityProvider implements IdentityProvider {
     }
 
     public OidcIdentityProvider withDex(String clientId, String clientSecret, String baseUri) {
-        oidcUtil.addProvider("dex", Provider.builder() //
+        oidcUtil.addProvider(Provider.builder() //
+                .id("dex") //
                 .configurationUri(baseUri + "/.well-known/openid-configuration") //
                 .clientId(clientId) //
                 .clientSecret(clientSecret) //
@@ -43,7 +44,8 @@ public class OidcIdentityProvider implements IdentityProvider {
     }
 
     public OidcIdentityProvider withGoogle(String clientId, String clientSecret) {
-        oidcUtil.addProvider("google", Provider.builder() //
+        oidcUtil.addProvider(Provider.builder() //
+                .id("google") //
                 .configurationUri("https://accounts.google.com/.well-known/openid-configuration") //
                 .clientId(clientId) //
                 .clientSecret(clientSecret) //
@@ -53,7 +55,8 @@ public class OidcIdentityProvider implements IdentityProvider {
     }
 
     public OidcIdentityProvider withMicrosoft(String clientId, String clientSecret, String tenantId) {
-        oidcUtil.addProvider("microsoft", Provider.builder() //
+        oidcUtil.addProvider(Provider.builder() //
+                .id("microsoft") //
                 .configurationUri("https://login.microsoftonline.com/" + tenantId + "/v2.0/.well-known/openid-configuration") //
                 .clientId(clientId) //
                 .clientSecret(clientSecret) //
@@ -63,11 +66,12 @@ public class OidcIdentityProvider implements IdentityProvider {
     }
 
     public OidcIdentityProvider withFacebook(String clientId, String clientSecret) {
-        oidcUtil.addProvider("facebook", Provider.builder() //
+        oidcUtil.addProvider(Provider.builder() //
+                .id("facebook") //
                 .configurationUri("https://www.facebook.com/.well-known/openid-configuration") //
                 .clientId(clientId) //
                 .clientSecret(clientSecret) //
-                .scopes("email public_profile") //
+                .scopes("openid email public_profile") //
                 .build());
         return this;
     }
@@ -103,7 +107,7 @@ public class OidcIdentityProvider implements IdentityProvider {
     }
 
     private Principal createPrincipal(JwtValidToken token) {
-        Principal principal = new Principal(token.payload().determineUser(), List.of("user"), token.token());
+        Principal principal = new Principal(token.payload().determineUser(), List.of("user"), token.provider(), token.token());
         logger.info("Authentication successful for {}", principal.name());
         return principal;
     }

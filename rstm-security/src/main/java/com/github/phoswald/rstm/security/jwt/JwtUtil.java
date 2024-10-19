@@ -1,5 +1,6 @@
 package com.github.phoswald.rstm.security.jwt;
 
+import static com.github.phoswald.rstm.security.Principal.LOCAL_PROVIDER;
 import static com.github.phoswald.rstm.security.jwt.JwtHeader.ALG_HS256;
 import static com.github.phoswald.rstm.security.jwt.JwtHeader.ALG_RS256;
 import static com.github.phoswald.rstm.security.jwt.JwtHeader.TYP_JWT;
@@ -98,14 +99,14 @@ public class JwtUtil {
             logger.warn("Token has expired: exp={}", payload.exp());
             return Optional.empty();
         }
-        return Optional.of(new JwtValidToken(token, payload));
+        return Optional.of(new JwtValidToken(LOCAL_PROVIDER, token, payload));
     }
 
-    public Optional<JwtValidToken> validateTokenWithRsa(String token, String issuer, String audience, JwtKeySet keyset) {
+    public Optional<JwtValidToken> validateTokenWithRsa(String token, String issuer, String audience, String provider, JwtKeySet keyset) {
         Objects.requireNonNull(token, "Parameter token must not be null");
         Objects.requireNonNull(issuer, "Parameter issuer must not be null");
         Objects.requireNonNull(audience, "Parameter audience must not be null");
-        Objects.requireNonNull(keyset, "Parameter keyset must not be null");
+        Objects.requireNonNull(keyset, "Parameter keysets must not be null");
         Matcher matcher = TOKEN_PATTERN.matcher(token);
         if (!matcher.matches()) {
             logger.warn("Token has invalid format");
@@ -121,7 +122,7 @@ public class JwtUtil {
         }
         JwtKey jwtKey = findJwtKey(keyset, header.kid());
         if (jwtKey == null) {
-            logger.warn("Key with kid={} not found in JwtKeySet of {} entries", header.kid(), keyset.keys().size());
+            logger.warn("Key with kid={} not found in JwtKeySet", header.kid());
             return Optional.empty();
         }
         PublicKey publicKey = createPublicKeyRsa(decodeBase64(jwtKey.n()), decodeBase64(jwtKey.e()));
@@ -143,7 +144,7 @@ public class JwtUtil {
             logger.warn("Token has expired: exp={}", payload.exp());
             return Optional.empty();
         }
-        return Optional.of(new JwtValidToken(token, payload));
+        return Optional.of(new JwtValidToken(provider, token, payload));
     }
 
     private byte[] createHmacSha256(String data, String secret) {

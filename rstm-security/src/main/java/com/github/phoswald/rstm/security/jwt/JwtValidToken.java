@@ -1,3 +1,3 @@
 package com.github.phoswald.rstm.security.jwt;
 
-public record JwtValidToken(String token, JwtPayload payload) { }
+public record JwtValidToken(String provider, String token, JwtPayload payload) { }

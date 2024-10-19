@@ -1,5 +1,6 @@
 package com.github.phoswald.rstm.security.oidc;
 
+import static com.github.phoswald.rstm.security.Principal.LOCAL_PROVIDER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -36,6 +37,7 @@ import com.github.phoswald.rstm.security.SimpleIdentityProvider;
 class OidcIdentityProviderTest {
 
     private static final String TOKEN = "eyJhbGciOiJSUzI1NiIsImtpZCI6ImQ1OTgzNGNlOTc3YmVkNDZkNmE1NGI0NjZjZjdiODk3NzBhOWZiOTIifQ.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjU1NTYvZGV4Iiwic3ViIjoiQ2cwd0xUTTROUzB5T0RBNE9TMHdFZ1J0YjJOciIsImF1ZCI6InJzdG0tYXBwIiwiZXhwIjoxNzI4ODMzMDQzLCJpYXQiOjE3Mjg3NDY2NDMsImF0X2hhc2giOiJPRmowVHg1MHRTOTVReERZb1hFZnVnIiwiY19oYXNoIjoielNRbEEyWlprQUxIWW9jcklIQ0F3ZyIsImVtYWlsIjoia2lsZ29yZUBraWxnb3JlLnRyb3V0IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5hbWUiOiJLaWxnb3JlIFRyb3V0In0.py5M1sFUHZVhQJjooI299tdAWBsdLaZebD7j2TpBNCsiWldcrJtV8HRejADrpfuNX-XvqytbLATYbSQ1AMV8J95mfaFvkbrWAUFY2MXF81F2Fzp1xXAdRL-PlwkYsUiWanfOiJE3EZFr-EQURvCng9VW9wO_mqvRpf7NjCDvYa0kk_H5ntGhoH76dSRQH4gY_5-58SfiPfQdEZSzg0khQzyLlD5jJuxTo6HKrh3BkyPYsgRszX1C8sKKuckDPbuPKKLkRNMwA48fuNrFeEhI8RrByrCTPjZtFGFlFiktZijXJ2T7ji6-mieyXfSK8rZSxHzCueauU0hqoAKa6WHSZg";
+    private static final String DEX_PROVIDER = "dex";
     private static final String REDIRECT_URI = "https://example.com/oauth/callback";
 
     // for troubleshooting: set org.mockserver.log.MockServerEventLog from "warn" to "info"
@@ -61,7 +63,7 @@ class OidcIdentityProviderTest {
 
     @Test
     void authenticateWithOidcRedirect_dex_success() {
-        Optional<String> url = testee.authenticateWithOidcRedirect("dex");
+        Optional<String> url = testee.authenticateWithOidcRedirect(DEX_PROVIDER);
         assertTrue(url.isPresent());
         assertThat(url.get(), startsWith("http://127.0.0.1:5556/dex/auth?"));
         assertThat(url.get(), containsString("?response_type=code&"));
@@ -85,7 +87,7 @@ class OidcIdentityProviderTest {
 
     @Test
     void authenticateWithOidcCallback_dex_success() {
-        Optional<String> url = testee.authenticateWithOidcRedirect("dex");
+        Optional<String> url = testee.authenticateWithOidcRedirect(DEX_PROVIDER);
         assertTrue(url.isPresent());
         assertThat(url.get(), endsWith("&state=01000000000000000200000000000000"));
 
@@ -93,15 +95,17 @@ class OidcIdentityProviderTest {
         assertTrue(principal.isPresent());
         assertEquals("kilgore@kilgore.trout", principal.get().name());
         assertEquals(List.of("user"), principal.get().roles());
+        assertEquals(DEX_PROVIDER, principal.get().provider());
         assertEquals(TOKEN, principal.get().token());
     }
 
     @Test
-    void authenticateWithToken_vaid_success() {
+    void authenticateWithToken_valid_success() {
         Optional<Principal> principal = testee.authenticateWithToken(TOKEN);
         assertTrue(principal.isPresent());
         assertEquals("kilgore@kilgore.trout", principal.get().name());
         assertEquals(List.of("user"), principal.get().roles());
+        assertEquals(DEX_PROVIDER, principal.get().provider());
         assertEquals(TOKEN, principal.get().token());
     }
 
@@ -110,6 +114,7 @@ class OidcIdentityProviderTest {
         Principal principal = testee.authenticateWithPassword("username1", "password1".toCharArray()).get();
         assertEquals("username1", principal.name());
         assertEquals(List.of("role1"), principal.roles());
+        assertEquals(LOCAL_PROVIDER, principal.provider());
         assertThat(principal.token(), matchesRegex("[0-9a-f]{32}"));
     }
 
@@ -120,6 +125,7 @@ class OidcIdentityProviderTest {
         Principal principal = testee.authenticateWithToken(token).get();
         assertEquals("username1", principal.name());
         assertEquals(List.of("role1"), principal.roles());
+        assertEquals(LOCAL_PROVIDER, principal.provider());
         assertThat(principal.token(), matchesRegex("[0-9a-f]{32}"));
     }
 
