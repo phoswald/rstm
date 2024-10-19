@@ -27,8 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.phoswald.rstm.security.jwt.JwtKeySet;
-import com.github.phoswald.rstm.security.jwt.JwtPayload;
 import com.github.phoswald.rstm.security.jwt.JwtUtil;
+import com.github.phoswald.rstm.security.jwt.JwtValidToken;
 
 class OidcUtil {
 
@@ -52,7 +52,7 @@ class OidcUtil {
             JwtKeySet keySet = request(config.jwks_uri(), JwtKeySet.class, null);
             if(Objects.equals(providerId, "facebook")) {
                 config = config.toBuilder() //
-                        .token_endpoint("https://graph.facebook.com/v11.0/oauth/access_token") //
+                        .token_endpoint("https://graph.facebook.com/v21.0/oauth/access_token") //
                         .build();
             }
             providers.put(providerId, provider.toBuilder().config(config).keySet(keySet).build());
@@ -80,7 +80,7 @@ class OidcUtil {
         return Optional.of(provider.config().authorization_endpoint() + "?" + query);
     }
 
-    Optional<TokenAndPayload> authenticateWithCallback(String code, String state) {
+    Optional<JwtValidToken> authenticateWithCallback(String code, String state) {
         logger.info("Completing authentication with callback with code={}, state={}", code, state);
 
         State stateObj = stateManager.consume(state);
@@ -108,18 +108,17 @@ class OidcUtil {
             return Optional.empty();
         }
 
-        return jwtUtil.validateTokenWithSignature(
-                token.id_token(), provider.config().issuer(), provider.clientId(), provider.keySet()) //
-                .map(payload -> new TokenAndPayload(token.id_token(), payload));
+        return jwtUtil.validateTokenWithRsa(
+                token.id_token(), provider.config().issuer(), provider.clientId(), provider.keySet());
     }
 
-    Optional<JwtPayload> validateTokenWithSignature(String token) {
+    Optional<JwtValidToken> validateToken(String token) {
+        // TODO (optimize): decode token only once!
         for(Provider provider : providers.values()) {
-            // TODO (optimize): decode token only once!
-            Optional<JwtPayload> payload = jwtUtil.validateTokenWithSignature(
+            Optional<JwtValidToken> validToken = jwtUtil.validateTokenWithRsa(
                     token, provider.config().issuer(), provider.clientId(), provider.keySet());
-            if(payload.isPresent()) {
-                return payload;
+            if(validToken.isPresent()) {
+                return validToken;
             }
         }
         return Optional.empty();
@@ -167,6 +166,4 @@ class OidcUtil {
             throw new IOException(message);
         }
     }
-
-    static record TokenAndPayload(String token, JwtPayload payload) { }
 }

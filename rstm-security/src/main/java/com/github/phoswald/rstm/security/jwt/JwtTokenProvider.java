@@ -32,9 +32,9 @@ public class JwtTokenProvider implements TokenProvider {
 
     @Override
     public Optional<Principal> authenticateWithToken(String token) {
-        Optional<JwtPayload> payload = jwtUtil.validateTokenWithHmac(token, issuer, secret);
-        if (payload.isPresent()) {
-            return Optional.of(new Principal(payload.get().determineUser(), payload.get().determineRoles(), token));
+        Optional<JwtValidToken> validToken = jwtUtil.validateTokenWithHmac(token, issuer, secret);
+        if (validToken.isPresent()) {
+            return Optional.of(new Principal(validToken.get().payload().determineUser(), validToken.get().payload().determineRoles(), token));
         } else {
             return Optional.empty();
         }

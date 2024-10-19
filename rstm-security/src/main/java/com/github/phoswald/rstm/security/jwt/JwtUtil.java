@@ -62,7 +62,7 @@ public class JwtUtil {
         return encodeBase64(headerStr) + "." + encodeBase64(payloadStr) + "." + encodeBase64(signature);
     }
 
-    public Optional<JwtPayload> validateTokenWithHmac(String token, String issuer, String secret) {
+    public Optional<JwtValidToken> validateTokenWithHmac(String token, String issuer, String secret) {
         Objects.requireNonNull(token, "Parameter token must not be null");
         Objects.requireNonNull(issuer, "Parameter issuer must not be null");
         Objects.requireNonNull(secret, "Parameter secret must not be null");
@@ -98,10 +98,10 @@ public class JwtUtil {
             logger.warn("Token has expired: exp={}", payload.exp());
             return Optional.empty();
         }
-        return Optional.of(payload);
+        return Optional.of(new JwtValidToken(token, payload));
     }
 
-    public Optional<JwtPayload> validateTokenWithSignature(String token, String issuer, String audience, JwtKeySet keyset) {
+    public Optional<JwtValidToken> validateTokenWithRsa(String token, String issuer, String audience, JwtKeySet keyset) {
         Objects.requireNonNull(token, "Parameter token must not be null");
         Objects.requireNonNull(issuer, "Parameter issuer must not be null");
         Objects.requireNonNull(audience, "Parameter audience must not be null");
@@ -143,7 +143,7 @@ public class JwtUtil {
             logger.warn("Token has expired: exp={}", payload.exp());
             return Optional.empty();
         }
-        return Optional.of(payload);
+        return Optional.of(new JwtValidToken(token, payload));
     }
 
     private byte[] createHmacSha256(String data, String secret) {

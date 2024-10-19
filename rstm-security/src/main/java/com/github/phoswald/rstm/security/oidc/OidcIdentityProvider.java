@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.phoswald.rstm.security.IdentityProvider;
 import com.github.phoswald.rstm.security.Principal;
-import com.github.phoswald.rstm.security.jwt.JwtPayload;
+import com.github.phoswald.rstm.security.jwt.JwtValidToken;
 
 /**
  * A federated IDP for OpenID Connect (OIDC). A local upstream is also supported.
@@ -84,9 +84,9 @@ public class OidcIdentityProvider implements IdentityProvider {
 
     @Override
     public Optional<Principal> authenticateWithOidcCallback(String code, String state) {
-        var result = oidcUtil.authenticateWithCallback(code, state);
-        if (result.isPresent()) {
-            return Optional.of(createPrincipal(result.get().payload(), result.get().token()));
+        Optional<JwtValidToken> validToken = oidcUtil.authenticateWithCallback(code, state);
+        if (validToken.isPresent()) {
+            return Optional.of(createPrincipal(validToken.get()));
         } else {
             return Optional.empty();
         }
@@ -94,16 +94,16 @@ public class OidcIdentityProvider implements IdentityProvider {
 
     @Override
     public Optional<Principal> authenticateWithToken(String token) {
-        Optional<JwtPayload> payload = oidcUtil.validateTokenWithSignature(token);
-        if (payload.isPresent()) {
-            return Optional.of(createPrincipal(payload.get(), token));
+        Optional<JwtValidToken> validToken = oidcUtil.validateToken(token);
+        if (validToken.isPresent()) {
+            return Optional.of(createPrincipal(validToken.get()));
         } else {
             return upstream.authenticateWithToken(token);
         }
     }
 
-    private Principal createPrincipal(JwtPayload payload, String token) {
-        Principal principal = new Principal(payload.determineUser(), List.of("user"), token);
+    private Principal createPrincipal(JwtValidToken token) {
+        Principal principal = new Principal(token.payload().determineUser(), List.of("user"), token.token());
         logger.info("Authentication successful for {}", principal.name());
         return principal;
     }
