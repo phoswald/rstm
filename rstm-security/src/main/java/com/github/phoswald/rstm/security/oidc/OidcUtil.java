@@ -19,12 +19,10 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.random.RandomGenerator;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.phoswald.rstm.databind.Databinder;
 import com.github.phoswald.rstm.security.jwt.JwtKeySet;
 import com.github.phoswald.rstm.security.jwt.JwtUtil;
 import com.github.phoswald.rstm.security.jwt.JwtValidToken;
@@ -32,9 +30,9 @@ import com.github.phoswald.rstm.security.jwt.JwtValidToken;
 class OidcUtil {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Databinder binder = new Databinder();
     private final StateManager stateManager;
     private final JwtUtil jwtUtil;
-    private final Jsonb json = JsonbBuilder.create();
 
     private final String redirectUri;
     private final Map<String, Provider> providers = new LinkedHashMap<>();
@@ -156,7 +154,7 @@ class OidcUtil {
             if (responseClass == String.class) {
                 return responseClass.cast(responseBody);
             } else {
-                return json.fromJson(responseBody, responseClass);
+                return binder.fromJson(responseBody, responseClass);
             }
         } catch (IOException | URISyntaxException e) {
             String message = String.format("%s %s failed: %s", method, uri, e.getMessage());

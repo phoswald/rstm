@@ -30,19 +30,18 @@ import java.util.regex.Pattern;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.phoswald.rstm.databind.Databinder;
+
 public class JwtUtil {
 
+    private static final Databinder BINDER = new Databinder().pretty(false);
     private static final Pattern TOKEN_PATTERN = Pattern.compile( //
             "([A-Z-a-z0-9_-]+)\\.([A-Z-a-z0-9_-]+)\\.([A-Z-a-z0-9_-]+)");
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    private final Jsonb json = JsonbBuilder.create();
     private final LongSupplier clock;
     private final long clockSkew = Duration.ofMinutes(1).toSeconds();
     private final long lifespan = Duration.ofHours(2).toSeconds();
@@ -57,8 +56,8 @@ public class JwtUtil {
         Objects.requireNonNull(secret, "Parameter secret must not be null");
         long now = clock.getAsLong();
         long exp = now + lifespan;
-        String payloadStr = json.toJson(payload.toBuilder().iss(issuer).aud(issuer).iat(now).nbf(now).exp(exp).build());
-        String headerStr = json.toJson(new JwtHeader(TYP_JWT, ALG_HS256, null));
+        String payloadStr = BINDER.toJson(payload.toBuilder().iss(issuer).aud(issuer).iat(now).nbf(now).exp(exp).build());
+        String headerStr = BINDER.toJson(JwtHeader.builder().typ(TYP_JWT).alg(ALG_HS256).build());
         byte[] signature = createHmacSha256(encodeBase64(headerStr) + "." + encodeBase64(payloadStr), secret);
         return encodeBase64(headerStr) + "." + encodeBase64(payloadStr) + "." + encodeBase64(signature);
     }
@@ -75,7 +74,7 @@ public class JwtUtil {
         String headerStr = decodeBase64toString(matcher.group(1));
         String payloadStr = decodeBase64toString(matcher.group(2));
         byte[] signature = decodeBase64(matcher.group(3));
-        JwtHeader header = json.fromJson(headerStr, JwtHeader.class);
+        JwtHeader header = BINDER.fromJson(headerStr, JwtHeader.class);
         if (!Objects.equals(header.typ(), TYP_JWT) || !Objects.equals(header.alg(), ALG_HS256)) {
             logger.warn("Token header unsupported: typ={}, alg={}", header.typ(), header.alg());
             return Optional.empty();
@@ -85,7 +84,7 @@ public class JwtUtil {
             logger.warn("Token signature mismatch (HMAC)");
             return Optional.empty();
         }
-        JwtPayload payload = json.fromJson(payloadStr, JwtPayload.class);
+        JwtPayload payload = BINDER.fromJson(payloadStr, JwtPayload.class);
         if (!Objects.equals(payload.iss(), issuer) || !Objects.equals(payload.aud(), issuer)) {
             logger.warn("Token issuer or audience mismatch: iss={}, aud={}", payload.iss(), payload.aud());
             return Optional.empty();
@@ -115,7 +114,7 @@ public class JwtUtil {
         String headerStr = decodeBase64toString(matcher.group(1));
         String payloadStr = decodeBase64toString(matcher.group(2));
         byte[] signature = decodeBase64(matcher.group(3));
-        JwtHeader header = json.fromJson(headerStr, JwtHeader.class);
+        JwtHeader header = BINDER.fromJson(headerStr, JwtHeader.class);
         if (/*!Objects.equals(header.typ(), TYP_JWT) || */ !Objects.equals(header.alg(), ALG_RS256)) { // not set by Dex
             logger.warn("Token header unsupported: typ={}, alg={}", header.typ(), header.alg());
             return Optional.empty();
@@ -130,7 +129,7 @@ public class JwtUtil {
             logger.warn("Token signature mismatch (RSA)");
             return Optional.empty();
         }
-        JwtPayload payload = json.fromJson(payloadStr, JwtPayload.class);
+        JwtPayload payload = BINDER.fromJson(payloadStr, JwtPayload.class);
         if (!Objects.equals(payload.iss(), issuer) || !Objects.equals(payload.aud(), audience)) {
             logger.warn("Token issuer or audience mismatch: iss={}, aud={}", payload.iss(), payload.aud());
             return Optional.empty();

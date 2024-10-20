@@ -12,29 +12,9 @@ import com.github.phoswald.record.builder.RecordBuilder;
 @RecordBuilder
 public record JwtPayload(
         /**
-         * the issuer, optional, a string or URI
-         */
-        String iss,
-        /**
-         * the subject, optional, a string or URI, RSTM: username
-         */
-        String sub,
-        /**
          * the audience, optional, a string or URI (single or array)
          */
         String aud,
-        /**
-         * expiration time, optional, seconds since epoch
-         */
-        Long exp,
-        /**
-         * not before, optional, seconds since epoch
-         */
-        Long nbf,
-        /**
-         * issued at, optional, seconds since epoch
-         */
-        Long iat,
         /**
          * Set by Google and Dex
          */
@@ -44,17 +24,37 @@ public record JwtPayload(
          */
         Boolean email_verified,
         /**
+         * expiration time, optional, seconds since epoch
+         */
+        Long exp,
+        /**
+         * Set by RSTM from IDP (roles)
+         */
+        List<String> groups,
+        /**
+         * issued at, optional, seconds since epoch
+         */
+        Long iat,
+        /**
+         * the issuer, optional, a string or URI
+         */
+        String iss,
+        /**
          * Set by Google and Dex to the real name
          */
         String name,
+        /**
+         * not before, optional, seconds since epoch
+         */
+        Long nbf,
         /**
          * Set by Goolge to a image URL (PNG)
          */
         String picture,
         /**
-         * Set by RSTM from IDP (roles)
+         * the subject, optional, a string or URI, RSTM: username
          */
-        List<String> groups //
+        String sub //
 ) {
 
     public static JwtPayloadBuilder builder() {
