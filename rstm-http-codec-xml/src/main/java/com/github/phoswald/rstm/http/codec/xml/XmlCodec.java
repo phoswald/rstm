@@ -1,11 +1,7 @@
 package com.github.phoswald.rstm.http.codec.xml;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-
+import com.github.phoswald.rstm.databind.Databinder;
 import com.github.phoswald.rstm.http.HttpCodec;
-
-import jakarta.xml.bind.JAXB;
 
 public class XmlCodec implements HttpCodec {
 
@@ -20,13 +16,11 @@ public class XmlCodec implements HttpCodec {
 
     @Override
     public byte[] encode(Object object) {
-        var buffer = new ByteArrayOutputStream();
-        JAXB.marshal(object, buffer);
-        return buffer.toByteArray();
+        return new Databinder().toXml((Class) object.getClass(), object);
     }
 
     @Override
     public <T> T decode(Class<T> clazz, byte[] bytes) {
-        return JAXB.unmarshal(new ByteArrayInputStream(bytes), clazz);
+        return new Databinder().fromXml(clazz, bytes);
     }
 }

@@ -19,17 +19,6 @@
       <artifactId>rstm-http</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>jakarta.xml.bind</groupId>
-      <artifactId>jakarta.xml.bind-api</artifactId>
-    </dependency>
-
-    <!-- Runtime -->
-    <dependency>
-      <groupId>org.glassfish.jaxb</groupId>
-      <artifactId>jaxb-runtime</artifactId>
-      <scope>runtime</scope>
-    </dependency>
 
     <!-- Testing -->
     <dependency>

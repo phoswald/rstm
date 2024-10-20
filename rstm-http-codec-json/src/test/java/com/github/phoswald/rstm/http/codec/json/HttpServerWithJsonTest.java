@@ -41,7 +41,7 @@ class HttpServerWithJsonTest {
         then().
             statusCode(200).
             contentType("application/json").
-            body(equalTo("{\"output\":\"Test Output\"}"));
+            body(equalTo("{\n    \"output\": \"Test Output\"\n}\n"));
     }
 
     @Test
@@ -54,18 +54,14 @@ class HttpServerWithJsonTest {
         then().
             statusCode(200).
             contentType("application/json").
-            body(equalTo("{\"output\":\"Test Output for Test Input\"}"));
+            body(equalTo("{\n    \"output\": \"Test Output for Test Input\"\n}\n"));
     }
 
     private static SampleResponse handleGet() {
-        SampleResponse response = new SampleResponse();
-        response.setOutput("Test Output");
-        return response;
+        return new SampleResponse("Test Output");
     }
 
     private static SampleResponse handlePost(SampleRequest request) {
-        SampleResponse response = new SampleResponse();
-        response.setOutput("Test Output for " + request.getInput());
-        return response;
+        return new SampleResponse("Test Output for " + request.input());
     }
 }

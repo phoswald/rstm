@@ -22,6 +22,11 @@
 
     <!-- Compile -->
     <dependency>
+      <groupId>com.github.phoswald</groupId>
+      <artifactId>rstm-databind</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
@@ -29,17 +34,6 @@
       <groupId>at.favre.lib</groupId>
       <artifactId>bcrypt</artifactId>
       <version>0.10.2</version>
-    </dependency>
-    <dependency>
-      <groupId>jakarta.json.bind</groupId>
-      <artifactId>jakarta.json.bind-api</artifactId>
-    </dependency>
-
-    <!-- Runtime -->
-    <dependency>
-      <groupId>org.eclipse</groupId>
-      <artifactId>yasson</artifactId>
-      <scope>runtime</scope>
     </dependency>
 
     <!-- Testing -->

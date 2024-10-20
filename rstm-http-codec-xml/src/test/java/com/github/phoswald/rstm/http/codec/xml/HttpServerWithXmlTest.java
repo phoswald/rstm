@@ -41,7 +41,7 @@ class HttpServerWithXmlTest {
         then().
             statusCode(200).
             contentType("text/xml").
-            body(equalTo("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<sampleResponse>\n    <output>Test Output</output>\n</sampleResponse>\n"));
+            body(equalTo("<?xml version=\"1.0\" ?>\n<sampleResponse>\n    <output>Test Output</output>\n</sampleResponse>\n")); // XXX enc, sa
     }
 
     @Test
@@ -54,18 +54,14 @@ class HttpServerWithXmlTest {
         then().
             statusCode(200).
             contentType("text/xml").
-            body(equalTo("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<sampleResponse>\n    <output>Test Output for Test Input</output>\n</sampleResponse>\n"));
+            body(equalTo("<?xml version=\"1.0\" ?>\n<sampleResponse>\n    <output>Test Output for Test Input</output>\n</sampleResponse>\n")); // XXX enc, sa
     }
 
     private static SampleResponse handleGet() {
-        SampleResponse response = new SampleResponse();
-        response.setOutput("Test Output");
-        return response;
+        return new SampleResponse("Test Output");
     }
 
     private static SampleResponse handlePost(SampleRequest request) {
-        SampleResponse response = new SampleResponse();
-        response.setOutput("Test Output for " + request.getInput());
-        return response;
+        return new SampleResponse("Test Output for " + request.input());
     }
 }
