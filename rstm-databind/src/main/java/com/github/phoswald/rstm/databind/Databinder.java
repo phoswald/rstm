@@ -35,8 +35,13 @@ public class Databinder {
     public <T> T create(Class<T> clazz, Map<String, Object> map) {
         ClassInfo<T> classInfo = getClassInfo(clazz);
         Object[] args = new Object[classInfo.fields().size()];
-        for (FieldInfo<T> field : classInfo.fields().values()) {
-            args[field.index()] = map.get(field.name());
+        for (FieldInfo<T> fieldInfo : classInfo.fields().values()) {
+            args[fieldInfo.index()] = coerce(fieldInfo, map.get(fieldInfo.name()));
+        }
+        for (String name : map.keySet()) {
+            if(!classInfo.fields().containsKey(name)) {
+                throw new DatabinderException("Invalid field for " + clazz + ": " + name);
+            }
         }
         return classInfo.constructor().apply(args);
     }
@@ -51,7 +56,7 @@ public class Databinder {
         return buffer.toByteArray();
     }
 
-    public String toJson(Object instance) { // XXX
+    public String toJson(Object instance) { // TODO (API): should be compatible with JSON-B
         return new String(toJson((Class) instance.getClass(), instance), UTF_8);
     }
 
@@ -83,7 +88,7 @@ public class Databinder {
         }
     }
 
-    public <T> T fromJson(Class<T> clazz, String json) { // XXX
+    public <T> T fromJson(Class<T> clazz, String json) { // TODO (API): should be compatible with JSON-B
         return fromJson(clazz, json.getBytes(UTF_8));
     }
 
@@ -137,6 +142,67 @@ public class Databinder {
         } catch (ReflectiveOperationException e) {
             throw new DatabinderException(e);
         }
+    }
+
+    private static Object coerce(FieldInfo<?> fieldInfo, Object value) {
+        if(value == null) {
+            if(fieldInfo.clazz() == byte.class) {
+                return (byte) 0;
+            }
+            if(fieldInfo.clazz() == short.class) {
+                return (short) 0;
+            }
+            if(fieldInfo.clazz() == int.class) {
+                return 0;
+            }
+            if(fieldInfo.clazz() == long.class) {
+                return 0L;
+            }
+            if(fieldInfo.clazz() == float.class) {
+                return 0.0f;
+            }
+            if(fieldInfo.clazz() == double.class) {
+                return 0.0;
+            }
+            if(fieldInfo.clazz() == boolean.class) {
+                return false;
+            }
+            if(fieldInfo.clazz() == char.class) {
+                return '0'; // XXX: represent '\0'
+            }
+            return null;
+        }
+        if(value.getClass() == fieldInfo.clazz()) {
+            return value;
+        }
+        if(fieldInfo.clazz() == String.class) {
+            return value.toString();
+        }
+        if(fieldInfo.clazz() == Byte.class || fieldInfo.clazz() == byte.class) {
+            return Byte.valueOf(value.toString());
+        }
+        if(fieldInfo.clazz() == Short.class || fieldInfo.clazz() == short.class) {
+            return Short.valueOf(value.toString());
+        }
+        if(fieldInfo.clazz() == Integer.class || fieldInfo.clazz() == int.class) {
+            return Integer.valueOf(value.toString());
+        }
+        if(fieldInfo.clazz() == Long.class || fieldInfo.clazz() == long.class) {
+            return Long.valueOf(value.toString());
+        }
+        if(fieldInfo.clazz() == Float.class || fieldInfo.clazz() == float.class) {
+            return Float.valueOf(value.toString());
+        }
+        if(fieldInfo.clazz() == Double.class || fieldInfo.clazz() == double.class) {
+            return Double.valueOf(value.toString());
+        }
+        if(fieldInfo.clazz() == Boolean.class || fieldInfo.clazz() == boolean.class) {
+            return Boolean.valueOf(value.toString()); // XXX: parse boolean strictly
+        }
+        if(fieldInfo.clazz() == Character.class || fieldInfo.clazz() == char.class) {
+            return Character.valueOf(value.toString().charAt(0)); // XXX: parse character strictly
+        }
+        throw new DatabinderException("Cannot coerce to " + fieldInfo.clazz() + " from " + value.getClass());
     }
 
     private static <T> Constructor<T> constructor(Class<T> clazz) {

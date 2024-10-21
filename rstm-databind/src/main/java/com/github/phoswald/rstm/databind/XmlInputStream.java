@@ -10,7 +10,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import com.github.phoswald.rstm.databind.Databinder.ClassInfo;
-import com.github.phoswald.rstm.databind.Databinder.FieldInfo;
 
 class XmlInputStream implements DataInputStream {
 
@@ -39,17 +38,17 @@ class XmlInputStream implements DataInputStream {
             String fieldName;
             while((fieldName = startObject()) != null) {
                 System.out.println("XML: fieldName=" + fieldName);
-                FieldInfo<T> fieldInfo = classInfo.fields().get(fieldName);
+//                FieldInfo<T> fieldInfo = classInfo.fields().get(fieldName);
                 next();
                 Object fieldValue = text();
                 if(fieldValue != null) {
                     System.out.println("XML: fieldValue=" + fieldValue);
-                    if(fieldInfo.clazz() == Integer.class) {
-                        fieldValue = Integer.valueOf((String) fieldValue);
-                    }
-                    if(fieldInfo.clazz() == Long.class) {
-                        fieldValue = Long.valueOf((String) fieldValue);
-                    }
+//                    if(fieldInfo.clazz() == Integer.class) {
+//                        fieldValue = Integer.valueOf((String) fieldValue);
+//                    }
+//                    if(fieldInfo.clazz() == Long.class) {
+//                        fieldValue = Long.valueOf((String) fieldValue);
+//                    }
                     map.put(fieldName, fieldValue);
                 }
                 next();

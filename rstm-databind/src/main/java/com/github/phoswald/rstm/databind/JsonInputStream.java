@@ -9,7 +9,6 @@ import jakarta.json.stream.JsonParser;
 import jakarta.json.stream.JsonParser.Event;
 
 import com.github.phoswald.rstm.databind.Databinder.ClassInfo;
-import com.github.phoswald.rstm.databind.Databinder.FieldInfo;
 
 class JsonInputStream implements DataInputStream {
 
@@ -34,23 +33,21 @@ class JsonInputStream implements DataInputStream {
             while((e = parser.next()) == Event.KEY_NAME) {
                 String fieldName = parser.getString();
                 System.out.println("Json: fieldName=" + fieldName);
-                FieldInfo<T> fieldInfo = classInfo.fields().get(fieldName);
                 Object fieldValue = null;
                 e = parser.next();
                 if(e == Event.VALUE_STRING) {
                     fieldValue = parser.getString();
-                    System.out.println("Json: fieldValue=" + fieldValue);
                 }
                 if(e == Event.VALUE_NUMBER) {
-                    fieldValue = Long.toString(parser.getLong());
-                    System.out.println("Json: fieldValue=" + fieldValue);
-                    if(fieldInfo.clazz() == Integer.class) {
-                        fieldValue = Integer.valueOf((String) fieldValue);
-                    }
-                    if(fieldInfo.clazz() == Long.class) {
-                        fieldValue = Long.valueOf((String) fieldValue);
-                    }
+                    fieldValue = parser.getBigDecimal();
                 }
+                if(e == Event.VALUE_TRUE) {
+                    fieldValue = true;
+                }
+                if(e == Event.VALUE_FALSE) {
+                    fieldValue = false;
+                }
+                System.out.println("Json: fieldValue=" + fieldValue);
                 map.put(fieldName, fieldValue);
             }
         }
