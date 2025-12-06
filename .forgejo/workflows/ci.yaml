@@ -16,10 +16,10 @@ jobs:
 #      - uses: actions/setup-java@v4
 #        with:
 #          distribution: 'temurin'
-#          java-version: '21'
+#          java-version: '25'
 #          cache: 'maven'
 #      - run: ls -la
-#      - run: java -version # OpenJDK Runtime Environment Temurin-21.0.9+10 (build 21.0.9+10-LTS)
+#      - run: java -version # OpenJDK Runtime Environment Temurin-25.0.1+8 (build 25.0.1+8-LTS)
 #      - run: curl "https://downloads.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz" -s | tar -xz -C /usr/local
 #      - run: ln -s -t /usr/local/bin/ /usr/local/apache-maven-$MAVEN_VERSION/bin/mvn
 #      - run: mvn -version # Apache Maven 3.9.11
@@ -29,7 +29,7 @@ jobs:
     #needs: myjob1
     runs-on: docker
     container:
-      image: maven:3.9.11-eclipse-temurin-21-alpine      
+      image: maven:3.9.11-eclipse-temurin-25-alpine      
     steps:
       - run: "cat /etc/os-release" # Alpine Linux v3.22
       - run: id # uid=0(root) gid=0(root) groups=0(root),...
@@ -45,6 +45,6 @@ jobs:
           restore-keys: |
             maven-
       - run: ls -la
-      - run: java -version # OpenJDK Runtime Environment Temurin-21.0.9+10 (build 21.0.9+10-LTS)
+      - run: java -version # OpenJDK Runtime Environment Temurin-25.0.1+8 (build 25.0.1+8-LTS)
       - run: mvn -version # Apache Maven 3.9.11
       - run: mvn -B clean deploy 
