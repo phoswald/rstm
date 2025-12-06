@@ -4,31 +4,46 @@ env:
   MAVEN_VERSION: 3.9.11
 
 jobs:
+
   myjob1:
     runs-on: docker
-    # container:
-    #   image: maven:3.9.11-eclipse-temurin-21-alpine      
     steps:
+      - run: "cat /etc/os-release" # Debian GNU/Linux 12 (bookworm)
+      - run: id # uid=0(root) gid=0(root) groups=0(root)
+      - run: pwd # /workspace/philip/rstm
+      - run: node --version # v22.21.1
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
           cache: 'maven'
-      - run: id && pwd && ls -la
-      # - run: "cat /etc/os-release" # Debian 12 (/etc/lsb-release does not exist)
-      # - run: "echo $PATH"
-      - run: node --version # v22.21.1
-      - run: java -version
+      - run: ls -la
+      - run: java -version # OpenJDK Runtime Environment Temurin-21.0.9+10 (build 21.0.9+10-LTS)
       - run: curl "https://downloads.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz" -s | tar -xz -C /usr/local
       - run: ln -s -t /usr/local/bin/ /usr/local/apache-maven-$MAVEN_VERSION/bin/mvn
-      - run: mvn -version
+      - run: mvn -version # Apache Maven 3.9.11
       - run: mvn -B clean verify 
 
-  # myjob2:
-  #   needs: myjob1
-  #   runs-on: docker
-  #   container:
-  #     image: maven:3.9.11-eclipse-temurin-21-alpine      
-  #   steps:
-  #     - run: hostname && id && pwd && ls -la
+  myjob2:
+    #needs: myjob1
+    runs-on: docker
+    container:
+      image: maven:3.9.11-eclipse-temurin-21-alpine      
+    steps:
+      - run: "cat /etc/os-release" # Alpine Linux v3.22
+      - run: id # uid=0(root) gid=0(root) groups=0(root),...
+      - run: pwd # /workspace/philip/rstm
+      - run: apk add nodejs
+      - run: node --version # v22.16.0
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            maven-
+      - run: ls -la
+      - run: java -version # OpenJDK Runtime Environment Temurin-21.0.9+10 (build 21.0.9+10-LTS)
+      - run: mvn -version # Apache Maven 3.9.11
+      - run: mvn -B clean verify 
