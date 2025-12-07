@@ -108,11 +108,11 @@
   <distributionManagement>
     <repository>
       <id>forgejo</id>
-      <url>http://172.17.0.1:3000/api/packages/philip/maven</url>
+      <url>http://surin.home:3000/api/packages/philip/maven</url>
     </repository>
     <snapshotRepository>
       <id>forgejo</id>
-      <url>http://172.17.0.1:3000/api/packages/philip/maven</url>
+      <url>http://surin.home:3000/api/packages/philip/maven</url>
     </snapshotRepository>
   </distributionManagement>
 
