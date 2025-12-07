@@ -36,6 +36,7 @@ jobs:
       - run: pwd # /workspace/philip/rstm
       - run: apk add nodejs
       - run: node --version # v22.16.0
+      - run: mkdir -p ~/.m2 &&  echo "${{ secrets.M2_SETTINGS }}" > ~/.m2/settings.xml
       - uses: actions/checkout@v4
       - uses: actions/cache@v4
         with:
@@ -46,4 +47,4 @@ jobs:
       - run: ls -la
       - run: java -version # OpenJDK Runtime Environment Temurin-21.0.9+10 (build 21.0.9+10-LTS)
       - run: mvn -version # Apache Maven 3.9.11
-      - run: mvn -B clean verify 
+      - run: mvn -B clean deploy 
