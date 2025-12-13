@@ -105,13 +105,20 @@
     <module>rstm-template</module>
   </modules>
 
+  <repositories>
+    <repository>
+      <id>code.phoswald.ch</id>
+      <url>https://code.phoswald.ch/api/packages/philip/maven</url>
+    </repository>
+  </repositories>
+
   <distributionManagement>
     <repository>
-      <id>forgejo</id>
+      <id>code.phoswald.ch</id>
       <url>https://code.phoswald.ch/api/packages/philip/maven</url>
     </repository>
     <snapshotRepository>
-      <id>forgejo</id>
+      <id>code.phoswald.ch</id>
       <url>https://code.phoswald.ch/api/packages/philip/maven</url>
     </snapshotRepository>
   </distributionManagement>

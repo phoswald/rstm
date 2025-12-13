@@ -4,7 +4,6 @@ on: [push, pull_request]
 #  MAVEN_VERSION: 3.9.11
 
 jobs:
-
 #  myjob1:
 #    runs-on: docker
 #    steps:
@@ -16,12 +15,9 @@ jobs:
 #          distribution: 'temurin'
 #          java-version: '25'
 #          cache: 'maven'
-#      - run: java -version # OpenJDK Runtime Environment Temurin-25.0.1+8 (build 25.0.1+8-LTS)
 #      - run: curl "https://downloads.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz" -s | tar -xz -C /usr/local
 #      - run: ln -s -t /usr/local/bin/ /usr/local/apache-maven-$MAVEN_VERSION/bin/mvn
-#      - run: mvn -version # Apache Maven 3.9.11
-#      - run: mvn -B clean verify 
-
+#      - run: mvn -B clean deploy
   ci-build:
     #needs: myjob1
     runs-on: docker
@@ -36,4 +32,4 @@ jobs:
           restore-keys: |
             maven-
       - run: mkdir -p ~/.m2 &&  echo "${{ secrets.M2_SETTINGS }}" > ~/.m2/settings.xml
-      - run: mvn -B clean deploy 
+      - run: mvn -B clean deploy
