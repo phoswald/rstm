@@ -9,8 +9,6 @@ jobs:
 #    runs-on: docker
 #    steps:
 #      - run: "cat /etc/os-release" # Debian GNU/Linux 12 (bookworm)
-#      - run: id # uid=0(root) gid=0(root) groups=0(root)
-#      - run: pwd # /workspace/philip/rstm
 #      - run: node --version # v22.21.1
 #      - uses: actions/checkout@v4
 #      - uses: actions/setup-java@v4
@@ -18,7 +16,6 @@ jobs:
 #          distribution: 'temurin'
 #          java-version: '25'
 #          cache: 'maven'
-#      - run: ls -la
 #      - run: java -version # OpenJDK Runtime Environment Temurin-25.0.1+8 (build 25.0.1+8-LTS)
 #      - run: curl "https://downloads.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz" -s | tar -xz -C /usr/local
 #      - run: ln -s -t /usr/local/bin/ /usr/local/apache-maven-$MAVEN_VERSION/bin/mvn
@@ -32,9 +29,7 @@ jobs:
       image: maven:3.9.11-eclipse-temurin-25-alpine      
     steps:
       - run: "cat /etc/os-release" # Alpine Linux v3.22
-      - run: id # uid=0(root) gid=0(root) groups=0(root),...
-      - run: pwd # /workspace/philip/rstm
-      - run: apk add nodejs
+      - run: apk add --no-cache nodejs
       - run: node --version # v22.16.0
       - run: mkdir -p ~/.m2 &&  echo "${{ secrets.M2_SETTINGS }}" > ~/.m2/settings.xml
       - uses: actions/checkout@v4
@@ -44,7 +39,6 @@ jobs:
           key: maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             maven-
-      - run: ls -la
       - run: java -version # OpenJDK Runtime Environment Temurin-25.0.1+8 (build 25.0.1+8-LTS)
       - run: mvn -version # Apache Maven 3.9.11
       - run: mvn -B clean deploy 
