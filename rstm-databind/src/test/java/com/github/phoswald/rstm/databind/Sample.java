@@ -28,11 +28,13 @@ record Sample( //
         char charPField, //
 
         Instant instantField, //
+        SampleEnum enumField, //
         SamplePair recordField, //
 
         List<String> stringListField, //
         List<Integer> integerListField, //
         List<Instant> instantListField, //
+        List<SampleEnum> enumListField, //
         List<SamplePair> recordListField //
 ) {
     static SampleBuilder builder() {

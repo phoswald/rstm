@@ -3,6 +3,7 @@ package com.github.phoswald.rstm.databind;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Instant;
@@ -40,6 +41,13 @@ class SimpleTypeTest {
             Arguments.of(Instant.ofEpochMilli(1730754686120L), "2024-11-04T21:11:26.120Z"),
             Arguments.of(Instant.ofEpochMilli(1730754686000L), "2024-11-04T21:11:26.000Z"),
             Arguments.of(Instant.ofEpochMilli(0), "1970-01-01T00:00:00.000Z"));
+    }
+
+    @Test
+    void roundTripEnum() {
+        SimpleType testee = SimpleType.forEnum(SampleEnum.class);
+        assertSame(SampleEnum.ONE, testee.coerce("ONE"));
+        assertEquals("ONE", testee.format(SampleEnum.ONE));
     }
 
     @ParameterizedTest

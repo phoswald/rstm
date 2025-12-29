@@ -163,6 +163,9 @@ public class Databinder {
             if((type = SimpleType.instances.get(clazz)) != null) {
                 return type;
             }
+            if(clazz.isEnum()) {
+                return SimpleType.forEnum(clazz);
+            }
             if(clazz.isRecord()) {
                 return new RecordType(getClassInfo(clazz));
             }

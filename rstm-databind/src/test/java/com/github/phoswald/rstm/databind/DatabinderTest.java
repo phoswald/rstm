@@ -25,8 +25,8 @@ class DatabinderTest {
             "stringField", //
             "byteField", "shortField", "integerField", "longField", "floatField", "doubleField", "booleanField", "characterField", //
             "bytePField", "shortPField", "intPField", "longPField", "floatPField", "doublePField", "booleanPField", "charPField", //
-            "instantField", "recordField", //
-            "stringListField", "integerListField", "instantListField", "recordListField");
+            "instantField", "enumField", "recordField", //
+            "stringListField", "integerListField", "instantListField", "enumListField", "recordListField");
 
     private static final Sample INSTANCE = Sample.builder() //
             .stringField("sample") //
@@ -47,10 +47,12 @@ class DatabinderTest {
             .booleanPField(true) //
             .charPField('A') //
             .instantField(Instant.ofEpochMilli(1730754686000L)) //
+            .enumField(SampleEnum.ONE) //
             .recordField(new SamplePair("sampleKey", "sampleVal")) //
             .stringListField(List.of("sample1", "sample2")) //
             .integerListField(List.of(42, 43)) //
             .instantListField(List.of(Instant.ofEpochMilli(1730754686000L), Instant.ofEpochMilli(1730754686120L))) //
+            .enumListField(List.of(SampleEnum.ONE, SampleEnum.TWO)) //
             .recordListField(List.of(new SamplePair("sampleKey1", "sampleVal1"), new SamplePair("sampleKey2", "sampleVal2")))
             .build();
 
@@ -75,10 +77,12 @@ class DatabinderTest {
             Map.entry("booleanPField", true), //
             Map.entry("charPField", 'A'), //
             Map.entry("instantField", Instant.ofEpochMilli(1730754686000L)), //
+            Map.entry("enumField", "ONE"), //
             Map.entry("recordField", new SamplePair("sampleKey", "sampleVal")), //
             Map.entry("stringListField", List.of("sample1", "sample2")), //
             Map.entry("integerListField", List.of(42, 43)), //
             Map.entry("instantListField", List.of(Instant.ofEpochMilli(1730754686000L), Instant.ofEpochMilli(1730754686120L))), //
+            Map.entry("enumListField", List.of(SampleEnum.ONE, SampleEnum.TWO)), //
             Map.entry("recordListField", List.of(new SamplePair("sampleKey1", "sampleVal1"), new SamplePair("sampleKey2", "sampleVal2"))));
 
     private static final Map<String, Object> MAP_EMPTY = Map.of();
@@ -104,6 +108,7 @@ class DatabinderTest {
                 <booleanPField>true</booleanPField>
                 <charPField>A</charPField>
                 <instantField>2024-11-04T21:11:26.000Z</instantField>
+                <enumField>ONE</enumField>
                 <recordField>
                     <key>sampleKey</key>
                     <val>sampleVal</val>
@@ -114,6 +119,8 @@ class DatabinderTest {
                 <integerListField>43</integerListField>
                 <instantListField>2024-11-04T21:11:26.000Z</instantListField>
                 <instantListField>2024-11-04T21:11:26.120Z</instantListField>
+                <enumListField>ONE</enumListField>
+                <enumListField>TWO</enumListField>
                 <recordListField>
                     <key>sampleKey1</key>
                     <val>sampleVal1</val>
@@ -191,6 +198,7 @@ class DatabinderTest {
                 "booleanPField": true,
                 "charPField": "A",
                 "instantField": "2024-11-04T21:11:26.000Z",
+                "enumField": "ONE",
                 "recordField": {
                     "key": "sampleKey",
                     "val": "sampleVal"
@@ -206,6 +214,10 @@ class DatabinderTest {
                 "instantListField": [
                     "2024-11-04T21:11:26.000Z",
                     "2024-11-04T21:11:26.120Z"
+                ],
+                "enumListField": [
+                    "ONE",
+                    "TWO"
                 ],
                 "recordListField": [
                     {

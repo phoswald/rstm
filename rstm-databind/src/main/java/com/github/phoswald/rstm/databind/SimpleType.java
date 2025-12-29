@@ -31,6 +31,10 @@ record SimpleType( //
 
     static final Map<Class<?>, SimpleType> instances = list.stream().collect(toMap(SimpleType::clazz, identity()));
 
+    static SimpleType forEnum(Class<?> clazz) {
+        return new SimpleType(clazz, value -> parseEnum(clazz, value), SimpleType::formatEnum);
+    }
+
     @Override
     public Object coerce(Object value) {
         return value == null ? null : clazz.isInstance(value) ? value : parseMethod.apply(value.toString());
@@ -57,5 +61,13 @@ record SimpleType( //
 
     private static String formatInstant(Object value) {
         return INSTANT_FORMAT.format((Instant) value);
+    }
+
+    private static Object parseEnum(Class clazz, String name) {
+        return Enum.valueOf(clazz, name);
+    }
+
+    private static String formatEnum(Object value) {
+        return ((Enum) value).name();
     }
 }
