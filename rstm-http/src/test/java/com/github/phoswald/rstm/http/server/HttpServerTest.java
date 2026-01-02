@@ -41,19 +41,17 @@ class HttpServerTest {
                             post(request -> HttpResponse.text(200, "Response for POST of " + request.text())),
                             put(request -> HttpResponse.text(200, "Response for PUT of " + request.text())),
                             delete(request -> HttpResponse.text(200, "Response for DELETE"))),
-                    route("/dynamic/html",
-                            get(request -> HttpResponse.html(200, "<!doctype html><html><head><title>T</title></head><body>B</body></html>"))),
-                    route("/dynamic/param/{name}",
-                            get(request -> HttpResponse.text(200, "Response for GET with p1=" + request.pathParam("name").orElse(null)))),
-                    route("/dynamic/query",
+                    route("/dynamic/text/param/{name}",
+                            get(request -> HttpResponse.text(200, "Response for GET with name=" + request.pathParam("name").orElse(null)))),
+                    route("/dynamic/text/query",
                             get(request -> HttpResponse.text(200, "Response for GET with q1=" + request.queryParam("q1").orElse(null) + " and q2=" + request.queryParam("q2").orElse(null) + " and q3=" + request.queryParam("q3").orElse(null)))),
-                    route("/dynamic/form",
+                    route("/dynamic/text/form",
                             post(request -> HttpResponse.text(200, "Response for POST with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null) + " and f3=" + request.formParam("f3").orElse(null))),
                             put(request -> HttpResponse.text(200, "Response for PUT with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null) + " and f3=" + request.formParam("f3").orElse(null)))),
+                    route("/dynamic/html",
+                            get(request -> HttpResponse.html(200, "<!doctype html><html><head><title>T</title></head><body>B</body></html>"))),
                     route("/dynamic/redirect", get(request -> HttpResponse.redirect(302, "/dynamic/other"))),
-                    route("/dynamic/failure", get(request -> {
-                        throw new IllegalStateException("");
-                    }))
+                    route("/dynamic/failure", get(request -> { throw new IllegalStateException(""); }))
             ))
             .build();
 
@@ -79,7 +77,7 @@ class HttpServerTest {
             "/static/resources/subdir/index.html",
             "/static/resources/subdir/"
     })
-    void get_resourceExistingHtml_success(String path) {
+    void get_resourceHtml_success(String path) {
         when()
                 .get(path)
                 .then()
@@ -91,13 +89,21 @@ class HttpServerTest {
     }
 
     @Test
-    void get_resourceExistingIco_success() {
-        when().get("/static/resources/favicon.ico").then().statusCode(200).contentType("image/x-icon").header("content-length", "1406");
+    void get_resourceIco_success() {
+        when()
+                .get("/static/resources/favicon.ico")
+                .then()
+                .statusCode(200)
+                .contentType("image/x-icon")
+                .header("content-length", "1406");
     }
 
     @Test
     void get_resourceNotExisting_notFound() {
-        when().get("/static/resources/missing.html").then().statusCode(404);
+        when()
+                .get("/static/resources/missing.html")
+                .then()
+                .statusCode(404);
     }
 
     @ParameterizedTest
@@ -120,7 +126,7 @@ class HttpServerTest {
             "/static/files/subdir/index.html",
             "/static/files/subdir/"
     })
-    void get_fileExistingHtml_success(String path) {
+    void get_fileHtml_success(String path) {
         when()
                 .get(path)
                 .then()
@@ -132,7 +138,7 @@ class HttpServerTest {
     }
 
     @Test
-    void get_fileExistingIco_success() {
+    void get_fileIco_success() {
         when()
                 .get("/static/files/favicon.ico")
                 .then()
@@ -163,7 +169,7 @@ class HttpServerTest {
     }
 
     @Test
-    void get_dynamicExisting_success() {
+    void get_dynamicText_success() {
         when()
                 .get("/dynamic/text")
                 .then()
@@ -173,7 +179,7 @@ class HttpServerTest {
     }
 
     @Test
-    void post_dynamicExisting_success() {
+    void post_dynamicText_success() {
         given()
                 .contentType("text/plain")
                 .body("Sample Request")
@@ -186,7 +192,7 @@ class HttpServerTest {
     }
 
     @Test
-    void put_dynamicExisting_success() {
+    void put_dynamicText_success() {
         given()
                 .contentType("text/plain")
                 .body("Sample Request")
@@ -199,7 +205,7 @@ class HttpServerTest {
     }
 
     @Test
-    void delete_dynamicExisting_success() {
+    void delete_dynamicText_success() {
         when()
                 .delete("/dynamic/text")
                 .then()
@@ -209,7 +215,57 @@ class HttpServerTest {
     }
 
     @Test
-    void get_dynamicHtmlExisting_success() {
+    void get_dynamicTextPathParam_success() {
+        when()
+                .get("/dynamic/text/param/1234")
+                .then()
+                .statusCode(200)
+                .body(equalTo("Response for GET with name=1234"));
+    }
+
+    @Test
+    void get_dynamicTextQueryParam_success() {
+        given()
+                .queryParam("q1", "search")
+                .queryParam("q2", ASCII)
+                .queryParam("q3", UNICODE)
+                .when()
+                .get("/dynamic/text/query")
+                .then()
+                .statusCode(200)
+                .body(equalTo("Response for GET with q1=search and q2=" + ASCII + " and q3=" + UNICODE));
+    }
+
+    @Test
+    void post_dynamicTextFormParam_success() {
+        given()
+                .contentType("application/x-www-form-urlencoded; charset=utf-8")
+                .formParam("f1", "search")
+                .formParam("f2", ASCII)
+                .formParam("f3", UNICODE)
+                .when()
+                .post("/dynamic/text/form")
+                .then()
+                .statusCode(200)
+                .body(equalTo("Response for POST with f1=search and f2=" + ASCII + " and f3=" + UNICODE));
+    }
+
+    @Test
+    void put_dynamicTextFormParam_success() {
+        given()
+                .contentType("application/x-www-form-urlencoded; charset=utf-8")
+                .formParam("f1", "search")
+                .formParam("f2", ASCII)
+                .formParam("f3", UNICODE)
+                .when()
+                .put("/dynamic/text/form")
+                .then()
+                .statusCode(200)
+                .body(equalTo("Response for PUT with f1=search and f2=" + ASCII + " and f3=" + UNICODE));
+    }
+
+    @Test
+    void get_dynamicHtml_success() {
         when()
                 .get("/dynamic/html")
                 .then()
@@ -217,56 +273,6 @@ class HttpServerTest {
                 .contentType("text/html")
                 .body("html.head.title", equalTo("T"))
                 .body("html.body", equalTo("B"));
-    }
-
-    @Test
-    void get_dynamicPathParam_success() {
-        when()
-                .get("/dynamic/param/1234")
-                .then()
-                .statusCode(200)
-                .body(equalTo("Response for GET with p1=1234"));
-    }
-
-    @Test
-    void get_dynamicQueryParam_success() {
-        given()
-                .queryParam("q1", "search")
-                .queryParam("q2", ASCII)
-                .queryParam("q3", UNICODE)
-                .when()
-                .get("/dynamic/query")
-                .then()
-                .statusCode(200)
-                .body(equalTo("Response for GET with q1=search and q2=" + ASCII + " and q3=" + UNICODE));
-    }
-
-    @Test
-    void post_dynamicFormParam_success() {
-        given()
-                .contentType("application/x-www-form-urlencoded; charset=utf-8")
-                .formParam("f1", "search")
-                .formParam("f2", ASCII)
-                .formParam("f3", UNICODE)
-                .when()
-                .post("/dynamic/form")
-                .then()
-                .statusCode(200)
-                .body(equalTo("Response for POST with f1=search and f2=" + ASCII + " and f3=" + UNICODE));
-    }
-
-    @Test
-    void put_dynamicFormParam_success() {
-        given()
-                .contentType("application/x-www-form-urlencoded; charset=utf-8")
-                .formParam("f1", "search")
-                .formParam("f2", ASCII)
-                .formParam("f3", UNICODE)
-                .when()
-                .put("/dynamic/form")
-                .then()
-                .statusCode(200)
-                .body(equalTo("Response for PUT with f1=search and f2=" + ASCII + " and f3=" + UNICODE));
     }
 
     @Test
