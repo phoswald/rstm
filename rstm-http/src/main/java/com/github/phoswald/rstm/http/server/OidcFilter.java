@@ -7,7 +7,7 @@ import com.github.phoswald.rstm.http.HttpResponse;
 import com.github.phoswald.rstm.security.Principal;
 
 /**
- * Handles the redirect URI of the OAuth2 authorization code flow for OIDC login 
+ * Handles the redirect URI of the OAuth2 authorization code flow for OIDC login
  */
 class OidcFilter implements HttpFilter { // TODO (cleanup): should be handler, not a filter
 

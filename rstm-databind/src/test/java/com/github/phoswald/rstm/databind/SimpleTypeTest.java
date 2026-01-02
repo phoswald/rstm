@@ -37,10 +37,10 @@ class SimpleTypeTest {
 
     private static List<Arguments> roundTripValues() {
         return List.of(
-            Arguments.of("sample", "sample"),
-            Arguments.of(Instant.ofEpochMilli(1730754686120L), "2024-11-04T21:11:26.120Z"),
-            Arguments.of(Instant.ofEpochMilli(1730754686000L), "2024-11-04T21:11:26.000Z"),
-            Arguments.of(Instant.ofEpochMilli(0), "1970-01-01T00:00:00.000Z"));
+                Arguments.of("sample", "sample"),
+                Arguments.of(Instant.ofEpochMilli(1730754686120L), "2024-11-04T21:11:26.120Z"),
+                Arguments.of(Instant.ofEpochMilli(1730754686000L), "2024-11-04T21:11:26.000Z"),
+                Arguments.of(Instant.ofEpochMilli(0), "1970-01-01T00:00:00.000Z"));
     }
 
     @Test
@@ -62,13 +62,13 @@ class SimpleTypeTest {
 
     private static List<Arguments> coerceValues() {
         return List.of(
-//          Arguments.of(Instant.ofEpochMilli(1730754686000L), "2024-11-04T21:11:26"),
-            Arguments.of(Instant.ofEpochMilli(1730754686000L), "2024-11-04T21:11:26Z"),
-//          Arguments.of(Instant.ofEpochMilli(1730754686120L), "2024-11-04T21:11:26.12"),
-            Arguments.of(Instant.ofEpochMilli(1730754686120L), "2024-11-04T21:11:26.12Z"),
-//          Arguments.of(Instant.ofEpochMilli(1730754686120L), "2024-11-04T21:11:26.120"),
-            Arguments.of(Instant.ofEpochMilli(1730754686120L), "2024-11-04T21:11:26.120Z"),
-            Arguments.of(Instant.ofEpochSecond(1730754686, 123456789), "2024-11-04T21:11:26.123456789Z"));
+//              Arguments.of(Instant.ofEpochMilli(1730754686000L), "2024-11-04T21:11:26"),
+                Arguments.of(Instant.ofEpochMilli(1730754686000L), "2024-11-04T21:11:26Z"),
+//              Arguments.of(Instant.ofEpochMilli(1730754686120L), "2024-11-04T21:11:26.12"),
+                Arguments.of(Instant.ofEpochMilli(1730754686120L), "2024-11-04T21:11:26.12Z"),
+//              Arguments.of(Instant.ofEpochMilli(1730754686120L), "2024-11-04T21:11:26.120"),
+                Arguments.of(Instant.ofEpochMilli(1730754686120L), "2024-11-04T21:11:26.120Z"),
+                Arguments.of(Instant.ofEpochSecond(1730754686, 123456789), "2024-11-04T21:11:26.123456789Z"));
     }
 
     @ParameterizedTest
@@ -80,8 +80,8 @@ class SimpleTypeTest {
 
     private static List<Arguments> coerceInvalidValues() {
         return List.of(
-            Arguments.of(Instant.class, "2024-11-04 21:11:26.120Z", DateTimeParseException.class),
-            Arguments.of(Instant.class, "2024-11-04T21:11:26.120",  DateTimeParseException.class),
-            Arguments.of(Instant.class, "2024-11-31T00:00:00.000Z", DateTimeParseException.class));
+                Arguments.of(Instant.class, "2024-11-04 21:11:26.120Z", DateTimeParseException.class),
+                Arguments.of(Instant.class, "2024-11-04T21:11:26.120", DateTimeParseException.class),
+                Arguments.of(Instant.class, "2024-11-31T00:00:00.000Z", DateTimeParseException.class));
     }
 }

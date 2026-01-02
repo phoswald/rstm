@@ -27,7 +27,7 @@ public class MetricsRegistry {
     }
 
     private <T extends Metric> T register(T metric) {
-        if(metrics.putIfAbsent(metric.instance(), metric) != null) {
+        if (metrics.putIfAbsent(metric.instance(), metric) != null) {
             throw new IllegalArgumentException("Duplicate instance: " + metric.instance());
         }
         return metric;
@@ -39,7 +39,7 @@ public class MetricsRegistry {
 
     String collectMetrics() {
         var builder = new StringBuilder();
-        metrics.forEach((_,metric) -> collectMetric(builder, metric));
+        metrics.forEach((_, metric) -> collectMetric(builder, metric));
         return builder.toString();
     }
 
@@ -47,7 +47,7 @@ public class MetricsRegistry {
         try {
             double value = metric.calculateValue();
             metric.instance().formatValue(builder, value);
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.warn("Exception while collecting '{}': {}", metric.instance().name(), e.toString());
         }
     }

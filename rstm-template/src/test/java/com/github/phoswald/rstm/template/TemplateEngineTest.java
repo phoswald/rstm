@@ -68,7 +68,7 @@ class TemplateEngineTest {
     @Test
     void compileAndExecute_validArrayObject_success() {
         SampleArrayArguments arguments = new SampleArrayArguments(
-                new SamplePair[] { new SamplePair("foo", "bar"), new SamplePair("bar", "baz") });
+                new SamplePair[]{new SamplePair("foo", "bar"), new SamplePair("bar", "baz")});
 
         Template<SampleArrayArguments> template = testee.compile(SampleArrayArguments.class, "sample-collection");
         String html = template.evaluate(arguments);

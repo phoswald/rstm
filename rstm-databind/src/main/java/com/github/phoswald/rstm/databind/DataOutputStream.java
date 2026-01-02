@@ -12,7 +12,7 @@ abstract class DataOutputStream implements AutoCloseable {
         writeStartObject(name);
         for (FieldInfo fieldInfo : classInfo.fields().access().values()) {
             Object fieldValue = fieldInfo.getter().apply(instance);
-            if(fieldValue != null) {
+            if (fieldValue != null) {
                 switch (fieldInfo.type()) {
                     case PrimitiveType primitiveType -> writeValue(fieldInfo.name(), fieldValue);
                     case SimpleType simpleType -> writeValue(fieldInfo.name(), simpleType.format(fieldValue));
@@ -26,8 +26,8 @@ abstract class DataOutputStream implements AutoCloseable {
 
     private void writeList(FieldInfo fieldInfo, ListType listType, List<?> listInstance) throws Exception {
         writeStartList(fieldInfo.name());
-        for(Object listElement : listInstance) {
-            switch(listType.elementType()) {
+        for (Object listElement : listInstance) {
+            switch (listType.elementType()) {
                 case SimpleType simpleType -> writeValue(fieldInfo.name(), simpleType.format(listElement));
                 case RecordType recordType -> writeObject(recordType.classInfo(), fieldInfo.name(), listElement);
             }

@@ -33,7 +33,7 @@ record PrimitiveType(
     }
 
     private static Boolean parseBoolean(String s) {
-        return switch(s) {
+        return switch (s) {
             case "true" -> true;
             case "false" -> false;
             default -> throw new IllegalArgumentException("Cannot parse boolean: " + s);
@@ -41,7 +41,7 @@ record PrimitiveType(
     }
 
     private static Character parseCharacter(String s) {
-        if(s.length() == 1) {
+        if (s.length() == 1) {
             return s.charAt(0);
         } else {
             throw new IllegalArgumentException("Cannot parse character: " + s);

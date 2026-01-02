@@ -40,7 +40,7 @@ public class SimpleIdentityProvider implements IdentityProvider {
     public Optional<Principal> authenticateWithPassword(String username, char[] password) {
         Objects.requireNonNull(username);
         Objects.requireNonNull(password);
-        if(Arrays.equals(password, passwords.get(username))) {
+        if (Arrays.equals(password, passwords.get(username))) {
             logger.info("Login successful for username={}", username);
             return Optional.of(principals.get(username));
         } else {

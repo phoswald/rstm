@@ -14,9 +14,9 @@ class LoginFilter implements HttpFilter { // TODO (cleanup): should be handler, 
     @Override
     public HttpResponse handle(String path, HttpRequest request, HttpServerConfig config) throws Exception {
         String provider = request.queryParam("provider").orElse("");
-        if(!provider.isEmpty()) {
+        if (!provider.isEmpty()) {
             Optional<String> location = config.identityProvider().authenticateWithOidcRedirect(provider);
-            if(location.isPresent()) {
+            if (location.isPresent()) {
                 return HttpResponse.builder().status(302).location(location.get()).build();
             }
         } else {
@@ -26,7 +26,6 @@ class LoginFilter implements HttpFilter { // TODO (cleanup): should be handler, 
             if (principal.isPresent()) {
                 return HttpResponse.builder().status(302).location(request.relativizePath("/")).session(principal.get().token()).build();
             }
-            
         }
         return HttpResponse.builder().status(302).location(request.relativizePath("/login-error.html")).build();
     }

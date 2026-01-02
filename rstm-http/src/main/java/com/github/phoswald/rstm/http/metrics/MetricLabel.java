@@ -13,9 +13,9 @@ public record MetricLabel(String name, String value) {
         builder.append('=');
         builder.append('"');
         int len = value.length();
-        for(int pos = 0; pos < len; pos++) {
+        for (int pos = 0; pos < len; pos++) {
             char c = value.charAt(pos);
-            if(c == '\\' || c == '"' || c == '\n') {
+            if (c == '\\' || c == '"' || c == '\n') {
                 builder.append('\\');
                 builder.append(c == '\n' ? 'n' : c);
             } else {

@@ -64,7 +64,7 @@ public class Databinder {
     }
 
     public void toXml(Object instance, Writer writer) {
-        try(DataOutputStream stream = new XmlOutputStream(writer, pretty)) {
+        try (DataOutputStream stream = new XmlOutputStream(writer, pretty)) {
             stream.writeObject(getClassInfo(instance.getClass()), instance);
         } catch (DatabinderException e) {
             throw e;
@@ -84,7 +84,7 @@ public class Databinder {
     }
 
     public void toJson(Object instance, Writer writer) {
-        try(DataOutputStream stream = new JsonOutputStream(writer, pretty)) {
+        try (DataOutputStream stream = new JsonOutputStream(writer, pretty)) {
             stream.writeObject(getClassInfo(instance.getClass()), instance);
         } catch (DatabinderException e) {
             throw e;
@@ -102,7 +102,7 @@ public class Databinder {
     }
 
     public <T> T fromXml(Reader reader, Class<T> clazz) {
-        try(DataInputStream stream = new XmlInputStream(reader, tolerant)) {
+        try (DataInputStream stream = new XmlInputStream(reader, tolerant)) {
             return clazz.cast(stream.readObject(getClassInfo(clazz)));
         } catch (DatabinderException e) {
             throw e;
@@ -120,7 +120,7 @@ public class Databinder {
     }
 
     public <T> T fromJson(Reader reader, Class<T> clazz) {
-        try(DataInputStream stream = new JsonInputStream(reader, tolerant)) {
+        try (DataInputStream stream = new JsonInputStream(reader, tolerant)) {
             return clazz.cast(stream.readObject(getClassInfo(clazz)));
         } catch (DatabinderException e) {
             throw e;
@@ -132,8 +132,8 @@ public class Databinder {
     private ClassInfo getClassInfo(Class<?> clazz) {
         synchronized (classes) {
             ClassInfo classInfo = classes.get(clazz);
-            if(classInfo == null) {
-                if(!clazz.isRecord()) {
+            if (classInfo == null) {
+                if (!clazz.isRecord()) {
                     throw new DatabinderException("Not a record: " + clazz);
                 }
                 classInfo = ClassInfo.create(clazz);
@@ -155,22 +155,22 @@ public class Databinder {
     }
 
     private AnyType createType(Type genericType) {
-        if(genericType instanceof Class clazz) {
+        if (genericType instanceof Class clazz) {
             AnyType type;
-            if((type = PrimitiveType.instances.get(clazz)) != null) {
+            if ((type = PrimitiveType.instances.get(clazz)) != null) {
                 return type;
             }
-            if((type = SimpleType.instances.get(clazz)) != null) {
+            if ((type = SimpleType.instances.get(clazz)) != null) {
                 return type;
             }
-            if(clazz.isEnum()) {
+            if (clazz.isEnum()) {
                 return SimpleType.forEnum(clazz);
             }
-            if(clazz.isRecord()) {
+            if (clazz.isRecord()) {
                 return new RecordType(getClassInfo(clazz));
             }
-        } else if(genericType instanceof ParameterizedType paramType) {
-            if(paramType.getRawType() == List.class && paramType.getActualTypeArguments().length == 1) {
+        } else if (genericType instanceof ParameterizedType paramType) {
+            if (paramType.getRawType() == List.class && paramType.getActualTypeArguments().length == 1) {
                 return new ListType((ElementType) createType(paramType.getActualTypeArguments()[0]));
             }
         }

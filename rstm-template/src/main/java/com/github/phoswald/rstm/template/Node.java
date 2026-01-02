@@ -24,7 +24,7 @@ record ExprAttr(Property<String> property, String attribute, HtmlElement nestedN
     public void evaluateNode(HtmlGenerator generator, TemplateArgument<?> argument) {
         String value = property.getValue(argument);
         HtmlElement node = nestedNode;
-        if(value != null) {
+        if (value != null) {
             node = nestedNode.addAttribute(attribute, value);
         }
         node.evaluateNode(generator, argument);

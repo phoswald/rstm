@@ -33,14 +33,14 @@ abstract class DataInputStream implements AutoCloseable {
         boolean startField(String name, boolean tolerant) {
             prevFieldInfo = fieldInfo;
             fieldInfo = classInfo.fields().access().get(name);
-            if(fieldInfo == null && !tolerant) {
-                throw new DatabinderException("Unknown field for " + classInfo.clazz() +  ": " + name);
+            if (fieldInfo == null && !tolerant) {
+                throw new DatabinderException("Unknown field for " + classInfo.clazz() + ": " + name);
             }
             return fieldInfo != null;
         }
 
         void startList() {
-            if(fieldInfo != null) {
+            if (fieldInfo != null) {
                 listValue = new ArrayList<>();
                 map.put(fieldInfo.name(), listValue);
             }
@@ -51,9 +51,9 @@ abstract class DataInputStream implements AutoCloseable {
         }
 
         void addValue(Object value) {
-            if(listValue != null) {
+            if (listValue != null) {
                 listValue.add(value);
-            } else if(fieldInfo != null) {
+            } else if (fieldInfo != null) {
                 map.put(fieldInfo.name(), value);
             }
         }

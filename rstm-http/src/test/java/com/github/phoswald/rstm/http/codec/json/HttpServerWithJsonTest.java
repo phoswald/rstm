@@ -36,25 +36,33 @@ class HttpServerWithJsonTest {
 
     @Test
     void get_validJson_success() {
-        when().
-            get("/dynamic/json").
-        then().
-            statusCode(200).
-            contentType("application/json").
-            body(equalTo("{\n    \"output\": \"Test Output\"\n}\n"));
+        when()
+                .get("/dynamic/json")
+                .then()
+                .statusCode(200)
+                .contentType("application/json")
+                .body(equalTo("""
+                        {
+                            "output": "Test Output"
+                        }
+                        """));
     }
 
     @Test
     void post_validJson_success() {
-        given().
-            contentType("application/json").
-            body("{\"input\":\"Test Input\"}").
-        when().
-            post("/dynamic/json").
-        then().
-            statusCode(200).
-            contentType("application/json").
-            body(equalTo("{\n    \"output\": \"Test Output for Test Input\"\n}\n"));
+        given()
+                .contentType("application/json")
+                .body("{\"input\":\"Test Input\"}")
+                .when()
+                .post("/dynamic/json")
+                .then()
+                .statusCode(200)
+                .contentType("application/json")
+                .body(equalTo("""
+                        {
+                            "output": "Test Output for Test Input"
+                        }
+                        """));
     }
 
     private static SampleResponse handleGet() {

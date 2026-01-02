@@ -42,39 +42,39 @@ class XHtmlParser {
         while (reader.hasNext() && !exit) {
             int xmlEvent = reader.next();
             switch (xmlEvent) {
-            case START_ELEMENT:
-                Map<String, String> attributes = new LinkedHashMap<>();
-                Operation operation = Operation.nop(compilation);
-                for (int i = 0; i < reader.getAttributeCount(); i++) {
-                    String attributeNamespace = reader.getAttributeNamespace(i);
-                    String attributeName = reader.getAttributeLocalName(i);
-                    String attributeValue = reader.getAttributeValue(i);
-                    if (Objects.equals(attributeNamespace, NAMESPACE)) {
-                        operation = processAttribute(compilation, attributeName, attributeValue);
-                    } else if (reader.getAttributeNamespace(i) == null) {
-                        attributes.put(attributeName, attributeValue);
-                    } else {
-                        throw new IllegalArgumentException("Unsupported namespace: " + attributeNamespace);
+                case START_ELEMENT:
+                    Map<String, String> attributes = new LinkedHashMap<>();
+                    Operation operation = Operation.nop(compilation);
+                    for (int i = 0; i < reader.getAttributeCount(); i++) {
+                        String attributeNamespace = reader.getAttributeNamespace(i);
+                        String attributeName = reader.getAttributeLocalName(i);
+                        String attributeValue = reader.getAttributeValue(i);
+                        if (Objects.equals(attributeNamespace, NAMESPACE)) {
+                            operation = processAttribute(compilation, attributeName, attributeValue);
+                        } else if (reader.getAttributeNamespace(i) == null) {
+                            attributes.put(attributeName, attributeValue);
+                        } else {
+                            throw new IllegalArgumentException("Unsupported namespace: " + attributeNamespace);
+                        }
                     }
-                }
-                List<Node> children = parseNodes(operation.nestedCompilation());
-                HtmlElement element = new HtmlElement(reader.getLocalName(), attributes, children);
-                nodes.add(operation.processHtmlElement(element));
-                break;
-            case END_ELEMENT:
-                exit = true;
-                break;
-            case CHARACTERS:
-                nodes.add(new HtmlText(reader.getText()));
-                break;
-            case COMMENT:
-                nodes.add(new HtmlComment(reader.getText()));
-                break;
-            case END_DOCUMENT:
-                exit = true;
-                break;
-            default:
-                break;
+                    List<Node> children = parseNodes(operation.nestedCompilation());
+                    HtmlElement element = new HtmlElement(reader.getLocalName(), attributes, children);
+                    nodes.add(operation.processHtmlElement(element));
+                    break;
+                case END_ELEMENT:
+                    exit = true;
+                    break;
+                case CHARACTERS:
+                    nodes.add(new HtmlText(reader.getText()));
+                    break;
+                case COMMENT:
+                    nodes.add(new HtmlComment(reader.getText()));
+                    break;
+                case END_DOCUMENT:
+                    exit = true;
+                    break;
+                default:
+                    break;
             }
         }
         return nodes;

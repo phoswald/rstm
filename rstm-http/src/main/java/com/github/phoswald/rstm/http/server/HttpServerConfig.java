@@ -9,7 +9,7 @@ import com.github.phoswald.rstm.http.HttpMethod;
 import com.github.phoswald.rstm.http.HttpRequest;
 import com.github.phoswald.rstm.http.HttpResponse;
 import com.github.phoswald.rstm.security.IdentityProvider;
- 
+
 @RecordBuilder
 public record HttpServerConfig(
         int httpPort,
@@ -32,15 +32,15 @@ public record HttpServerConfig(
     public static HttpFilter route(String route, HttpFilter... filters) {
         return new RouteFilter(route, combine(filters));
     }
-    
+
     public static HttpFilter auth(String role, HttpFilter... filters) {
         return new AuthFilter(List.of(role), combine(filters));
     }
-    
+
     public static HttpFilter login() {
         return new LoginFilter();
     }
-    
+
     public static HttpFilter oidc() {
         return new OidcFilter();
     }
@@ -93,12 +93,12 @@ public record HttpServerConfig(
 
     public static HttpFilter postHtml(ThrowingFunction<HttpRequest, Object> handler) {
         return post(request -> {
-           Object response = handler.invoke(request);
-           if(response instanceof Path location) {
-               return HttpResponse.redirect(302, request.relativizePath(location.toString()));
-           } else {
-               return HttpResponse.html(200, response.toString());
-           }
+            Object response = handler.invoke(request);
+            if (response instanceof Path location) {
+                return HttpResponse.redirect(302, request.relativizePath(location.toString()));
+            } else {
+                return HttpResponse.html(200, response.toString());
+            }
         });
     }
 
@@ -107,7 +107,7 @@ public record HttpServerConfig(
     }
 
     public static HttpFilter combine(HttpFilter... filters) {
-        if(filters.length == 1) {
+        if (filters.length == 1) {
             return filters[0];
         } else {
             return new CombineFilter(List.of(filters));

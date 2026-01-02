@@ -47,13 +47,13 @@ class OidcUtil {
         try {
             Configuration config = request(provider.configurationUri(), Configuration.class, null);
             JwtKeySet keySet = request(config.jwks_uri(), JwtKeySet.class, null);
-            if(provider.id().equals("facebook")) {
+            if (provider.id().equals("facebook")) {
                 config = config.toBuilder()
                         .token_endpoint("https://graph.facebook.com/v21.0/oauth/access_token")
                         .build();
             }
             providers.put(provider.id(), provider.toBuilder().config(config).keySet(keySet).build());
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
     }
@@ -100,7 +100,7 @@ class OidcUtil {
                 throw new IOException(String.format(
                         "Received error=%s, error_description=%s", token.error(), token.error_description()));
             }
-        } catch(IOException e) {
+        } catch (IOException e) {
             logger.error("Failed to get token from code: {}", e.getMessage());
             return Optional.empty();
         }
@@ -111,10 +111,10 @@ class OidcUtil {
 
     Optional<JwtValidToken> validateToken(String token) {
         // TODO (optimize): decode token only once!
-        for(Provider provider : providers.values()) {
+        for (Provider provider : providers.values()) {
             Optional<JwtValidToken> validToken = jwtUtil.validateTokenWithRsa(
                     token, provider.config().issuer(), provider.clientId(), provider.id(), provider.keySet());
-            if(validToken.isPresent()) {
+            if (validToken.isPresent()) {
                 return validToken;
             }
         }

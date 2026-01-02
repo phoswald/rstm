@@ -55,136 +55,135 @@ class HttpServerWithAuthTest {
 
     @Test
     void post_login_allowed() {
-        given().
-            formParam("username", "username1").
-            formParam("password", "password1").
-        when().
-            post("/login").
-        then().
-            statusCode(302).
-            header("location", ".").
-            cookie("session", username1.token());
+        given()
+                .formParam("username", "username1")
+                .formParam("password", "password1")
+                .when()
+                .post("/login")
+                .then()
+                .statusCode(302)
+                .header("location", ".")
+                .cookie("session", username1.token());
     }
 
     @Test
     void post_login_denied() {
-        given().
-            redirects().follow(false).
-        when().
-            post("/login").
-        then().
-            statusCode(302).
-            header("location", "login-error.html").
-            cookies(Map.of());
+        given()
+                .redirects().follow(false)
+                .when()
+                .post("/login")
+                .then()
+                .statusCode(302)
+                .header("location", "login-error.html")
+                .cookies(Map.of());
     }
 
     @Test
     void get_noAuth_redirect() {
-        given().
-            redirects().follow(false).
-        when().
-            get("/secured/resource").
-        then().
-            statusCode(302).
-            header("location", "../login.html");
+        given()
+                .redirects().follow(false)
+                .when()
+                .get("/secured/resource")
+                .then()
+                .statusCode(302)
+                .header("location", "../login.html");
     }
 
     @Test
     void get_basicAuth_allowed() {
-        given().
-            auth().preemptive().basic("username1", "password1").
-        when().
-            get("/secured/resource").
-        then().
-            statusCode(200).
-            body(equalTo("Hello, username1!"));
+        given()
+                .auth().preemptive().basic("username1", "password1")
+                .when()
+                .get("/secured/resource")
+                .then()
+                .statusCode(200)
+                .body(equalTo("Hello, username1!"));
     }
 
     @Test
     void get_basicAuth_denied() {
-        given().
-            auth().preemptive().basic("username2", "password2").
-        when().
-            get("/secured/resource").
-        then().
-            statusCode(401);
+        given()
+                .auth().preemptive().basic("username2", "password2")
+                .when()
+                .get("/secured/resource")
+                .then()
+                .statusCode(401);
     }
 
     @Test
     void get_basicAuth_redirect() {
-        given().
-            redirects().follow(false).
-            auth().preemptive().basic("username1", "bad").
-        when().
-            get("/secured/resource").
-        then().
-            statusCode(302).
-            header("location", "../login.html");
+        given()
+                .redirects().follow(false)
+                .auth().preemptive().basic("username1", "bad")
+                .when()
+                .get("/secured/resource")
+                .then()
+                .statusCode(302)
+                .header("location", "../login.html");
     }
 
     @Test
     void get_bearerAuth_allowed() {
-        given().
-            auth().preemptive().oauth2(username1.token()).
-        when().
-            get("/secured/resource").
-        then().
-            statusCode(200).
-            body(equalTo("Hello, username1!"));
+        given()
+                .auth().preemptive().oauth2(username1.token())
+                .when()
+                .get("/secured/resource")
+                .then()
+                .statusCode(200)
+                .body(equalTo("Hello, username1!"));
     }
 
     @Test
     void get_bearerAuth_denied() {
-        given().
-            auth().preemptive().oauth2(username2.token()).
-        when().
-            get("/secured/resource").
-        then().
-            statusCode(401);
+        given()
+                .auth().preemptive().oauth2(username2.token())
+                .when()
+                .get("/secured/resource")
+                .then()
+                .statusCode(401);
     }
 
     @Test
     void get_bearerAuth_redirect() {
-        given().
-            redirects().follow(false).
-            auth().preemptive().oauth2("bad").
-        when().
-            get("/secured/resource").
-        then().
-            statusCode(302).
-            header("location", "../login.html");
+        given()
+                .redirects().follow(false)
+                .auth().preemptive().oauth2("bad")
+                .when()
+                .get("/secured/resource")
+                .then()
+                .statusCode(302)
+                .header("location", "../login.html");
     }
 
     @Test
     void get_session_allowed() {
-        given().
-            cookie("session", username1.token()).
-        when().
-            get("/secured/resource").
-        then().
-            statusCode(200).
-            body(equalTo("Hello, username1!"));
+        given()
+                .cookie("session", username1.token())
+                .when()
+                .get("/secured/resource")
+                .then()
+                .statusCode(200)
+                .body(equalTo("Hello, username1!"));
     }
 
     @Test
     void get_session_denied() {
-        given().
-            cookie("session", username2.token()).
-        when().
-            get("/secured/resource").
-        then().
-            statusCode(401);
+        given()
+                .cookie("session", username2.token())
+                .when()
+                .get("/secured/resource")
+                .then()
+                .statusCode(401);
     }
 
     @Test
     void get_session_redirect() {
-        given().
-            redirects().follow(false).
-            cookie("session", "bad").
-        when().
-            get("/secured/resource").
-        then().
-            statusCode(302).
-            header("location", "../login.html");
+        given()
+                .redirects().follow(false)
+                .cookie("session", "bad")
+                .when().get("/secured/resource")
+                .then()
+                .statusCode(302)
+                .header("location", "../login.html");
     }
 }

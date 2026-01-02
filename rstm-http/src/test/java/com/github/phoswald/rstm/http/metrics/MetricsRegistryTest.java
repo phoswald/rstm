@@ -34,15 +34,15 @@ class MetricsRegistryTest {
         testee.registerGauge("sample_gauge", () -> 42.5, label1);
         testee.registerCounter("sample_counter", label1, label2).value().addAndGet(3);
 
-        when().
-            get("/metrics").
-        then().
-            statusCode(200).
-            contentType("text/plain").
-            body(equalTo("""
-                    sample_counter{sample_label="sample_value",sample_label2="sample_value2"} 3
-                    sample_gauge{sample_label="sample_value"} 42.5
-                    """));
+        when()
+                .get("/metrics")
+                .then()
+                .statusCode(200)
+                .contentType("text/plain")
+                .body(equalTo("""
+                        sample_counter{sample_label="sample_value",sample_label2="sample_value2"} 3
+                        sample_gauge{sample_label="sample_value"} 42.5
+                        """));
     }
 
     @Test

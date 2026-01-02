@@ -30,7 +30,7 @@ class AuthFilter implements HttpFilter {
         if (principal.isEmpty()) {
             return HttpResponse.builder().status(302).location(request.relativizePath("/login.html")).build();
         }
-        if(!authorize(principal.get())) {
+        if (!authorize(principal.get())) {
             return HttpResponse.builder().status(401).build();
         }
         request = request.toBuilder().principal(principal.get()).build();
@@ -42,7 +42,7 @@ class AuthFilter implements HttpFilter {
             if (request.authorization().toLowerCase().startsWith("basic ")) {
                 String authParams = decodeBase64(request.authorization().substring(5).trim());
                 int separatorOffset = authParams.indexOf(':');
-                if(separatorOffset != -1) {
+                if (separatorOffset != -1) {
                     String username = authParams.substring(0, separatorOffset);
                     char[] password = authParams.substring(separatorOffset + 1).toCharArray();
                     return identityProvider.authenticateWithPassword(username, password);
@@ -57,20 +57,20 @@ class AuthFilter implements HttpFilter {
         }
         return Optional.empty();
     }
-    
+
     private boolean authorize(Principal principal) {
-        for(String role: roles) {
-            if(principal.roles().contains(role)) {
+        for (String role : roles) {
+            if (principal.roles().contains(role)) {
                 return true;
             }
         }
         return false;
     }
-    
+
     private String decodeBase64(String s) {
         try {
             return new String(Base64.getDecoder().decode(s), UTF_8);
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             return "";
         }
     }

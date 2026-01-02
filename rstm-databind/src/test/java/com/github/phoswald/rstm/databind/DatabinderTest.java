@@ -346,7 +346,7 @@ class DatabinderTest {
     }
 
     private Map.Entry<String, ?> toStringEntry(Map.Entry<String, Object> e) {
-        return switch(e.getValue()) {
+        return switch (e.getValue()) {
             case SamplePair pair -> e;
             case List<?> list -> Map.entry(e.getKey(), list.stream().map(this::toStringValue).toList());
             case Object obj -> Map.entry(e.getKey(), obj.toString());
@@ -354,7 +354,7 @@ class DatabinderTest {
     }
 
     private Object toStringValue(Object v) {
-        return switch(v) {
+        return switch (v) {
             case SamplePair pair -> v;
             case Object o -> o.toString();
         };

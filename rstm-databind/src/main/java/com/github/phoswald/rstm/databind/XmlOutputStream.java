@@ -21,7 +21,7 @@ class XmlOutputStream extends DataOutputStream {
         this.stream = stream;
         this.writer = XMLOutputFactory.newInstance().createXMLStreamWriter(stream /*, "UTF-8" */);
         writeStartDocument(); // writer.writeStartDocument("UTF-8", "1.0") does not write standalone attribute!
-        if(pretty) {
+        if (pretty) {
             writer.writeCharacters("\n");
         }
     }
@@ -35,11 +35,11 @@ class XmlOutputStream extends DataOutputStream {
 
     @Override
     void writeStartObject(String name) throws XMLStreamException {
-        if(pretty) {
+        if (pretty) {
             writer.writeCharacters(indent.repeat(level));
         }
         writer.writeStartElement(name);
-        if(pretty) {
+        if (pretty) {
             writer.writeCharacters("\n");
         }
         level++;
@@ -48,30 +48,32 @@ class XmlOutputStream extends DataOutputStream {
     @Override
     void writeEndObject(String name) throws XMLStreamException {
         level--;
-        if(pretty) {
+        if (pretty) {
             writer.writeCharacters(indent.repeat(level));
         }
         writer.writeEndElement();
-        if(pretty) {
+        if (pretty) {
             writer.writeCharacters("\n");
         }
     }
 
     @Override
-    void writeStartList(String name) { }
+    void writeStartList(String name) {
+    }
 
     @Override
-    void writeEndList(String name) { }
+    void writeEndList(String name) {
+    }
 
     @Override
     void writeValue(String name, Object value) throws XMLStreamException {
-        if(pretty) {
+        if (pretty) {
             writer.writeCharacters(indent.repeat(level));
         }
         writer.writeStartElement(name);
         writer.writeCharacters(value.toString());
         writer.writeEndElement();
-        if(pretty) {
+        if (pretty) {
             writer.writeCharacters("\n");
         }
     }

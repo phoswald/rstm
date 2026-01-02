@@ -41,7 +41,7 @@ public class HealthCheckRegistry {
     private HealthCheckResult checkHealth(HealthCheck check) {
         try {
             return HealthCheckResult.create(check.name(), check.function().invoke());
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.warn("Exception while checking '{}': {}", check.name(), e.toString());
             return HealthCheckResult.create(check.name(), false);
         }

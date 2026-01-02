@@ -25,16 +25,16 @@ class JsonInputStream extends DataInputStream {
     @Override
     Object readObject(ClassInfo classInfo) throws Exception {
         stack.push(new Scope(classInfo));
-        while(parser.hasNext()) {
+        while (parser.hasNext()) {
             Scope scope = stack.peek();
             Event event = parser.next();
-            switch(event) {
+            switch (event) {
                 case Event.START_OBJECT:
-                    if(scope.fieldInfo != null) {
-                        if(scope.fieldInfo.type() instanceof RecordType recordType) {
+                    if (scope.fieldInfo != null) {
+                        if (scope.fieldInfo.type() instanceof RecordType recordType) {
                             scope = stack.push(new Scope(recordType.classInfo()));
-                        } else if(scope.fieldInfo.type() instanceof ListType listType) {
-                            if(listType.elementType() instanceof RecordType recordType) {
+                        } else if (scope.fieldInfo.type() instanceof ListType listType) {
+                            if (listType.elementType() instanceof RecordType recordType) {
                                 scope = stack.push(new Scope(recordType.classInfo()));
                             }
                         }
@@ -43,7 +43,7 @@ class JsonInputStream extends DataInputStream {
                     break;
                 case Event.END_OBJECT:
                     scope.level--;
-                    if(scope.level == 0 && stack.size() > 1) {
+                    if (scope.level == 0 && stack.size() > 1) {
                         Object instance = stack.pop().createInstance();
                         stack.peek().addValue(instance);
                     }

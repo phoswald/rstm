@@ -20,7 +20,7 @@ import at.favre.lib.crypto.bcrypt.BCrypt.Version;
 
 /**
  * A local IDP that stores users, hashed passwords and roles in a SQL database.
- * 
+ *
  * See https://github.com/patrickfav/bcrypt
  */
 public class JdbcIdentityProvider implements IdentityProvider {
@@ -39,7 +39,7 @@ public class JdbcIdentityProvider implements IdentityProvider {
         Objects.requireNonNull(username);
         Objects.requireNonNull(password);
         JdbcUser userEntity = selectUser(username);
-        if(userEntity != null && checkPassword(password, userEntity.hashedPassword())) {
+        if (userEntity != null && checkPassword(password, userEntity.hashedPassword())) {
             logger.info("Login successful for username={}", username);
             return Optional.of(tokenProvider.createPrincipal(userEntity.username(), userEntity.rolesAsList()));
         } else {
@@ -47,21 +47,21 @@ public class JdbcIdentityProvider implements IdentityProvider {
             return Optional.empty();
         }
     }
-    
+
     @Override
     public Optional<Principal> authenticateWithToken(String token) {
         return tokenProvider.authenticateWithToken(token);
     }
-    
+
     private JdbcUser selectUser(String username) {
-        try(Connection connection = connectionFactory.get()) {
+        try (Connection connection = connectionFactory.get()) {
             PreparedStatement statement = connection.prepareStatement("""
                     SELECT username_, password_, roles_
                     FROM user_
                     WHERE username_ = ?
                     """);
             statement.setString(1, username);
-            try(ResultSet resultSet = statement.executeQuery()) {
+            try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     return JdbcUser.builder()
                             .username(resultSet.getString("username_"))
@@ -76,11 +76,11 @@ public class JdbcIdentityProvider implements IdentityProvider {
             throw new IllegalStateException(e);
         }
     }
-    
+
     private boolean checkPassword(char[] enteredPassword, String hashedPassword) {
         return BCrypt.verifyer().verify(enteredPassword, hashedPassword).verified;
     }
-    
+
     public static String hashPassword(char[] password) {
         return BCrypt.with(Version.VERSION_2A).hashToString(10, password);
     }

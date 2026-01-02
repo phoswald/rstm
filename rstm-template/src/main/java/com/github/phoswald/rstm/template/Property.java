@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 
-record Property<T> (String name, Type type, Function<TemplateArgument<?>, T> accessor) {
+record Property<T>(String name, Type type, Function<TemplateArgument<?>, T> accessor) {
 
     T getValue(TemplateArgument<?> argument) {
         return accessor.apply(argument);

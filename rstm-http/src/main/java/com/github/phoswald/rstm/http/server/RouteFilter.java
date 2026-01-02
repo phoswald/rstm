@@ -27,21 +27,21 @@ class RouteFilter implements HttpFilter {
         List<String> pathParts = parseParts(path);
         boolean pathIsDir = isDir(path);
         Map<String, String> params = new HashMap<>(request.pathParams());
-        for(String routePart : routeParts) {
-            if(pathParts.isEmpty()) {
+        for (String routePart : routeParts) {
+            if (pathParts.isEmpty()) {
                 return null;
             }
             String pathPart = pathParts.get(0);
-            if(routePart.startsWith("{") && routePart.endsWith("}")) {
+            if (routePart.startsWith("{") && routePart.endsWith("}")) {
                 params.put(routePart.substring(1, routePart.length() - 1), pathPart);
             } else {
-                if(!routePart.equals(pathPart)) {
+                if (!routePart.equals(pathPart)) {
                     return null;
                 }
             }
             pathParts.remove(0);
         }
-        if(params.size() > request.pathParams().size()) {
+        if (params.size() > request.pathParams().size()) {
             request = request.toBuilder().pathParams(params).build();
         }
         return filter.handle(joinParts(pathParts, pathIsDir), request, config);

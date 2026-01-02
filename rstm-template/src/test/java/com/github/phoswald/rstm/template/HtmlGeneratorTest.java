@@ -16,7 +16,7 @@ class HtmlGeneratorTest {
     private final HtmlGenerator testee = new HtmlGenerator();
 
     @ParameterizedTest
-    @ValueSource(strings = { "p", "h1", "some-other" })
+    @ValueSource(strings = {"p", "h1", "some-other"})
     void generateElement_validName_success(String input) {
         testee.generateElementStart(input, Map.of());
         testee.generateElementEnd(input);
@@ -24,7 +24,7 @@ class HtmlGeneratorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "P", "H1", "1", "ö", "-" })
+    @ValueSource(strings = {"P", "H1", "1", "ö", "-"})
     @NullSource
     void generateElement_invalidName_success(String input) {
         assertThrows(IllegalArgumentException.class, () -> testee.generateElementStart(input, Map.of()));
@@ -32,7 +32,7 @@ class HtmlGeneratorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "x", "href", "some-other" })
+    @ValueSource(strings = {"x", "href", "some-other"})
     void generateElement_validAttributeName_success(String input) {
         testee.generateElementStart("p", Map.of(input, "text"));
         testee.generateElementEnd("p");
@@ -40,14 +40,14 @@ class HtmlGeneratorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "X", "HREF", "1", "ö", "-" })
+    @ValueSource(strings = {"X", "HREF", "1", "ö", "-"})
     @NullSource
     void generateElement_invalidAttributeName_success(String input) {
         assertThrows(IllegalArgumentException.class, () -> testee.generateElementStart("p", singletonMap(input, "text"))); // Cannot use Map.of() for null value
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "text", " text ", "\ntext\n" })
+    @ValueSource(strings = {"text", " text ", "\ntext\n"})
     @NullSource
     void generateElement_validAttributeValue_success(String input) {
         testee.generateElementStart("a", singletonMap("href", input)); // Cannot use Map.of() for null value
@@ -63,7 +63,7 @@ class HtmlGeneratorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "text", " text ", "\ntext\n" })
+    @ValueSource(strings = {"text", " text ", "\ntext\n"})
     @NullSource
     void generateText_valid_success(String input) {
         testee.generateText(input);
@@ -77,7 +77,7 @@ class HtmlGeneratorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "comment", " comment ", " multi \n line ", "<!- -", "- ->", "" })
+    @ValueSource(strings = {"comment", " comment ", " multi \n line ", "<!- -", "- ->", ""})
     @NullSource
     void generateComment_valid_success(String input) {
         testee.generateComment(input);
@@ -85,7 +85,7 @@ class HtmlGeneratorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "--", "<!--", "-->" })
+    @ValueSource(strings = {"--", "<!--", "-->"})
     void generateComment_invalid_exception(String input) {
         assertThrows(IllegalArgumentException.class, () -> testee.generateComment(input));
     }

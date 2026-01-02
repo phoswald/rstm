@@ -31,7 +31,7 @@ class JsonOutputStream extends DataOutputStream {
     @Override
     public void close() throws IOException {
         generator.flush();
-        if(pretty) {
+        if (pretty) {
             stream.write('\n');
         }
         generator.close();
@@ -39,7 +39,7 @@ class JsonOutputStream extends DataOutputStream {
 
     @Override
     void writeStartObject(String name) throws IOException {
-        if(stack.peek() == Scope.OBJECT) {
+        if (stack.peek() == Scope.OBJECT) {
             generator.writeKey(name);
         }
         generator.writeStartObject();
@@ -54,7 +54,7 @@ class JsonOutputStream extends DataOutputStream {
 
     @Override
     void writeStartList(String name) throws Exception {
-        if(stack.peek() == Scope.OBJECT) {
+        if (stack.peek() == Scope.OBJECT) {
             generator.writeKey(name);
         }
         generator.writeStartArray();
@@ -69,12 +69,12 @@ class JsonOutputStream extends DataOutputStream {
 
     @Override
     void writeValue(String name, Object value) throws IOException {
-        if(stack.peek() == Scope.OBJECT) {
+        if (stack.peek() == Scope.OBJECT) {
             generator.writeKey(name);
         }
-        if(value instanceof Number) {
+        if (value instanceof Number) {
             generator.write(new BigDecimal(value.toString()));
-        } else if(value instanceof Boolean booleanValue) {
+        } else if (value instanceof Boolean booleanValue) {
             generator.write(booleanValue.booleanValue());
         } else {
             generator.write(value.toString());

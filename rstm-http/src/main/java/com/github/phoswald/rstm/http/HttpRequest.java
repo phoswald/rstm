@@ -11,9 +11,9 @@ import com.github.phoswald.rstm.security.Principal;
 public record HttpRequest(
         HttpMethod method,
         String path,
-        Map<String,String> pathParams,
-        Map<String,String> queryParams,
-        Map<String,String> formParams,
+        Map<String, String> pathParams,
+        Map<String, String> queryParams,
+        Map<String, String> formParams,
         String authorization,
         String session,
         Principal principal,
@@ -49,20 +49,20 @@ public record HttpRequest(
     }
 
     public String relativizePath(String otherPath) {
-        if(!otherPath.startsWith("/")) {
+        if (!otherPath.startsWith("/")) {
             throw new IllegalArgumentException(otherPath);
         }
         int index = 0;
         int sharedLength = 0;
-        while(index < path.length() && index < otherPath.length() && path.charAt(index) == otherPath.charAt(index)) {
-            if(path.charAt(index) == '/') {
-                sharedLength = index+1;                
+        while (index < path.length() && index < otherPath.length() && path.charAt(index) == otherPath.charAt(index)) {
+            if (path.charAt(index) == '/') {
+                sharedLength = index + 1;
             }
             index++;
         }
         otherPath = otherPath.substring(sharedLength);
         index = sharedLength;
-        while((index = path.indexOf("/", index)) != -1) {
+        while ((index = path.indexOf("/", index)) != -1) {
             otherPath = "../" + otherPath;
             index++;
         }

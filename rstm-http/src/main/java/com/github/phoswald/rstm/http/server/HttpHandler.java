@@ -41,9 +41,9 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
     }
 
     private HttpRequest readRequest(HttpExchange exchange) throws IOException {
-        Map<String,String> pathParams = new HashMap<>();
-        Map<String,String> queryParams = new HashMap<>();
-        Map<String,String> formParams = new HashMap<>();
+        Map<String, String> pathParams = new HashMap<>();
+        Map<String, String> queryParams = new HashMap<>();
+        Map<String, String> formParams = new HashMap<>();
         byte[] body = null;
         decodeQueryString(queryParams, exchange.getRequestURI().getRawQuery());
         String contentType = exchange.getRequestHeaders().getFirst("content-type");
@@ -84,16 +84,16 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
             }
         }
     }
-    
+
     private String getSessionCookie(HttpExchange exchange) {
         String cookieList = exchange.getRequestHeaders().getFirst("cookie");
-        if(cookieList != null) {
-            for(String cookiePair : cookieList.split("; ")) {
+        if (cookieList != null) {
+            for (String cookiePair : cookieList.split("; ")) {
                 int separatorOffset = cookiePair.indexOf('=');
-                if(separatorOffset != -1) {
+                if (separatorOffset != -1) {
                     String cookieName = cookiePair.substring(0, separatorOffset).trim();
                     String cookieValue = cookiePair.substring(separatorOffset + 1).trim();
-                    if(cookieName.equals("session")) {
+                    if (cookieName.equals("session")) {
                         return cookieValue;
                     }
                 }
@@ -105,7 +105,7 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
     private HttpResponse processRequest(HttpRequest request) {
         try {
             return config.filter().handle(request.path(), request, config);
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.warn("Processing {} {} failed:", request.method(), request.path(), e);
             return HttpResponse.empty(500);
         }

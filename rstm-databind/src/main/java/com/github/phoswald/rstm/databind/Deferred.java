@@ -1,12 +1,12 @@
 package com.github.phoswald.rstm.databind;
 
-class Deferred <T> {
+class Deferred<T> {
 
     private boolean defined;
     private T value;
 
     void define(T value) {
-        if(defined) {
+        if (defined) {
             throw new IllegalStateException("value already defined");
         }
         this.defined = true;
@@ -14,7 +14,7 @@ class Deferred <T> {
     }
 
     T access() {
-        if(!defined) {
+        if (!defined) {
             throw new IllegalStateException("value not yet defined");
         }
         return value;

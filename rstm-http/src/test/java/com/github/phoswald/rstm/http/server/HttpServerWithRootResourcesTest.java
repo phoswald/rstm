@@ -33,40 +33,39 @@ class HttpServerWithRootResourcesTest {
             "/subdir/"
     })
     void get_resourceExistingHtml_success(String path) {
-        when().
-            get(path).
-        then().
-            statusCode(200).
-            contentType("text/html").
-            body(
-                startsWith("<!doctype html>"),
-                containsString("<title>Sample Page</title>"),
-                containsString("<h1>Sample Page</h1>"));
+        when()
+                .get(path)
+                .then()
+                .statusCode(200)
+                .contentType("text/html")
+                .body(startsWith("<!doctype html>"))
+                .body(containsString("<title>Sample Page</title>"))
+                .body(containsString("<h1>Sample Page</h1>"));
     }
 
     @Test
     void get_resourceExistingIco_success() {
-        when().
-            get("/favicon.ico").
-        then().
-            statusCode(200).
-            contentType("image/x-icon").
-            header("content-length", "1406");
+        when()
+                .get("/favicon.ico")
+                .then()
+                .statusCode(200)
+                .contentType("image/x-icon")
+                .header("content-length", "1406");
     }
 
     @Test
     void get_resourceNotExisting_notFound() {
-        when().
-            get("/missing.html").
-        then().
-            statusCode(404);
+        when()
+                .get("/missing.html")
+                .then()
+                .statusCode(404);
     }
 
     @Test
     void get_resourceInvalidPath_badRequest() {
-        when().
-            get("/../simplelogger.properties").
-        then().
-            statusCode(400);
+        when()
+                .get("/../simplelogger.properties")
+                .then()
+                .statusCode(400);
     }
 }

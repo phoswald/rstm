@@ -42,7 +42,7 @@ record ClassInfo(
             args[index++] = fieldInfo.type().coerce(map.get(fieldInfo.name()));
         }
         for (String name : map.keySet()) {
-            if(!fields.containsKey(name)) {
+            if (!fields.containsKey(name)) {
                 throw new DatabinderException("Invalid field for " + clazz + ": " + name);
             }
         }

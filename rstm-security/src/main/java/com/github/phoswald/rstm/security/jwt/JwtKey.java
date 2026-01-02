@@ -3,7 +3,7 @@ package com.github.phoswald.rstm.security.jwt;
 import com.github.phoswald.record.builder.RecordBuilder;
 
 /**
- *  Part of response from JWKS endpoint, see JwtKeySet for root element
+ * Part of response from JWKS endpoint, see JwtKeySet for root element
  */
 @RecordBuilder
 public record JwtKey(
@@ -31,8 +31,8 @@ public record JwtKey(
          * the exponent for the RSA public key, Base64 URL encoded
          */
         String e
-) { 
-    
+) {
+
     public static JwtKeyBuilder builder() {
         return new JwtKeyBuilder();
     }

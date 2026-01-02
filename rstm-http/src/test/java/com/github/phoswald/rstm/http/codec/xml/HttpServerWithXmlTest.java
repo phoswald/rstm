@@ -36,25 +36,35 @@ class HttpServerWithXmlTest {
 
     @Test
     void get_validXml_success() {
-        when().
-            get("/dynamic/xml").
-        then().
-            statusCode(200).
-            contentType("text/xml").
-            body(equalTo("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<sampleResponse>\n    <output>Test Output</output>\n</sampleResponse>\n"));
+        when()
+                .get("/dynamic/xml")
+                .then()
+                .statusCode(200)
+                .contentType("text/xml")
+                .body(equalTo("""
+                        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                        <sampleResponse>
+                            <output>Test Output</output>
+                        </sampleResponse>
+                        """));
     }
 
     @Test
     void post_validXml_success() {
-        given().
-            contentType("text/xml").
-            body("<sampleRequest><input>Test Input</input></sampleRequest>").
-        when().
-            post("/dynamic/xml").
-        then().
-            statusCode(200).
-            contentType("text/xml").
-            body(equalTo("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<sampleResponse>\n    <output>Test Output for Test Input</output>\n</sampleResponse>\n"));
+        given()
+                .contentType("text/xml")
+                .body("<sampleRequest><input>Test Input</input></sampleRequest>")
+                .when()
+                .post("/dynamic/xml")
+                .then()
+                .statusCode(200)
+                .contentType("text/xml")
+                .body(equalTo("""
+                        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                        <sampleResponse>
+                            <output>Test Output for Test Input</output>
+                        </sampleResponse>
+                        """));
     }
 
     private static SampleResponse handleGet() {

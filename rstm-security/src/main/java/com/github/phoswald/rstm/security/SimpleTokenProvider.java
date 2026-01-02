@@ -34,7 +34,7 @@ public class SimpleTokenProvider implements TokenProvider {
     @Override
     public Optional<Principal> authenticateWithToken(String token) {
         Principal principal = tokens.get(token);
-        if(principal != null) {
+        if (principal != null) {
             return Optional.of(principal);
         } else {
             return Optional.empty();
