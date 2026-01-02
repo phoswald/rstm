@@ -63,10 +63,10 @@ public class JdbcIdentityProvider implements IdentityProvider {
             statement.setString(1, username);
             try(ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    return JdbcUser.builder() //
-                            .username(resultSet.getString("username_")) //
-                            .hashedPassword(resultSet.getString("password_")) //
-                            .roles(resultSet.getString("roles_")) //
+                    return JdbcUser.builder()
+                            .username(resultSet.getString("username_"))
+                            .hashedPassword(resultSet.getString("password_"))
+                            .roles(resultSet.getString("roles_"))
                             .build();
                 } else {
                     return null;

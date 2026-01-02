@@ -14,9 +14,9 @@ class HealthCheckRegistryTest {
 
     private final HealthCheckRegistry testee = new HealthCheckRegistry();
 
-    private final HttpServerConfig config = HttpServerConfig.builder() //
-            .httpPort(8080) //
-            .filter(testee.createRoute()) //
+    private final HttpServerConfig config = HttpServerConfig.builder()
+            .httpPort(8080)
+            .filter(testee.createRoute())
             .build();
 
     private final HttpServer server = new HttpServer(config);

@@ -7,18 +7,18 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-record ClassInfo( //
-        String name, //
-        Class<?> clazz, //
-        Function<Object[], Object> constructor, //
-        Deferred<Map<String, FieldInfo>> fields //
+record ClassInfo(
+        String name,
+        Class<?> clazz,
+        Function<Object[], Object> constructor,
+        Deferred<Map<String, FieldInfo>> fields
 ) {
     static ClassInfo create(Class<?> clazz) {
         Constructor<?> constructor = getConstructor(clazz);
-        return new ClassInfo( //
-                getName(clazz), //
-                clazz, //
-                args -> construct(constructor, args), //
+        return new ClassInfo(
+                getName(clazz),
+                clazz,
+                args -> construct(constructor, args),
                 new Deferred<>());
     }
 
@@ -56,8 +56,8 @@ record ClassInfo( //
 
     private static Constructor<?> getConstructor(Class<?> clazz) {
         try {
-            Class<?>[] args = Arrays.stream(clazz.getRecordComponents())//
-                    .map(RecordComponent::getType) //
+            Class<?>[] args = Arrays.stream(clazz.getRecordComponents())
+                    .map(RecordComponent::getType)
                     .toArray(Class<?>[]::new);
             return clazz.getDeclaredConstructor(args);
         } catch (ReflectiveOperationException e) {

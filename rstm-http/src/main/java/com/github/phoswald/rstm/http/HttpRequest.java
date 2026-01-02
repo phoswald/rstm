@@ -8,16 +8,16 @@ import com.github.phoswald.record.builder.RecordBuilder;
 import com.github.phoswald.rstm.security.Principal;
 
 @RecordBuilder
-public record HttpRequest( //
-        HttpMethod method, //
-        String path, //
-        Map<String,String> pathParams, //
-        Map<String,String> queryParams, //
-        Map<String,String> formParams, //
-        String authorization, //
-        String session, //
-        Principal principal, //
-        byte[] body //
+public record HttpRequest(
+        HttpMethod method,
+        String path,
+        Map<String,String> pathParams,
+        Map<String,String> queryParams,
+        Map<String,String> formParams,
+        String authorization,
+        String session,
+        Principal principal,
+        byte[] body
 ) {
 
     public static HttpRequestBuilder builder() {

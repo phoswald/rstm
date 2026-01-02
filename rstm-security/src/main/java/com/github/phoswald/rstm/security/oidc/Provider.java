@@ -6,12 +6,12 @@ import com.github.phoswald.record.builder.RecordBuilder;
 import com.github.phoswald.rstm.security.jwt.JwtKeySet;
 
 @RecordBuilder
-record Provider( //
-        String id, //
-        String configurationUri, //
-        String clientId, //
-        String clientSecret, //
-        String scopes, //
+record Provider(
+        String id,
+        String configurationUri,
+        String clientId,
+        String clientSecret,
+        String scopes,
         Configuration config, // from well known configuration endpoint
         JwtKeySet keySet // from JWKS endpoint
 ) {

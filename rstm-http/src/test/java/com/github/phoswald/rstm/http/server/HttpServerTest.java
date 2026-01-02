@@ -29,30 +29,30 @@ class HttpServerTest {
     private static final String ASCII = "! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ \t \r \n"; 
     private static final String UNICODE = "€ äöü αβγδ กขฃ";
 
-    private static final HttpServerConfig config = HttpServerConfig.builder() //
-            .httpPort(8080) //
-            .filter(combine( //
-                    route("/static/resources/", //
-                            resources("/html/")), //
-                    route("/static/files/", //
-                            filesystem(Paths.get("src/test/resources/html/"))), //
-                    route("/dynamic/text", //
-                            get(request -> HttpResponse.text(200, "Response for GET")), //
-                            post(request -> HttpResponse.text(200, "Response for POST of " + request.text())), //
-                            put(request -> HttpResponse.text(200, "Response for PUT of " + request.text())), //
-                            delete(request -> HttpResponse.text(200, "Response for DELETE"))), //
-                    route("/dynamic/html", //
-                            get(request -> HttpResponse.html(200, "<!doctype html><html><head><title>T</title></head><body>B</body></html>"))), //
-                    route("/dynamic/param/{name}", //
-                            get(request -> HttpResponse.text(200, "Response for GET with p1=" + request.pathParam("name").orElse(null)))), //
-                    route("/dynamic/query", //
-                            get(request -> HttpResponse.text(200, "Response for GET with q1=" + request.queryParam("q1").orElse(null) + " and q2=" + request.queryParam("q2").orElse(null) + " and q3=" + request.queryParam("q3").orElse(null)))), //
-                    route("/dynamic/form", //
-                            post(request -> HttpResponse.text(200, "Response for POST with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null) + " and f3=" + request.formParam("f3").orElse(null))), //
-                            put(request -> HttpResponse.text(200, "Response for PUT with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null) + " and f3=" + request.formParam("f3").orElse(null)))), //
-                    route("/dynamic/redirect", get(request -> HttpResponse.redirect(302, "/dynamic/other"))), //
-                    route("/dynamic/failure", get(request -> { throw new IllegalStateException(""); })) //
-            )) //
+    private static final HttpServerConfig config = HttpServerConfig.builder()
+            .httpPort(8080)
+            .filter(combine(
+                    route("/static/resources/",
+                            resources("/html/")),
+                    route("/static/files/",
+                            filesystem(Paths.get("src/test/resources/html/"))),
+                    route("/dynamic/text",
+                            get(request -> HttpResponse.text(200, "Response for GET")),
+                            post(request -> HttpResponse.text(200, "Response for POST of " + request.text())),
+                            put(request -> HttpResponse.text(200, "Response for PUT of " + request.text())),
+                            delete(request -> HttpResponse.text(200, "Response for DELETE"))),
+                    route("/dynamic/html",
+                            get(request -> HttpResponse.html(200, "<!doctype html><html><head><title>T</title></head><body>B</body></html>"))),
+                    route("/dynamic/param/{name}",
+                            get(request -> HttpResponse.text(200, "Response for GET with p1=" + request.pathParam("name").orElse(null)))),
+                    route("/dynamic/query",
+                            get(request -> HttpResponse.text(200, "Response for GET with q1=" + request.queryParam("q1").orElse(null) + " and q2=" + request.queryParam("q2").orElse(null) + " and q3=" + request.queryParam("q3").orElse(null)))),
+                    route("/dynamic/form",
+                            post(request -> HttpResponse.text(200, "Response for POST with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null) + " and f3=" + request.formParam("f3").orElse(null))),
+                            put(request -> HttpResponse.text(200, "Response for PUT with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null) + " and f3=" + request.formParam("f3").orElse(null)))),
+                    route("/dynamic/redirect", get(request -> HttpResponse.redirect(302, "/dynamic/other"))),
+                    route("/dynamic/failure", get(request -> { throw new IllegalStateException(""); }))
+            ))
             .build();
 
     private static final HttpServer testee = new HttpServer(config);
@@ -71,11 +71,11 @@ class HttpServerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { //
-            "/static/resources/index.html", //
-            "/static/resources/", //
-            "/static/resources/subdir/index.html", //
-            "/static/resources/subdir/" //
+    @ValueSource(strings = {
+            "/static/resources/index.html",
+            "/static/resources/",
+            "/static/resources/subdir/index.html",
+            "/static/resources/subdir/"
     })
     void get_resourceExistingHtml_success(String path) {
         when().
@@ -108,10 +108,10 @@ class HttpServerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { //
-            "/static/resources/../simplelogger.properties", //
-            "/static/resources/../", //
-            "/static/resources/.." //
+    @ValueSource(strings = {
+            "/static/resources/../simplelogger.properties",
+            "/static/resources/../",
+            "/static/resources/.."
     })
     void get_resourceInvalidPath_badRequest(String path) {
         when().
@@ -121,11 +121,11 @@ class HttpServerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { //
-            "/static/files/index.html", //
-            "/static/files/", //
-            "/static/files/subdir/index.html", //
-            "/static/files/subdir/" //
+    @ValueSource(strings = {
+            "/static/files/index.html",
+            "/static/files/",
+            "/static/files/subdir/index.html",
+            "/static/files/subdir/"
     })
     void get_fileExistingHtml_success(String path) {
         when().
@@ -158,10 +158,10 @@ class HttpServerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { //
-            "/static/files/../simplelogger.properties", //
-            "/static/files/../", //
-            "/static/files/..", //
+    @ValueSource(strings = {
+            "/static/files/../simplelogger.properties",
+            "/static/files/../",
+            "/static/files/..",
     })
     void get_fileInvalidPath_badRequest(String path) {
         when().

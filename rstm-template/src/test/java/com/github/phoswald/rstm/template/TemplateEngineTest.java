@@ -67,7 +67,7 @@ class TemplateEngineTest {
 
     @Test
     void compileAndExecute_validArrayObject_success() {
-        SampleArrayArguments arguments = new SampleArrayArguments( //
+        SampleArrayArguments arguments = new SampleArrayArguments(
                 new SamplePair[] { new SamplePair("foo", "bar"), new SamplePair("bar", "baz") });
 
         Template<SampleArrayArguments> template = testee.compile(SampleArrayArguments.class, "sample-collection");
@@ -88,7 +88,7 @@ class TemplateEngineTest {
 
     @Test
     void compileAndExecute_validListObject_success() {
-        SampleListArguments arguments = new SampleListArguments( //
+        SampleListArguments arguments = new SampleListArguments(
                 List.of(new SamplePair("foo", "bar"), new SamplePair("bar", "baz")));
 
         Template<SampleListArguments> template = testee.compile(SampleListArguments.class, "sample-collection");

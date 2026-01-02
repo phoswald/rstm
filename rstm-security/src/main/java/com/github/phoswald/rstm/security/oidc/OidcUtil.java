@@ -48,8 +48,8 @@ class OidcUtil {
             Configuration config = request(provider.configurationUri(), Configuration.class, null);
             JwtKeySet keySet = request(config.jwks_uri(), JwtKeySet.class, null);
             if(provider.id().equals("facebook")) {
-                config = config.toBuilder() //
-                        .token_endpoint("https://graph.facebook.com/v21.0/oauth/access_token") //
+                config = config.toBuilder()
+                        .token_endpoint("https://graph.facebook.com/v21.0/oauth/access_token")
                         .build();
             }
             providers.put(provider.id(), provider.toBuilder().config(config).keySet(keySet).build());
@@ -68,11 +68,11 @@ class OidcUtil {
         }
 
         String state = stateManager.create(provider);
-        String query = query(List.of( //
-                Map.entry("response_type", "code"), //
-                Map.entry("client_id", provider.clientId()), //
-                Map.entry("redirect_uri", this.redirectUri), //
-                Map.entry("scope", provider.scopes()), //
+        String query = query(List.of(
+                Map.entry("response_type", "code"),
+                Map.entry("client_id", provider.clientId()),
+                Map.entry("redirect_uri", this.redirectUri),
+                Map.entry("scope", provider.scopes()),
                 Map.entry("state", state)));
         return Optional.of(provider.config().authorization_endpoint() + "?" + query);
     }
@@ -89,11 +89,11 @@ class OidcUtil {
         Provider provider = stateObj.provider();
         Token token;
         try {
-            String query = query(List.of( //
-                    Map.entry("grant_type", "authorization_code"), //
-                    Map.entry("code", code), //
-                    Map.entry("client_id", provider.clientId()), //
-                    Map.entry("client_secret", provider.clientSecret()), //
+            String query = query(List.of(
+                    Map.entry("grant_type", "authorization_code"),
+                    Map.entry("code", code),
+                    Map.entry("client_id", provider.clientId()),
+                    Map.entry("client_secret", provider.clientSecret()),
                     Map.entry("redirect_uri", this.redirectUri)));
             token = request(provider.config().token_endpoint(), Token.class, query);
             if (token.error() != null) {
@@ -122,8 +122,8 @@ class OidcUtil {
     }
 
     private String query(List<Map.Entry<String, String>> params) {
-        return String.join("&", params.stream() //
-                .map(e -> e.getKey() + "=" + URLEncoder.encode(e.getValue(), UTF_8)) //
+        return String.join("&", params.stream()
+                .map(e -> e.getKey() + "=" + URLEncoder.encode(e.getValue(), UTF_8))
                 .toList());
     }
 

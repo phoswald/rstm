@@ -38,10 +38,10 @@ class FilesystemFilter implements HttpFilter {
         }
         byte[] buffer = Files.readAllBytes(file);
         logger.debug("Sending: file={}, size={}", file, buffer.length);
-        return HttpResponse.builder() //
-                .status(200) //
-                .contentType(ContentTypes.getContentType(path)) //
-                .body(buffer) //
+        return HttpResponse.builder()
+                .status(200)
+                .contentType(ContentTypes.getContentType(path))
+                .body(buffer)
                 .build();
     }
 }

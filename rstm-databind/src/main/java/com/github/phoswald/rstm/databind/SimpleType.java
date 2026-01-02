@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-record SimpleType( //
-        Class<?> clazz, //
-        Function<String, Object> parseMethod, //
-        Function<Object, Object> formatMethod //
+record SimpleType(
+        Class<?> clazz,
+        Function<String, Object> parseMethod,
+        Function<Object, Object> formatMethod
 ) implements AnyType, ElementType {
 
     private static final DateTimeFormatter INSTANT_PARSE = DateTimeFormatter.ISO_INSTANT;
@@ -24,9 +24,9 @@ record SimpleType( //
             .appendInstant(3)
             .toFormatter();
 
-    private static final List<SimpleType> list = combine( //
-            PrimitiveType.instances.values().stream().map(SimpleType::fromPrimitiveType).toList(), //
-            new SimpleType(String.class, Object::toString, identity()), //
+    private static final List<SimpleType> list = combine(
+            PrimitiveType.instances.values().stream().map(SimpleType::fromPrimitiveType).toList(),
+            new SimpleType(String.class, Object::toString, identity()),
             new SimpleType(Instant.class, SimpleType::parseInstant, SimpleType::formatInstant));
 
     static final Map<Class<?>, SimpleType> instances = list.stream().collect(toMap(SimpleType::clazz, identity()));

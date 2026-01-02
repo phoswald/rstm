@@ -25,13 +25,13 @@ class JwtUtilTest {
     private static final String RSA_ISSUER = "http://127.0.0.1:5556/dex";
     private static final String RSA_AUDIENCE = "rstm-app";
     private static final String RSA_PROVIDER = "dexx";
-    private static final JwtKeySet RSA_KEYSET = new JwtKeySet(List.of(JwtKey.builder() //
-            .use("sig") //
-            .kty("RSA") //
+    private static final JwtKeySet RSA_KEYSET = new JwtKeySet(List.of(JwtKey.builder()
+            .use("sig")
+            .kty("RSA")
             .kid("d59834ce977bed46d6a54b466cf7b89770a9fb92")
-            .alg("RS256") //
-            .n("q3AjsR2c1NwfKpQ80skbunDd2uD7ezNOYW1xIAYg2wVOh-2RR5wQfLQRqyj-iinYjebyj8B2NHNJS3wsx5O8LhAhGRjqeQ2wjkW_M5QPunLNj-Mo8r6iFgIVS8TAdGPxKYbS7uVEU0LIrdBqKL2KyxTtWV7M1sfYIGUI819Y-VhyEZYxW7b31tLHSDNCLGvUHLOqLZ0UZslCuMjQOD02_3BgyYKCwXbNOnFsrlRZ27sJp8I1bykOEIxbg1HGP7Cw2eMY4qllWS1GCVZydyo8JKV5eGT8fOjRzddtnvtPPTGTvMZaeAzsmDXEKZZFiJ9-6QmheX51awd2Je780JR44Q") //
-            .e("AQAB") //
+            .alg("RS256")
+            .n("q3AjsR2c1NwfKpQ80skbunDd2uD7ezNOYW1xIAYg2wVOh-2RR5wQfLQRqyj-iinYjebyj8B2NHNJS3wsx5O8LhAhGRjqeQ2wjkW_M5QPunLNj-Mo8r6iFgIVS8TAdGPxKYbS7uVEU0LIrdBqKL2KyxTtWV7M1sfYIGUI819Y-VhyEZYxW7b31tLHSDNCLGvUHLOqLZ0UZslCuMjQOD02_3BgyYKCwXbNOnFsrlRZ27sJp8I1bykOEIxbg1HGP7Cw2eMY4qllWS1GCVZydyo8JKV5eGT8fOjRzddtnvtPPTGTvMZaeAzsmDXEKZZFiJ9-6QmheX51awd2Je780JR44Q")
+            .e("AQAB")
             .build()));
 
     private final Instant now = Instant.ofEpochSecond(1727968220); // 2024-10-03 15:10:20 UTC

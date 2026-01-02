@@ -20,7 +20,7 @@ public record JwtHeader(
         /**
          * the type, optional, RSTM: must be JWT
          */
-        String typ //
+        String typ
 ) {
 
     public static final String TYP_JWT = "JWT";

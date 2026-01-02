@@ -130,34 +130,34 @@ class OidcIdentityProviderTest {
     }
 
     private void mockDexConfig() throws IOException {
-        mockServer.when(request() //
-                .withMethod("GET") //
-                .withPath("/dex/.well-known/openid-configuration") //
-        ).respond(response() //
-                .withStatusCode(200) //
-                .withHeader("Content-Type", "application/json") //
+        mockServer.when(request()
+                .withMethod("GET")
+                .withPath("/dex/.well-known/openid-configuration")
+        ).respond(response()
+                .withStatusCode(200)
+                .withHeader("Content-Type", "application/json")
                 .withBody(Files.readString(Path.of("src/test/resources/mock-server/dex-config.json"))));
     }
 
     private void mockDexKeySet() throws IOException {
-        mockServer.when(request() //
-                .withMethod("GET") //
-                .withPath("/dex/keys") //
-        ).respond(response() //
-                .withStatusCode(200) //
-                .withHeader("Content-Type", "application/json") //
+        mockServer.when(request()
+                .withMethod("GET")
+                .withPath("/dex/keys")
+        ).respond(response()
+                .withStatusCode(200)
+                .withHeader("Content-Type", "application/json")
                 .withBody(Files.readString(Path.of("src/test/resources/mock-server/dex-keys.json"))));
     }
 
     private void mockDexTokenExchange(String clientId, String clientSecret, String code) throws IOException {
-        mockServer.when(request() //
-                .withMethod("POST") //
-                .withPath("/dex/token") //
-                .withContentType(MediaType.APPLICATION_FORM_URLENCODED) //
-                .withBody("grant_type=authorization_code&code=" + code + "&client_id=" + clientId + "&client_secret=" + clientSecret + "&redirect_uri=" + URLEncoder.encode(REDIRECT_URI, UTF_8)) //
-        ).respond(response() //
-                .withStatusCode(200) //
-                .withHeader("Content-Type", "application/json") //
+        mockServer.when(request()
+                .withMethod("POST")
+                .withPath("/dex/token")
+                .withContentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .withBody("grant_type=authorization_code&code=" + code + "&client_id=" + clientId + "&client_secret=" + clientSecret + "&redirect_uri=" + URLEncoder.encode(REDIRECT_URI, UTF_8))
+        ).respond(response()
+                .withStatusCode(200)
+                .withHeader("Content-Type", "application/json")
                 .withBody(Files.readString(Path.of("src/test/resources/mock-server/dex-token.json"))));
     }
 }

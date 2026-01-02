@@ -30,7 +30,7 @@ public record HttpHeaderValue(String valueOnly, Map<String, String> parameters) 
                     posSeparator = value.length();
                 }
                 if (pos + 1 < posAssignment && posAssignment + 1 < posSeparator) {
-                    parameters.put( //
+                    parameters.put(
                             value.substring(pos, posAssignment).trim(),
                             value.substring(posAssignment + 1, posSeparator).trim());
                 }

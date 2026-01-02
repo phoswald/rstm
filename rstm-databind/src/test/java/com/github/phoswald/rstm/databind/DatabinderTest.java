@@ -21,68 +21,68 @@ import org.junit.jupiter.api.Test;
 
 class DatabinderTest {
 
-    private static final List<String> FIELDS = List.of( //
-            "stringField", //
-            "byteField", "shortField", "integerField", "longField", "floatField", "doubleField", "booleanField", "characterField", //
-            "bytePField", "shortPField", "intPField", "longPField", "floatPField", "doublePField", "booleanPField", "charPField", //
-            "instantField", "enumField", "recordField", //
+    private static final List<String> FIELDS = List.of(
+            "stringField",
+            "byteField", "shortField", "integerField", "longField", "floatField", "doubleField", "booleanField", "characterField",
+            "bytePField", "shortPField", "intPField", "longPField", "floatPField", "doublePField", "booleanPField", "charPField",
+            "instantField", "enumField", "recordField",
             "stringListField", "integerListField", "instantListField", "enumListField", "recordListField");
 
-    private static final Sample INSTANCE = Sample.builder() //
-            .stringField("sample") //
-            .byteField((byte) 42) //
-            .shortField((short) 42) //
-            .integerField(42) //
-            .longField(42L) //
-            .floatField(42.0f) //
-            .doubleField(42.0) //
-            .booleanField(true) //
-            .characterField('A') //
-            .bytePField((byte) 42) //
-            .shortPField((short) 42) //
-            .intPField(42) //
-            .longPField(42L) //
-            .floatPField(42.0f) //
-            .doublePField(42.0) //
-            .booleanPField(true) //
-            .charPField('A') //
-            .instantField(Instant.ofEpochMilli(1730754686000L)) //
-            .enumField(SampleEnum.ONE) //
-            .recordField(new SamplePair("sampleKey", "sampleVal")) //
-            .stringListField(List.of("sample1", "sample2")) //
-            .integerListField(List.of(42, 43)) //
-            .instantListField(List.of(Instant.ofEpochMilli(1730754686000L), Instant.ofEpochMilli(1730754686120L))) //
-            .enumListField(List.of(SampleEnum.ONE, SampleEnum.TWO)) //
+    private static final Sample INSTANCE = Sample.builder()
+            .stringField("sample")
+            .byteField((byte) 42)
+            .shortField((short) 42)
+            .integerField(42)
+            .longField(42L)
+            .floatField(42.0f)
+            .doubleField(42.0)
+            .booleanField(true)
+            .characterField('A')
+            .bytePField((byte) 42)
+            .shortPField((short) 42)
+            .intPField(42)
+            .longPField(42L)
+            .floatPField(42.0f)
+            .doublePField(42.0)
+            .booleanPField(true)
+            .charPField('A')
+            .instantField(Instant.ofEpochMilli(1730754686000L))
+            .enumField(SampleEnum.ONE)
+            .recordField(new SamplePair("sampleKey", "sampleVal"))
+            .stringListField(List.of("sample1", "sample2"))
+            .integerListField(List.of(42, 43))
+            .instantListField(List.of(Instant.ofEpochMilli(1730754686000L), Instant.ofEpochMilli(1730754686120L)))
+            .enumListField(List.of(SampleEnum.ONE, SampleEnum.TWO))
             .recordListField(List.of(new SamplePair("sampleKey1", "sampleVal1"), new SamplePair("sampleKey2", "sampleVal2")))
             .build();
 
     private static final Sample INSTANCE_EMPTY = Sample.builder().build();
 
-    private static final Map<String, Object> MAP = Map.ofEntries( //
-            Map.entry("stringField", "sample"), //
-            Map.entry("byteField", (byte) 42), //
-            Map.entry("shortField", (short) 42), //
-            Map.entry("integerField", 42), //
-            Map.entry("longField", 42L), //
-            Map.entry("floatField", 42.0f), //
-            Map.entry("doubleField", 42.0), //
-            Map.entry("booleanField", true), //
-            Map.entry("characterField", 'A'), //
-            Map.entry("bytePField", (byte) 42), //
-            Map.entry("shortPField", (short) 42), //
-            Map.entry("intPField", 42), //
-            Map.entry("longPField", 42L), //
-            Map.entry("floatPField", 42.0f), //
-            Map.entry("doublePField", 42.0), //
-            Map.entry("booleanPField", true), //
-            Map.entry("charPField", 'A'), //
-            Map.entry("instantField", Instant.ofEpochMilli(1730754686000L)), //
-            Map.entry("enumField", "ONE"), //
-            Map.entry("recordField", new SamplePair("sampleKey", "sampleVal")), //
-            Map.entry("stringListField", List.of("sample1", "sample2")), //
-            Map.entry("integerListField", List.of(42, 43)), //
-            Map.entry("instantListField", List.of(Instant.ofEpochMilli(1730754686000L), Instant.ofEpochMilli(1730754686120L))), //
-            Map.entry("enumListField", List.of(SampleEnum.ONE, SampleEnum.TWO)), //
+    private static final Map<String, Object> MAP = Map.ofEntries(
+            Map.entry("stringField", "sample"),
+            Map.entry("byteField", (byte) 42),
+            Map.entry("shortField", (short) 42),
+            Map.entry("integerField", 42),
+            Map.entry("longField", 42L),
+            Map.entry("floatField", 42.0f),
+            Map.entry("doubleField", 42.0),
+            Map.entry("booleanField", true),
+            Map.entry("characterField", 'A'),
+            Map.entry("bytePField", (byte) 42),
+            Map.entry("shortPField", (short) 42),
+            Map.entry("intPField", 42),
+            Map.entry("longPField", 42L),
+            Map.entry("floatPField", 42.0f),
+            Map.entry("doublePField", 42.0),
+            Map.entry("booleanPField", true),
+            Map.entry("charPField", 'A'),
+            Map.entry("instantField", Instant.ofEpochMilli(1730754686000L)),
+            Map.entry("enumField", "ONE"),
+            Map.entry("recordField", new SamplePair("sampleKey", "sampleVal")),
+            Map.entry("stringListField", List.of("sample1", "sample2")),
+            Map.entry("integerListField", List.of(42, 43)),
+            Map.entry("instantListField", List.of(Instant.ofEpochMilli(1730754686000L), Instant.ofEpochMilli(1730754686120L))),
+            Map.entry("enumListField", List.of(SampleEnum.ONE, SampleEnum.TWO)),
             Map.entry("recordListField", List.of(new SamplePair("sampleKey1", "sampleVal1"), new SamplePair("sampleKey2", "sampleVal2"))));
 
     private static final Map<String, Object> MAP_EMPTY = Map.of();
@@ -338,8 +338,8 @@ class DatabinderTest {
 
     @Test
     void createInstance_validStrings_success() {
-        Map<String, Object> map = MAP.entrySet().stream() //
-                .map(this::toStringEntry) //
+        Map<String, Object> map = MAP.entrySet().stream()
+                .map(this::toStringEntry)
                 .collect((Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         Sample instance = testee.createInstance(Sample.class, map);
         assertEquals(INSTANCE, instance);
@@ -362,9 +362,9 @@ class DatabinderTest {
 
     @Test
     void createInstance_validBytes_success() {
-        Map<String, Object> map = Map.ofEntries( //
-                Map.entry("stringField", (byte) 42), //
-                Map.entry("integerField", (byte) 42), //
+        Map<String, Object> map = Map.ofEntries(
+                Map.entry("stringField", (byte) 42),
+                Map.entry("integerField", (byte) 42),
                 Map.entry("longField", (byte) 42));
         Sample instance = testee.createInstance(Sample.class, map);
         assertNotNull(instance);

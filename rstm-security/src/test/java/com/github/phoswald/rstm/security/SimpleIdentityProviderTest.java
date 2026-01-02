@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 
 class SimpleIdentityProviderTest {
 
-    private final IdentityProvider testee = new SimpleIdentityProvider() //
-            .withUser("username1", "password1", List.of("role1", "role3")) //
+    private final IdentityProvider testee = new SimpleIdentityProvider()
+            .withUser("username1", "password1", List.of("role1", "role3"))
             .withUser("username2", "password2", List.of("role2"));
 
     @Test

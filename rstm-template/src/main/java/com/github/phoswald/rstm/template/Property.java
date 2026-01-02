@@ -19,12 +19,12 @@ record Property<T> (String name, Type type, Function<TemplateArgument<?>, T> acc
         if (name.startsWith("#")) {
             String key = name.substring(1);
             getResourceText(compilation.resources(), key); // for verification, throws MissingResourceException
-            return new Property<>(name, String.class, //
+            return new Property<>(name, String.class,
                     argument -> getResourceText(argument.resources(), key));
         } else {
             Class<?> argumentClass = compilation.argumentClass();
             Method method = getPropertyAccessor(argumentClass, name);
-            return new Property<>(name, method.getGenericReturnType(), //
+            return new Property<>(name, method.getGenericReturnType(),
                     argument -> getPropertyValue(argumentClass, name, method, argument.instance()));
         }
     }
@@ -54,27 +54,27 @@ record Property<T> (String name, Type type, Function<TemplateArgument<?>, T> acc
     }
 
     Property<String> toStringProperty() {
-        return new Property<>(name, type, accessor.andThen( //
+        return new Property<>(name, type, accessor.andThen(
                 result -> result == null ? null : result.toString()));
     }
 
     Property<Boolean> toBooleanProperty() {
-        return new Property<>(name, type, accessor.andThen( //
+        return new Property<>(name, type, accessor.andThen(
                 result -> result != null && result != Boolean.FALSE && !result.toString().isEmpty()));
     }
 
     Property<Collection<?>> toArrayProperty() {
-        return new Property<>(name, type, accessor.andThen( //
+        return new Property<>(name, type, accessor.andThen(
                 result -> result == null ? List.of() : List.of((Object[]) result)));
     }
 
     Property<Collection<?>> toCollectionProperty() {
-        return new Property<>(name, type, accessor.andThen( //
+        return new Property<>(name, type, accessor.andThen(
                 result -> result == null ? List.of() : (Collection<?>) result));
     }
 
     Property<Collection<?>> toMapProperty() {
-        return new Property<>(name, type, accessor.andThen( //
+        return new Property<>(name, type, accessor.andThen(
                 result -> (result == null ? Map.of() : (Map<?, ?>) result).entrySet()));
     }
 }

@@ -23,22 +23,22 @@ import com.github.phoswald.rstm.security.SimpleIdentityProvider;
 
 class HttpServerWithAuthTest {
 
-    private static final IdentityProvider identityProvider = new SimpleIdentityProvider() //
-            .withUser("username1", "password1", List.of("role1", "role3")) //
+    private static final IdentityProvider identityProvider = new SimpleIdentityProvider()
+            .withUser("username1", "password1", List.of("role1", "role3"))
             .withUser("username2", "password2", List.of("role2"));
 
     private final Principal username1 = identityProvider.authenticateWithPassword("username1", "password1".toCharArray()).get();
     private final Principal username2 = identityProvider.authenticateWithPassword("username2", "password2".toCharArray()).get();
 
-    private static final HttpServerConfig config = HttpServerConfig.builder() //
-            .httpPort(8080) //
-            .filter(combine( //
-                    route("/login", login()), //
-                    route("/secured", auth("role1", //
-                            route("/resource", get(request -> //
-                                    HttpResponse.text(200, "Hello, " + request.principal().name() + "!"))))) //
-            )) //
-            .identityProvider(identityProvider) //
+    private static final HttpServerConfig config = HttpServerConfig.builder()
+            .httpPort(8080)
+            .filter(combine(
+                    route("/login", login()),
+                    route("/secured", auth("role1",
+                            route("/resource", get(request ->
+                                    HttpResponse.text(200, "Hello, " + request.principal().name() + "!")))))
+            ))
+            .identityProvider(identityProvider)
             .build();
 
     private static final HttpServer testee = new HttpServer(config);

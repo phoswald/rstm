@@ -13,9 +13,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class HttpServerWithRootResourcesTest {
 
-    private static final HttpServerConfig config = HttpServerConfig.builder() //
-            .httpPort(8080) //
-            .filter(route("/", resources("/html/"))) //
+    private static final HttpServerConfig config = HttpServerConfig.builder()
+            .httpPort(8080)
+            .filter(route("/", resources("/html/")))
             .build();
 
     private static final HttpServer testee = new HttpServer(config);
@@ -26,11 +26,11 @@ class HttpServerWithRootResourcesTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { //
-            "/index.html", //
-            "/", //
-            "/subdir/index.html", //
-            "/subdir/" //
+    @ValueSource(strings = {
+            "/index.html",
+            "/",
+            "/subdir/index.html",
+            "/subdir/"
     })
     void get_resourceExistingHtml_success(String path) {
         when().

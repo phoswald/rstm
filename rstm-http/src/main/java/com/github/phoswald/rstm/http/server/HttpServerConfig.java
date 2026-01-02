@@ -11,10 +11,10 @@ import com.github.phoswald.rstm.http.HttpResponse;
 import com.github.phoswald.rstm.security.IdentityProvider;
  
 @RecordBuilder
-public record HttpServerConfig( //
-        int httpPort, //
-        HttpFilter filter, //
-        IdentityProvider identityProvider //
+public record HttpServerConfig(
+        int httpPort,
+        HttpFilter filter,
+        IdentityProvider identityProvider
 ) {
 
     public static HttpServerConfigBuilder builder() {

@@ -38,7 +38,7 @@ import com.github.phoswald.rstm.databind.Databinder;
 public class JwtUtil {
 
     private static final Databinder BINDER = new Databinder().pretty(false);
-    private static final Pattern TOKEN_PATTERN = Pattern.compile( //
+    private static final Pattern TOKEN_PATTERN = Pattern.compile(
             "([A-Z-a-z0-9_-]+)\\.([A-Z-a-z0-9_-]+)\\.([A-Z-a-z0-9_-]+)");
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -159,10 +159,10 @@ public class JwtUtil {
     }
 
     private JwtKey findJwtKey(JwtKeySet keyset, String kid) {
-        return keyset.keys().stream() //
-                .filter(k -> Objects.equals(k.use(), "sig")) //
-                .filter(k -> Objects.equals(k.kty(), "RSA")) //
-                .filter(k -> Objects.equals(k.kid(), kid)) //
+        return keyset.keys().stream()
+                .filter(k -> Objects.equals(k.use(), "sig"))
+                .filter(k -> Objects.equals(k.kty(), "RSA"))
+                .filter(k -> Objects.equals(k.kid(), kid))
                 // .filter(k -> Objects.equals(k.alg(), ALG_RS256)) // not set by Microsoft
                 .findFirst().orElse(null);
     }

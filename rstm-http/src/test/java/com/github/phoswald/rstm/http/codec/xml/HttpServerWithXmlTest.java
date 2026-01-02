@@ -18,13 +18,13 @@ import com.github.phoswald.rstm.http.server.HttpServerConfig;
 
 class HttpServerWithXmlTest {
 
-    private static final HttpServerConfig config = HttpServerConfig.builder() //
-            .httpPort(8080) //
-            .filter(combine( //
-                    route("/dynamic/xml", //
-                            get(request -> HttpResponse.body(200, xml(), handleGet())), //
-                            post(request -> HttpResponse.body(200, xml(), handlePost(request.body(xml(), SampleRequest.class))))) //
-            )) //
+    private static final HttpServerConfig config = HttpServerConfig.builder()
+            .httpPort(8080)
+            .filter(combine(
+                    route("/dynamic/xml",
+                            get(request -> HttpResponse.body(200, xml(), handleGet())),
+                            post(request -> HttpResponse.body(200, xml(), handlePost(request.body(xml(), SampleRequest.class)))))
+            ))
             .build();
 
     private static final HttpServer testee = new HttpServer(config);

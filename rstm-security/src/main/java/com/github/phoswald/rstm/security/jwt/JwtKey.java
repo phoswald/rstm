@@ -30,7 +30,7 @@ public record JwtKey(
         /**
          * the exponent for the RSA public key, Base64 URL encoded
          */
-        String e //
+        String e
 ) { 
     
     public static JwtKeyBuilder builder() {

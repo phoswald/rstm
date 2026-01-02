@@ -40,10 +40,10 @@ class ResourcesFilter implements HttpFilter {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             input.transferTo(buffer);
             logger.debug("Sending: resource={}, size={}", resource, buffer.size());
-            return HttpResponse.builder() //
-                    .status(200) //
-                    .contentType(ContentTypes.getContentType(path)) //
-                    .body(buffer.toByteArray()) //
+            return HttpResponse.builder()
+                    .status(200)
+                    .contentType(ContentTypes.getContentType(path))
+                    .body(buffer.toByteArray())
                     .build();
         }
     }

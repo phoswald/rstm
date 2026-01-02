@@ -18,13 +18,13 @@ import com.github.phoswald.rstm.http.server.HttpServerConfig;
 
 class HttpServerWithJsonTest {
 
-    private static final HttpServerConfig config = HttpServerConfig.builder() //
-            .httpPort(8080) //
-            .filter(combine( //
-                    route("/dynamic/json", //
-                            get(request -> HttpResponse.body(200, json(), handleGet())), //
-                            post(request -> HttpResponse.body(200, json(), handlePost(request.body(json(), SampleRequest.class))))) //
-            )) //
+    private static final HttpServerConfig config = HttpServerConfig.builder()
+            .httpPort(8080)
+            .filter(combine(
+                    route("/dynamic/json",
+                            get(request -> HttpResponse.body(200, json(), handleGet())),
+                            post(request -> HttpResponse.body(200, json(), handlePost(request.body(json(), SampleRequest.class)))))
+            ))
             .build();
 
     private static final HttpServer testee = new HttpServer(config);

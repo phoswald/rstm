@@ -48,8 +48,8 @@ class RouteFilter implements HttpFilter {
     }
 
     private static List<String> parseParts(String path) {
-        return List.of(path.split("/")).stream() //
-                .filter(not(String::isEmpty)) //
+        return List.of(path.split("/")).stream()
+                .filter(not(String::isEmpty))
                 .collect(Collectors.toList()); // cannot use toList(), must be modifiable!
     }
 

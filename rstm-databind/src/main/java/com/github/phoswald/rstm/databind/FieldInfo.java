@@ -4,17 +4,17 @@ import java.lang.reflect.Method;
 import java.lang.reflect.RecordComponent;
 import java.util.function.Function;
 
-record FieldInfo( //
-        String name, //
-        AnyType type, //
-        Function<Object, Object> getter //
+record FieldInfo(
+        String name,
+        AnyType type,
+        Function<Object, Object> getter
 ) {
 
     static FieldInfo create(RecordComponent component, AnyType type) {
         Method accessor = component.getAccessor();
-        return new FieldInfo( //
-                component.getName(), //
-                type, //
+        return new FieldInfo(
+                component.getName(),
+                type,
                 instance -> get(instance, accessor));
     }
 

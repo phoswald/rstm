@@ -33,45 +33,45 @@ public class OidcIdentityProvider implements IdentityProvider {
     }
 
     public OidcIdentityProvider withDex(String clientId, String clientSecret, String baseUri) {
-        oidcUtil.addProvider(Provider.builder() //
-                .id("dex") //
-                .configurationUri(baseUri + "/.well-known/openid-configuration") //
-                .clientId(clientId) //
-                .clientSecret(clientSecret) //
-                .scopes("openid profile email offline_access") //
+        oidcUtil.addProvider(Provider.builder()
+                .id("dex")
+                .configurationUri(baseUri + "/.well-known/openid-configuration")
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .scopes("openid profile email offline_access")
                 .build());
         return this;
     }
 
     public OidcIdentityProvider withGoogle(String clientId, String clientSecret) {
-        oidcUtil.addProvider(Provider.builder() //
-                .id("google") //
-                .configurationUri("https://accounts.google.com/.well-known/openid-configuration") //
-                .clientId(clientId) //
-                .clientSecret(clientSecret) //
-                .scopes("openid profile email") //
+        oidcUtil.addProvider(Provider.builder()
+                .id("google")
+                .configurationUri("https://accounts.google.com/.well-known/openid-configuration")
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .scopes("openid profile email")
                 .build());
         return this;
     }
 
     public OidcIdentityProvider withMicrosoft(String clientId, String clientSecret, String tenantId) {
-        oidcUtil.addProvider(Provider.builder() //
-                .id("microsoft") //
-                .configurationUri("https://login.microsoftonline.com/" + tenantId + "/v2.0/.well-known/openid-configuration") //
-                .clientId(clientId) //
-                .clientSecret(clientSecret) //
-                .scopes("openid profile email") //
+        oidcUtil.addProvider(Provider.builder()
+                .id("microsoft")
+                .configurationUri("https://login.microsoftonline.com/" + tenantId + "/v2.0/.well-known/openid-configuration")
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .scopes("openid profile email")
                 .build());
         return this;
     }
 
     public OidcIdentityProvider withFacebook(String clientId, String clientSecret) {
-        oidcUtil.addProvider(Provider.builder() //
-                .id("facebook") //
-                .configurationUri("https://www.facebook.com/.well-known/openid-configuration") //
-                .clientId(clientId) //
-                .clientSecret(clientSecret) //
-                .scopes("openid email public_profile") //
+        oidcUtil.addProvider(Provider.builder()
+                .id("facebook")
+                .configurationUri("https://www.facebook.com/.well-known/openid-configuration")
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .scopes("openid email public_profile")
                 .build());
         return this;
     }

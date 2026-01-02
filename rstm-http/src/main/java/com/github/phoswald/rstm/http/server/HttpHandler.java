@@ -61,15 +61,15 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
                 body = buffer.toByteArray();
             }
         }
-        return HttpRequest.builder() //
-                .method(HttpMethod.valueOf(exchange.getRequestMethod())) //
-                .path(exchange.getRequestURI().getPath()) //
-                .pathParams(pathParams) //
-                .queryParams(queryParams) //
-                .formParams(formParams) //
-                .authorization(exchange.getRequestHeaders().getFirst("authorization")) //
-                .session(getSessionCookie(exchange)) //
-                .body(body) //
+        return HttpRequest.builder()
+                .method(HttpMethod.valueOf(exchange.getRequestMethod()))
+                .path(exchange.getRequestURI().getPath())
+                .pathParams(pathParams)
+                .queryParams(queryParams)
+                .formParams(formParams)
+                .authorization(exchange.getRequestHeaders().getFirst("authorization"))
+                .session(getSessionCookie(exchange))
+                .body(body)
                 .build();
     }
 
@@ -78,7 +78,7 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
             for (String queryParam : queryString.split("&")) {
                 int index = queryParam.indexOf("=");
                 if (index > 0) {
-                    queryParams.put(queryParam.substring(0, index), //
+                    queryParams.put(queryParam.substring(0, index),
                             URLDecoder.decode(queryParam.substring(index + 1), UTF_8));
                 }
             }

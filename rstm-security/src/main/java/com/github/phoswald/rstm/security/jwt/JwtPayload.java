@@ -54,7 +54,7 @@ public record JwtPayload(
         /**
          * the subject, optional, a string or URI, RSTM: username
          */
-        String sub //
+        String sub
 ) {
 
     public static JwtPayloadBuilder builder() {
