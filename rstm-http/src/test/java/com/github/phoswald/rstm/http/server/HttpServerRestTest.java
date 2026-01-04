@@ -3,6 +3,8 @@ package com.github.phoswald.rstm.http.server;
 import static com.github.phoswald.rstm.http.codec.JsonCodec.json;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.combine;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.deleteRest;
+import static com.github.phoswald.rstm.http.server.HttpServerConfig.get;
+import static com.github.phoswald.rstm.http.server.HttpServerConfig.getHtml;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.getRest;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.postRest;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.putRest;
@@ -11,29 +13,39 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.equalTo;
 
+import java.nio.file.Path;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+
+import com.github.phoswald.rstm.http.HttpResponse;
 
 class HttpServerRestTest {
 
     private static final HttpServerConfig config = HttpServerConfig.builder()
             .httpPort(8080)
             .filter(combine(
-                    route("/dynamic/json",
+                    route("/dynamic",
                             getRest(json(), _ -> new SampleResponse("Response for GET")),
                             postRest(json(), SampleRequest.class, request -> new SampleResponse("Response for POST of " + request.message())),
                             putRest(json(), SampleRequest.class, request -> new SampleResponse("Response for PUT of " + request.message())),
                             deleteRest(json(), _ -> new SampleResponse("Response for DELETE"))),
-                    route("/dynamic/json/param/{name}",
+                    route("/dynamic/param/{name}",
                             getRest(json(), SampleParams.class, params -> new SampleResponse("Response for GET with name=" + params.name()))),
-                    route("/dynamic/json/query",
+                    route("/dynamic/query",
                             getRest(json(), SampleParams.class, params -> new SampleResponse("Response for GET with q1=" + params.q1() + " and q2=" + params.q2())),
                             postRest(json(), SampleParams.class, SampleRequest.class, (params, request) -> new SampleResponse("Response for POST with q1=" + params.q1() + " and q2=" + params.q2() + " of " + request.message())),
                             putRest(json(), SampleParams.class, SampleRequest.class, (params, request) -> new SampleResponse("Response for PUT with q1=" + params.q1() + " and q2=" + params.q2() + " of " + request.message())),
-                            deleteRest(json(), SampleParams.class, (params) -> new SampleResponse("Response for DELETE with q1=" + params.q1() + " and q2=" + params.q2()))),
-                    route("/dynamic/json/form",
+                            deleteRest(json(), SampleParams.class, params -> new SampleResponse("Response for DELETE with q1=" + params.q1() + " and q2=" + params.q2()))),
+                    route("/dynamic/form",
                             postRest(json(), SampleParams.class, SampleRequest.class, (params, _) -> new SampleResponse("Response for POST with f1=" + params.f1() + " and f2=" + params.f2())),
-                            putRest(json(), SampleParams.class, SampleRequest.class, (params, _) -> new SampleResponse("Response for PUT with f1=" + params.f1() + " and f2=" + params.f2())))
+                            putRest(json(), SampleParams.class, SampleRequest.class, (params, _) -> new SampleResponse("Response for PUT with f1=" + params.f1() + " and f2=" + params.f2()))),
+                    route("/dynamic/empty",
+                            getRest(json(),  () -> "")),
+                    route("/dynamic/notexisting",
+                            getRest(json(), () -> null)),
+                    route("/dynamic/failing",
+                            getRest(json(), ()-> { throw new IllegalStateException(""); }))
             ))
             .build();
 
@@ -45,9 +57,9 @@ class HttpServerRestTest {
     }
 
     @Test
-    void get_dynamicJson_success() {
+    void get_dynamic_success() {
         when()
-                .get("/dynamic/json")
+                .get("/dynamic")
                 .then()
                 .statusCode(200)
                 .contentType("application/json")
@@ -55,12 +67,12 @@ class HttpServerRestTest {
     }
 
     @Test
-    void post_dynamicJson_success() {
+    void post_dynamic_success() {
         given()
                 .contentType("application/json")
                 .body("{\"message\":\"Sample Request\"}")
                 .when()
-                .post("/dynamic/json")
+                .post("/dynamic")
                 .then()
                 .statusCode(200)
                 .contentType("application/json")
@@ -68,12 +80,12 @@ class HttpServerRestTest {
     }
 
     @Test
-    void put_dynamicJson_success() {
+    void put_dynamic_success() {
         given()
                 .contentType("application/json")
                 .body("{\"message\":\"Sample Request\"}")
                 .when()
-                .put("/dynamic/json")
+                .put("/dynamic")
                 .then()
                 .statusCode(200)
                 .contentType("application/json")
@@ -81,9 +93,9 @@ class HttpServerRestTest {
     }
 
     @Test
-    void delete_dynamicJson_success() {
+    void delete_dynamic_success() {
         when()
-                .delete("/dynamic/json")
+                .delete("/dynamic")
                 .then()
                 .statusCode(200)
                 .contentType("application/json")
@@ -91,9 +103,9 @@ class HttpServerRestTest {
     }
 
     @Test
-    void get_dynamicJsonPathParam_success() {
+    void get_dynamicPathParam_success() {
         when()
-                .get("/dynamic/json/param/1234")
+                .get("/dynamic/param/1234")
                 .then()
                 .statusCode(200)
                 .contentType("application/json")
@@ -101,14 +113,14 @@ class HttpServerRestTest {
     }
 
     @Test
-    void get_dynamicJsonQueryParam_success() {
+    void get_dynamicQueryParam_success() {
         given()
                 .queryParam("q1", "search")
                 .queryParam("q2", "query")
                 .contentType("application/json")
                 .body("{\"message\":\"Sample Request\"}")
                 .when()
-                .get("/dynamic/json/query")
+                .get("/dynamic/query")
                 .then()
                 .statusCode(200)
                 .contentType("application/json")
@@ -116,14 +128,14 @@ class HttpServerRestTest {
     }
 
     @Test
-    void post_dynamicJsonQueryParam_success() {
+    void post_dynamicQueryParam_success() {
         given()
                 .queryParam("q1", "search")
                 .queryParam("q2", "query")
                 .contentType("application/json")
                 .body("{\"message\":\"Sample Request\"}")
                 .when()
-                .post("/dynamic/json/query")
+                .post("/dynamic/query")
                 .then()
                 .statusCode(200)
                 .contentType("application/json")
@@ -131,14 +143,14 @@ class HttpServerRestTest {
     }
 
     @Test
-    void put_dynamicJsonQueryParam_success() {
+    void put_dynamicQueryParam_success() {
         given()
                 .queryParam("q1", "search")
                 .queryParam("q2", "query")
                 .contentType("application/json")
                 .body("{\"message\":\"Sample Request\"}")
                 .when()
-                .put("/dynamic/json/query")
+                .put("/dynamic/query")
                 .then()
                 .statusCode(200)
                 .contentType("application/json")
@@ -146,14 +158,14 @@ class HttpServerRestTest {
     }
 
     @Test
-    void delete_dynamicJsonQueryParam_success() {
+    void delete_dynamicQueryParam_success() {
         given()
                 .queryParam("q1", "search")
                 .queryParam("q2", "query")
                 .contentType("application/json")
                 .body("{\"message\":\"Sample Request\"}")
                 .when()
-                .delete("/dynamic/json/query")
+                .delete("/dynamic/query")
                 .then()
                 .statusCode(200)
                 .contentType("application/json")
@@ -161,13 +173,13 @@ class HttpServerRestTest {
     }
 
     @Test
-    void post_dynamicJsonFormParam_success() {
+    void post_dynamicFormParam_success() {
         given()
                 .contentType("application/x-www-form-urlencoded; charset=utf-8")
                 .formParam("f1", "search")
                 .formParam("f2", "query")
                 .when()
-                .post("/dynamic/json/form")
+                .post("/dynamic/form")
                 .then()
                 .statusCode(200)
                 .contentType("application/json")
@@ -175,17 +187,43 @@ class HttpServerRestTest {
     }
 
     @Test
-    void put_dynamicJsonFormParam_success() {
+    void put_dynamicFormParam_success() {
         given()
                 .contentType("application/x-www-form-urlencoded; charset=utf-8")
                 .formParam("f1", "search")
                 .formParam("f2", "query")
                 .when()
-                .put("/dynamic/json/form")
+                .put("/dynamic/form")
                 .then()
                 .statusCode(200)
                 .contentType("application/json")
                 .body("message", equalTo("Response for PUT with f1=search and f2=query"));
+    }
+
+    @Test
+    void get_dynamicEmpty_success() {
+        when()
+                .get("/dynamic/empty")
+                .then()
+                .statusCode(204);
+    }
+
+    @Test
+    void get_dynamicNotExisting_statusNotFound() {
+        given()
+                .redirects().follow(false)
+                .when()
+                .get("/dynamic/notexisting")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    void get_dynamicFailing_statusError() {
+        when()
+                .get("/dynamic/failing")
+                .then()
+                .statusCode(500);
     }
 
     record SampleParams(int name, String q1, String q2, String f1, String f2) { }

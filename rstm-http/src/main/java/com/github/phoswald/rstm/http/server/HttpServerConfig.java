@@ -70,6 +70,64 @@ public record HttpServerConfig(
         return new MethodFilter(method, filter);
     }
 
+    public static HttpFilter getHtml(ThrowingSupplier<String> handler) {
+        return getHtml(ignoreRequest(handler));
+    }
+
+    public static HttpFilter getHtml(ThrowingFunction<HttpRequest, String> handler) {
+        return get(request -> {
+            String response = handler.invoke(request);
+            return createHtmlResponse(request, response);
+        });
+    }
+
+    public static <PAR> HttpFilter getHtml(Class<PAR> clazzPar, ThrowingFunction<PAR, String> handler) {
+        return getHtml(clazzPar, ignoreRequest(handler));
+    }
+
+    public static <PAR> HttpFilter getHtml(Class<PAR> clazzPar, ThrowingBiFunction<HttpRequest, PAR, String> handler) {
+        return get(request -> {
+            PAR paramsObj = params(request, clazzPar);
+            String response = handler.invoke(request, paramsObj);
+            return createHtmlResponse(request, response);
+        });
+    }
+
+    public static HttpFilter postHtml(ThrowingSupplier<String> handler) {
+        return postHtml(ignoreRequest(handler));
+    }
+
+    public static HttpFilter postHtml(ThrowingFunction<HttpRequest, String> handler) {
+        return post(request -> {
+            String response = handler.invoke(request);
+            return createHtmlResponse(request, response);
+        });
+    }
+
+    public static <PAR> HttpFilter postHtml(Class<PAR> clazzPar, ThrowingFunction<PAR, String> handler) {
+        return postHtml(clazzPar, ignoreRequest(handler));
+    }
+
+    public static <PAR> HttpFilter postHtml(Class<PAR> clazzPar, ThrowingBiFunction<HttpRequest, PAR, String> handler) {
+        return post(request -> {
+            PAR paramsObj = params(request, clazzPar);
+            String response = handler.invoke(request, paramsObj);
+            return createHtmlResponse(request, response);
+        });
+    }
+
+    private static HttpResponse createHtmlResponse(HttpRequest request, String response) {
+        if(response == null) {
+            return HttpResponse.empty(404);
+        } else if (response.isEmpty()) {
+            return HttpResponse.empty(204);
+        } else if (response.startsWith("redirect=")) {
+            return HttpResponse.redirect(302, request.relativizePath(response.substring(9)));
+        } else {
+            return HttpResponse.html(200, response.toString());
+        }
+    }
+
     public static <RES> HttpFilter getRest(HttpCodec codec, ThrowingSupplier<RES> handler) {
         return getRest(codec, ignoreRequest(handler));
     }
@@ -169,64 +227,10 @@ public record HttpServerConfig(
     private static <RES> HttpResponse createRestResponse(HttpCodec codec, RES responseObj) {
         if(responseObj == null) {
             return HttpResponse.empty(404);
+        } else if(responseObj instanceof  String responeStr && responeStr.isEmpty()) {
+            return HttpResponse.empty(204);
         } else {
             return HttpResponse.body(200, codec, responseObj);
-        }
-    }
-
-    public static HttpFilter getHtml(ThrowingSupplier<Object> handler) {
-        return getHtml(ignoreRequest(handler));
-    }
-
-    public static HttpFilter getHtml(ThrowingFunction<HttpRequest, Object> handler) {
-        return get(request -> {
-            Object response = handler.invoke(request);
-            return createHtmlResponse(request, response);
-        });
-    }
-
-    public static <PAR> HttpFilter getHtml(Class<PAR> clazzPar, ThrowingFunction<PAR, Object> handler) {
-        return getHtml(clazzPar, ignoreRequest(handler));
-    }
-
-    public static <PAR> HttpFilter getHtml(Class<PAR> clazzPar, ThrowingBiFunction<HttpRequest, PAR, Object> handler) {
-        return get(request -> {
-            PAR paramsObj = params(request, clazzPar);
-            Object response = handler.invoke(request, paramsObj);
-            return createHtmlResponse(request, response);
-        });
-    }
-
-    public static HttpFilter postHtml(ThrowingSupplier<Object> handler) {
-        return postHtml(ignoreRequest(handler));
-    }
-
-    public static HttpFilter postHtml(ThrowingFunction<HttpRequest, Object> handler) {
-        return post(request -> {
-            Object response = handler.invoke(request);
-            return createHtmlResponse(request, response);
-        });
-    }
-
-    public static <PAR> HttpFilter postHtml(Class<PAR> clazzPar, ThrowingFunction<PAR, Object> handler) {
-        return postHtml(clazzPar, ignoreRequest(handler));
-    }
-
-    public static <PAR> HttpFilter postHtml(Class<PAR> clazzPar, ThrowingBiFunction<HttpRequest, PAR, Object> handler) {
-        return post(request -> {
-            PAR paramsObj = params(request, clazzPar);
-            Object response = handler.invoke(request, paramsObj);
-            return createHtmlResponse(request, response);
-        });
-    }
-
-    private static HttpResponse createHtmlResponse(HttpRequest request, Object response) {
-        /*if(response == null) {
-            return HttpResponse.empty(404);
-        } else*/ if (response instanceof Path location) {
-            return HttpResponse.redirect(302, request.relativizePath(location.toString()));
-        } else {
-            return HttpResponse.html(200, response.toString());
         }
     }
 

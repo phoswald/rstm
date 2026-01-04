@@ -1,6 +1,6 @@
 package com.github.phoswald.rstm.http;
 
-import java.nio.charset.StandardCharsets;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.github.phoswald.record.builder.RecordBuilder;
 
@@ -21,19 +21,11 @@ public record HttpResponse(
         return builder().status(status).build();
     }
 
-    public static HttpResponse body(int status, HttpCodec codec, Object body) {
-        return builder()
-                .status(status)
-                .contentType(codec.getContentType())
-                .body(codec.encode(body))
-                .build();
-    }
-
     public static HttpResponse text(int status, String text) {
         return builder()
                 .status(status)
                 .contentType("text/plain")
-                .body(text.getBytes(StandardCharsets.UTF_8))
+                .body(text.getBytes(UTF_8))
                 .build();
     }
 
@@ -41,7 +33,15 @@ public record HttpResponse(
         return builder()
                 .status(status)
                 .contentType("text/html")
-                .body(html.getBytes(StandardCharsets.UTF_8))
+                .body(html.getBytes(UTF_8))
+                .build();
+    }
+
+    public static HttpResponse body(int status, HttpCodec codec, Object body) {
+        return builder()
+                .status(status)
+                .contentType(codec.getContentType())
+                .body(codec.encode(body))
                 .build();
     }
 
