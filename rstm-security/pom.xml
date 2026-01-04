@@ -30,11 +30,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>at.favre.lib</groupId>
-      <artifactId>bcrypt</artifactId>
-      <version>0.10.2</version>
-    </dependency>
 
     <!-- Testing -->
     <dependency>

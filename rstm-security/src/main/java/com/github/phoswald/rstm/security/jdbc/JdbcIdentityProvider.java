@@ -14,14 +14,10 @@ import org.slf4j.LoggerFactory;
 import com.github.phoswald.rstm.security.IdentityProvider;
 import com.github.phoswald.rstm.security.Principal;
 import com.github.phoswald.rstm.security.TokenProvider;
-
-import at.favre.lib.crypto.bcrypt.BCrypt;
-import at.favre.lib.crypto.bcrypt.BCrypt.Version;
+import com.github.phoswald.rstm.security.password.PasswordUtility;
 
 /**
  * A local IDP that stores users, hashed passwords and roles in a SQL database.
- *
- * See https://github.com/patrickfav/bcrypt
  */
 public class JdbcIdentityProvider implements IdentityProvider {
 
@@ -39,7 +35,7 @@ public class JdbcIdentityProvider implements IdentityProvider {
         Objects.requireNonNull(username);
         Objects.requireNonNull(password);
         JdbcUser userEntity = selectUser(username);
-        if (userEntity != null && checkPassword(password, userEntity.hashedPassword())) {
+        if (userEntity != null && PasswordUtility.verifyPassword(password, userEntity.hashedPassword())) {
             logger.info("Login successful for username={}", username);
             return Optional.of(tokenProvider.createPrincipal(userEntity.username(), userEntity.rolesAsList()));
         } else {
@@ -75,13 +71,5 @@ public class JdbcIdentityProvider implements IdentityProvider {
         } catch (SQLException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    private boolean checkPassword(char[] enteredPassword, String hashedPassword) {
-        return BCrypt.verifyer().verify(enteredPassword, hashedPassword).verified;
-    }
-
-    public static String hashPassword(char[] password) {
-        return BCrypt.with(Version.VERSION_2A).hashToString(10, password);
     }
 }
