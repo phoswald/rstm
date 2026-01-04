@@ -1,6 +1,6 @@
 package com.github.phoswald.rstm.http.server;
 
-import static com.github.phoswald.rstm.http.codec.json.JsonCodec.json;
+import static com.github.phoswald.rstm.http.codec.JsonCodec.json;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.combine;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.deleteRest;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.getRest;

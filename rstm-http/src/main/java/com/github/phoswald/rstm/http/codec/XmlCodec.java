@@ -1,4 +1,4 @@
-package com.github.phoswald.rstm.http.codec.json;
+package com.github.phoswald.rstm.http.codec;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -6,28 +6,28 @@ import java.io.ByteArrayOutputStream;
 import com.github.phoswald.rstm.databind.Databinder;
 import com.github.phoswald.rstm.http.HttpCodec;
 
-public class JsonCodec implements HttpCodec {
+public class XmlCodec implements HttpCodec {
 
     private static final Databinder BINDER = new Databinder();
 
-    public static HttpCodec json() {
-        return new JsonCodec();
+    public static HttpCodec xml() {
+        return new XmlCodec();
     }
 
     @Override
     public String getContentType() {
-        return "application/json";
+        return "text/xml";
     }
 
     @Override
     public byte[] encode(Object object) {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        BINDER.toJson(object, buffer);
+        BINDER.toXml(object, buffer);
         return buffer.toByteArray();
     }
 
     @Override
     public <T> T decode(Class<T> clazz, byte[] bytes) {
-        return BINDER.fromJson(new ByteArrayInputStream(bytes), clazz);
+        return BINDER.fromXml(new ByteArrayInputStream(bytes), clazz);
     }
 }

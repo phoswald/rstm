@@ -1,4 +1,4 @@
-package com.github.phoswald.rstm.http.codec.text;
+package com.github.phoswald.rstm.http.codec;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

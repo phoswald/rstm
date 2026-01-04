@@ -1,6 +1,6 @@
-package com.github.phoswald.rstm.http.codec.xml;
+package com.github.phoswald.rstm.http.codec;
 
-import static com.github.phoswald.rstm.http.codec.xml.XmlCodec.xml;
+import static com.github.phoswald.rstm.http.codec.XmlCodec.xml;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.combine;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.get;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.post;

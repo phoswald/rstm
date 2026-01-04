@@ -1,6 +1,6 @@
 package com.github.phoswald.rstm.http.health;
 
-import static com.github.phoswald.rstm.http.codec.json.JsonCodec.json;
+import static com.github.phoswald.rstm.http.codec.JsonCodec.json;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.get;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.route;
 
