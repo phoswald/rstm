@@ -40,7 +40,7 @@ class HttpServerWithXmlTest {
                 .get("/dynamic/xml")
                 .then()
                 .statusCode(200)
-                .contentType("text/xml")
+                .contentType("application/xml")
                 .body(equalTo("""
                         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
                         <sampleResponse>
@@ -52,13 +52,13 @@ class HttpServerWithXmlTest {
     @Test
     void post_validXml_success() {
         given()
-                .contentType("text/xml")
+                .contentType("application/xml")
                 .body("<sampleRequest><input>Test Input</input></sampleRequest>")
                 .when()
                 .post("/dynamic/xml")
                 .then()
                 .statusCode(200)
-                .contentType("text/xml")
+                .contentType("application/xml")
                 .body(equalTo("""
                         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
                         <sampleResponse>

@@ -16,7 +16,7 @@ public class XmlCodec implements HttpCodec {
 
     @Override
     public String getContentType() {
-        return "text/xml";
+        return "application/xml";
     }
 
     @Override
