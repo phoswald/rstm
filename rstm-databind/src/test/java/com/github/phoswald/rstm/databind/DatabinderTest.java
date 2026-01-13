@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class DatabinderTest {
@@ -550,7 +549,6 @@ class DatabinderTest {
         assertEquals(INSTANCE_EMPTY, instance);
     }
 
-    @Disabled // TODO (JSON): parse map!
     @Test
     void fromJson_validMap_success() {
         SampleMap instance = testee.fromJson(JSON_MAP, SampleMap.class);
