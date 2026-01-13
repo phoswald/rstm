@@ -8,16 +8,20 @@ package com.github.phoswald.rstm.http.server;
 class ContentTypes {
 
     static String getContentType(String path) {
-        if (path.endsWith(".html")) {
-            return "text/html";
-        } else if (path.endsWith(".ico")) {
-            return "image/x-icon";
-        } else if (path.endsWith(".svg")) {
-            return "image/svg+xml";
-        } else if (path.endsWith(".png")) {
-            return "image/png";
-        } else {
-            return null;
-        }
+        return switch(path.substring(path.lastIndexOf(".") + 1)) {
+            case "css" -> "text/css";
+            case "html" -> "text/html";
+            case "ico" -> "image/x-icon";
+            case "jpeg" -> "image/jpeg";
+            case "js" -> "text/javascript";
+            case "json" -> "application/json";
+            case "pdf" -> "application/pdf";
+            case "png" -> "image/png";
+            case "svg" -> "image/svg+xml";
+            case "txt" -> "text/plain";
+            case "xhtml" -> "application/xhtml+xml";
+            case "xml" -> "application/xml";
+            default -> null;
+        };
     }
 }

@@ -1,5 +1,6 @@
 package com.github.phoswald.rstm.http.server;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.github.phoswald.rstm.http.HttpRequest;
@@ -28,5 +29,10 @@ class LoginFilter implements HttpFilter { // TODO (cleanup): should be handler, 
             }
         }
         return HttpResponse.builder().status(302).location(request.relativizePath("/login-error.html")).build();
+    }
+
+    @Override
+    public List<RouteMetadata> createMetadata() {
+        return List.of();
     }
 }

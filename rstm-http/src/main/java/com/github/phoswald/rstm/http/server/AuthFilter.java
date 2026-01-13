@@ -37,6 +37,11 @@ class AuthFilter implements HttpFilter {
         return filter.handle(path, request, config);
     }
 
+    @Override
+    public List<RouteMetadata> createMetadata() {
+        return filter.createMetadata();
+    }
+
     private Optional<Principal> authenticate(HttpRequest request, IdentityProvider identityProvider) {
         if (request.authorization() != null) {
             if (request.authorization().toLowerCase().startsWith("basic ")) {

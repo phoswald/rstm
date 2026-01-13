@@ -1,16 +1,19 @@
 package com.github.phoswald.rstm.http.server;
 
+import static com.github.phoswald.rstm.http.HttpMethod.DELETE;
+import static com.github.phoswald.rstm.http.HttpMethod.GET;
+import static com.github.phoswald.rstm.http.HttpMethod.POST;
+import static com.github.phoswald.rstm.http.HttpMethod.PUT;
+
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.github.phoswald.record.builder.RecordBuilder;
-import com.github.phoswald.rstm.databind.Databinder;
 import com.github.phoswald.rstm.http.HttpCodec;
-import com.github.phoswald.rstm.http.HttpMethod;
 import com.github.phoswald.rstm.http.HttpRequest;
 import com.github.phoswald.rstm.http.HttpResponse;
+import com.github.phoswald.rstm.http.openapi.OpenApiConfig;
+import com.github.phoswald.rstm.http.openapi.OpenApiFilter;
 import com.github.phoswald.rstm.security.IdentityProvider;
 
 @RecordBuilder
@@ -19,9 +22,6 @@ public record HttpServerConfig(
         HttpFilter filter,
         IdentityProvider identityProvider
 ) {
-
-    private static final Databinder BINDER = new Databinder();
-
     public static HttpServerConfigBuilder builder() {
         return new HttpServerConfigBuilder();
     }
@@ -50,188 +50,120 @@ public record HttpServerConfig(
         return new OidcFilter();
     }
 
-    public static HttpFilter get(ThrowingFunction<HttpRequest, HttpResponse> filter) {
-        return method(HttpMethod.GET, filter);
+    public static HttpFilter openapi(OpenApiConfig config, HttpFilter... filters) {
+        return new OpenApiFilter(config, combine(filters));
     }
 
-    public static HttpFilter post(ThrowingFunction<HttpRequest, HttpResponse> filter) {
-        return method(HttpMethod.POST, filter);
+    public static HttpFilter get(ThrowingFunction<HttpRequest, HttpResponse> handler) {
+        return MethodFilter.of(GET, handler);
     }
 
-    public static HttpFilter put(ThrowingFunction<HttpRequest, HttpResponse> filter) {
-        return method(HttpMethod.PUT, filter);
+    public static HttpFilter post(ThrowingFunction<HttpRequest, HttpResponse> handler) {
+        return MethodFilter.of(POST, handler);
     }
 
-    public static HttpFilter delete(ThrowingFunction<HttpRequest, HttpResponse> filter) {
-        return method(HttpMethod.DELETE, filter);
+    public static HttpFilter put(ThrowingFunction<HttpRequest, HttpResponse> handler) {
+        return MethodFilter.of(PUT, handler);
     }
 
-    private static HttpFilter method(HttpMethod method, ThrowingFunction<HttpRequest, HttpResponse> filter) {
-        return new MethodFilter(method, filter);
+    public static HttpFilter delete(ThrowingFunction<HttpRequest, HttpResponse> handler) {
+        return MethodFilter.of(DELETE, handler);
     }
 
     public static HttpFilter getHtml(ThrowingSupplier<String> handler) {
-        return getHtml(ignoreRequest(handler));
+        return MethodFilter.forHtml(GET, ignoreRequest(handler));
     }
 
     public static HttpFilter getHtml(ThrowingFunction<HttpRequest, String> handler) {
-        return get(request -> {
-            String response = handler.invoke(request);
-            return createHtmlResponse(request, response);
-        });
+        return MethodFilter.forHtml(GET, handler);
     }
 
     public static <PAR> HttpFilter getHtml(Class<PAR> clazzPar, ThrowingFunction<PAR, String> handler) {
-        return getHtml(clazzPar, ignoreRequest(handler));
+        return MethodFilter.forHtmlWithParams(GET, clazzPar, ignoreRequest(handler));
     }
 
     public static <PAR> HttpFilter getHtml(Class<PAR> clazzPar, ThrowingBiFunction<HttpRequest, PAR, String> handler) {
-        return get(request -> {
-            PAR paramsObj = params(request, clazzPar);
-            String response = handler.invoke(request, paramsObj);
-            return createHtmlResponse(request, response);
-        });
+        return MethodFilter.forHtmlWithParams(GET, clazzPar, handler);
     }
 
     public static HttpFilter postHtml(ThrowingSupplier<String> handler) {
-        return postHtml(ignoreRequest(handler));
+        return MethodFilter.forHtml(POST, ignoreRequest(handler));
     }
 
     public static HttpFilter postHtml(ThrowingFunction<HttpRequest, String> handler) {
-        return post(request -> {
-            String response = handler.invoke(request);
-            return createHtmlResponse(request, response);
-        });
+        return MethodFilter.forHtml(POST, handler);
     }
 
     public static <PAR> HttpFilter postHtml(Class<PAR> clazzPar, ThrowingFunction<PAR, String> handler) {
-        return postHtml(clazzPar, ignoreRequest(handler));
+        return MethodFilter.forHtmlWithParams(POST, clazzPar, ignoreRequest(handler));
     }
 
     public static <PAR> HttpFilter postHtml(Class<PAR> clazzPar, ThrowingBiFunction<HttpRequest, PAR, String> handler) {
-        return post(request -> {
-            PAR paramsObj = params(request, clazzPar);
-            String response = handler.invoke(request, paramsObj);
-            return createHtmlResponse(request, response);
-        });
+        return MethodFilter.forHtmlWithParams(POST, clazzPar, handler);
     }
 
-    private static HttpResponse createHtmlResponse(HttpRequest request, String response) {
-        if(response == null) {
-            return HttpResponse.empty(404);
-        } else if (response.isEmpty()) {
-            return HttpResponse.empty(204);
-        } else if (response.startsWith("redirect=")) {
-            return HttpResponse.redirect(302, request.relativizePath(response.substring(9)));
-        } else {
-            return HttpResponse.html(200, response.toString());
-        }
+    public static <RES> HttpFilter getRest(HttpCodec codec, Class<RES> clazzRes, ThrowingSupplier<RES> handler) {
+        return MethodFilter.forRestWithResponse(GET, codec, clazzRes, ignoreRequest(handler));
     }
 
-    public static <RES> HttpFilter getRest(HttpCodec codec, ThrowingSupplier<RES> handler) {
-        return getRest(codec, ignoreRequest(handler));
+    public static <RES> HttpFilter getRest(HttpCodec codec, Class<RES> clazzRes, ThrowingFunction<HttpRequest, RES> handler) {
+        return MethodFilter.forRestWithResponse(GET, codec, clazzRes, handler);
     }
 
-    public static <RES> HttpFilter getRest(HttpCodec codec, ThrowingFunction<HttpRequest, RES> handler) {
-        return get(request -> {
-            RES responseObj = handler.invoke(request);
-            return createRestResponse(codec, responseObj);
-        });
+    public static <PAR, RES> HttpFilter getRest(HttpCodec codec, Class<PAR> clazzPar, Class<RES> clazzRes, ThrowingFunction<PAR, RES> handler) {
+        return MethodFilter.forRestWithParamsResponse(GET, codec, clazzPar, clazzRes, ignoreRequest(handler));
     }
 
-    public static <PAR, RES> HttpFilter getRest(HttpCodec codec, Class<PAR> clazzPar, ThrowingFunction<PAR, RES> handler) {
-        return getRest(codec, clazzPar, ignoreRequest(handler));
+    public static <PAR, RES> HttpFilter getRest(HttpCodec codec, Class<PAR> clazzPar, Class<RES> clazzRes, ThrowingBiFunction<HttpRequest, PAR, RES> handler) {
+        return MethodFilter.forRestWithParamsResponse(GET, codec, clazzPar, clazzRes, handler);
     }
 
-    public static <PAR, RES> HttpFilter getRest(HttpCodec codec, Class<PAR> clazzPar, ThrowingBiFunction<HttpRequest, PAR, RES> handler) {
-        return get(request -> {
-            PAR paramsObj = params(request, clazzPar);
-            RES responseObj = handler.invoke(request, paramsObj);
-            return createRestResponse(codec, responseObj);
-        });
+    public static <REQ, RES> HttpFilter postRest(HttpCodec codec, Class<REQ> clazzReq, Class<RES> clazzRes, ThrowingFunction<REQ, RES> handler) {
+        return MethodFilter.forRestWithRequestResponse(POST, codec, clazzReq, clazzRes, ignoreRequest(handler));
     }
 
-    public static <REQ, RES> HttpFilter postRest(HttpCodec codec, Class<REQ> clazzReq, ThrowingFunction<REQ, RES> handler) {
-        return postRest(codec, clazzReq, ignoreRequest(handler));
+    public static <REQ, RES> HttpFilter postRest(HttpCodec codec, Class<REQ> clazzReq, Class<RES> clazzRes, ThrowingBiFunction<HttpRequest, REQ, RES> handler) {
+        return MethodFilter.forRestWithRequestResponse(POST, codec, clazzReq, clazzRes,handler);
     }
 
-    public static <REQ, RES> HttpFilter postRest(HttpCodec codec, Class<REQ> clazzReq, ThrowingBiFunction<HttpRequest, REQ, RES> handler) {
-        return post(request -> {
-            REQ requestObj = request.body(codec, clazzReq);
-            RES responseObj = handler.invoke(request, requestObj);
-            return createRestResponse(codec, responseObj);
-        });
+    public static <PAR, REQ, RES> HttpFilter postRest(HttpCodec codec, Class<PAR> clazzPar, Class<REQ> clazzReq, Class<RES> clazzRes, ThrowingBiFunction<PAR, REQ, RES> handler) {
+        return MethodFilter.forRestWithParamsRequestResponse(POST, codec, clazzPar, clazzReq, clazzRes, ignoreRequest(handler));
     }
 
-    public static <PAR, REQ, RES> HttpFilter postRest(HttpCodec codec, Class<PAR> clazzPar, Class<REQ> clazzReq, ThrowingBiFunction<PAR, REQ, RES> handler) {
-        return postRest(codec, clazzPar, clazzReq, ignoreRequest(handler));
+    public static <PAR, REQ, RES> HttpFilter postRest(HttpCodec codec, Class<PAR> clazzPar, Class<REQ> clazzReq, Class<RES> clazzRes, ThrowingTriFunction<HttpRequest, PAR, REQ, RES> handler) {
+        return MethodFilter.forRestWithParamsRequestResponse(POST, codec, clazzPar, clazzReq, clazzRes, handler);
     }
 
-    public static <PAR, REQ, RES> HttpFilter postRest(HttpCodec codec, Class<PAR> clazzPar, Class<REQ> clazzReq, ThrowingTriFunction<HttpRequest, PAR, REQ, RES> handler) {
-        return post(request -> {
-            PAR paramsObj = params(request, clazzPar);
-            REQ requestObj = request.body(codec, clazzReq);
-            RES responseObj = handler.invoke(request, paramsObj, requestObj);
-            return createRestResponse(codec, responseObj);
-        });
+    public static <REQ, RES> HttpFilter putRest(HttpCodec codec, Class<REQ> clazzReq, Class<RES> clazzRes, ThrowingFunction<REQ, RES> handler) {
+        return MethodFilter.forRestWithRequestResponse(PUT, codec, clazzReq, clazzRes, ignoreRequest(handler));
     }
 
-    public static <REQ, RES> HttpFilter putRest(HttpCodec codec, Class<REQ> clazzReq, ThrowingFunction<REQ, RES> handler) {
-        return putRest(codec, clazzReq, ignoreRequest(handler));
+    public static <REQ, RES> HttpFilter putRest(HttpCodec codec, Class<REQ> clazzReq, Class<RES> clazzRes, ThrowingBiFunction<HttpRequest, REQ, RES> handler) {
+        return MethodFilter.forRestWithRequestResponse(PUT, codec, clazzReq, clazzRes, handler);
     }
 
-    public static <REQ, RES> HttpFilter putRest(HttpCodec codec, Class<REQ> clazzReq, ThrowingBiFunction<HttpRequest, REQ, RES> handler) {
-        return put(request -> {
-            REQ requestObj = request.body(codec, clazzReq);
-            RES responseObj = handler.invoke(request, requestObj);
-            return createRestResponse(codec, responseObj);
-        });
+    public static <PAR, REQ, RES> HttpFilter putRest(HttpCodec codec, Class<PAR> clazzPar, Class<REQ> clazzReq, Class<RES> clazzRes, ThrowingBiFunction<PAR, REQ, RES> handler) {
+        return MethodFilter.forRestWithParamsRequestResponse(PUT, codec, clazzPar, clazzReq, clazzRes, ignoreRequest(handler));
     }
 
-    public static <PAR, REQ, RES> HttpFilter putRest(HttpCodec codec, Class<PAR> clazzPar, Class<REQ> clazzReq, ThrowingBiFunction<PAR, REQ, RES> handler) {
-        return putRest(codec, clazzPar, clazzReq, ignoreRequest(handler));
+    public static <PAR, REQ, RES> HttpFilter putRest(HttpCodec codec, Class<PAR> clazzPar, Class<REQ> clazzReq, Class<RES> clazzRes, ThrowingTriFunction<HttpRequest, PAR, REQ, RES> handler) {
+        return MethodFilter.forRestWithParamsRequestResponse(PUT, codec, clazzPar, clazzReq, clazzRes, handler);
     }
 
-    public static <PAR, REQ, RES> HttpFilter putRest(HttpCodec codec, Class<PAR> clazzPar, Class<REQ> clazzReq, ThrowingTriFunction<HttpRequest, PAR, REQ, RES> handler) {
-        return put(request -> {
-            PAR paramsObj = params(request, clazzPar);
-            REQ requestObj = request.body(codec, clazzReq);
-            RES responseObj = handler.invoke(request, paramsObj, requestObj);
-            return createRestResponse(codec, responseObj);
-        });
+    public static <RES> HttpFilter deleteRest(HttpCodec codec, Class<RES> clazzRes, ThrowingSupplier<RES> handler) {
+        return MethodFilter.forRestWithResponse(DELETE, codec, clazzRes, ignoreRequest(handler));
     }
 
-    public static <RES> HttpFilter deleteRest(HttpCodec codec, ThrowingSupplier<RES> handler) {
-        return deleteRest(codec, ignoreRequest(handler));
+    public static <RES> HttpFilter deleteRest(HttpCodec codec, Class<RES> clazzRes, ThrowingFunction<HttpRequest, RES> handler) {
+        return MethodFilter.forRestWithResponse(DELETE, codec, clazzRes, handler);
     }
 
-    public static <RES> HttpFilter deleteRest(HttpCodec codec, ThrowingFunction<HttpRequest, RES> handler) {
-        return delete(request -> {
-            RES responseObj = handler.invoke(request);
-            return createRestResponse(codec, responseObj);
-        });
+    public static <PAR, RES> HttpFilter deleteRest(HttpCodec codec, Class<PAR> clazzPar, Class<RES> clazzRes, ThrowingFunction<PAR, RES> handler) {
+        return MethodFilter.forRestWithParamsResponse(DELETE, codec, clazzPar, clazzRes, ignoreRequest(handler));
     }
 
-    public static <PAR, RES> HttpFilter deleteRest(HttpCodec codec, Class<PAR> clazzPar, ThrowingFunction<PAR, RES> handler) {
-        return deleteRest(codec, clazzPar, ignoreRequest(handler));
-    }
-
-    public static <PAR, RES> HttpFilter deleteRest(HttpCodec codec, Class<PAR> clazzPar, ThrowingBiFunction<HttpRequest, PAR, RES> handler) {
-        return delete(request -> {
-            PAR paramsObj = params(request, clazzPar);
-            RES responseObj = handler.invoke(request, paramsObj);
-            return createRestResponse(codec, responseObj);
-        });
-    }
-
-    private static <RES> HttpResponse createRestResponse(HttpCodec codec, RES responseObj) {
-        if(responseObj == null) {
-            return HttpResponse.empty(404);
-        } else if(responseObj instanceof  String responeStr && responeStr.isEmpty()) {
-            return HttpResponse.empty(204);
-        } else {
-            return HttpResponse.body(200, codec, responseObj);
-        }
+    public static <PAR, RES> HttpFilter deleteRest(HttpCodec codec, Class<PAR> clazzPar, Class<RES> clazzRes, ThrowingBiFunction<HttpRequest, PAR, RES> handler) {
+        return MethodFilter.forRestWithParamsResponse(DELETE, codec, clazzPar, clazzRes, handler);
     }
 
     private static <A> ThrowingFunction<HttpRequest, A> ignoreRequest(ThrowingSupplier<A> handler) {
@@ -244,14 +176,6 @@ public record HttpServerConfig(
 
     private static <A, B, C> ThrowingTriFunction<HttpRequest, A, B, C> ignoreRequest(ThrowingBiFunction<A, B, C> handler) {
         return (_, paramA, paramB) -> handler.invoke(paramA, paramB);
-    }
-
-    private static <PAR> PAR params(HttpRequest request, Class<PAR> clazz) {
-        Map<String, Object> map = new HashMap<>();
-        map.putAll(request.queryParams()); // lowest prio
-        map.putAll(request.formParams()); // overrides query params
-        map.putAll(request.pathParams()); // overrides form params and query params
-        return BINDER.createInstance(clazz, map);
     }
 
     public static HttpFilter combine(HttpFilter... filters) {

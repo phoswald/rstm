@@ -1,5 +1,6 @@
 package com.github.phoswald.rstm.http.server;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.github.phoswald.rstm.http.HttpRequest;
@@ -20,5 +21,10 @@ class OidcFilter implements HttpFilter { // TODO (cleanup): should be handler, n
             return HttpResponse.builder().status(302).location(request.relativizePath("/")).session(principal.get().token()).build();
         }
         return HttpResponse.builder().status(302).location(request.relativizePath("/login-error.html")).build();
+    }
+
+    @Override
+    public List<RouteMetadata> createMetadata() {
+        return List.of();
     }
 }

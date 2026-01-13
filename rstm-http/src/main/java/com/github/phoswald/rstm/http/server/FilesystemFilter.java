@@ -3,6 +3,7 @@ package com.github.phoswald.rstm.http.server;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -43,5 +44,10 @@ class FilesystemFilter implements HttpFilter {
                 .contentType(ContentTypes.getContentType(path))
                 .body(buffer)
                 .build();
+    }
+
+    @Override
+    public List<RouteMetadata> createMetadata() {
+        return List.of();
     }
 }

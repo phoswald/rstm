@@ -23,4 +23,11 @@ class CombineFilter implements HttpFilter {
         }
         return null;
     }
+
+    @Override
+    public List<RouteMetadata> createMetadata() {
+        return filters.stream()
+                .flatMap(filter -> filter.createMetadata().stream())
+                .toList();
+    }
 }

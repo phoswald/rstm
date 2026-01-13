@@ -2,9 +2,9 @@ package com.github.phoswald.rstm.http;
 
 public interface HttpCodec {
 
-    public String getContentType();
+    String contentType();
 
-    public byte[] encode(Object object);
+    byte[] encode(Object object);
 
-    public <T> T decode(Class<T> clazz, byte[] bytes);
+    <T> T decode(Class<T> clazz, byte[] bytes);
 }

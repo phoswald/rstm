@@ -1,7 +1,6 @@
 package com.github.phoswald.rstm.http.server;
 
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.combine;
-import static com.github.phoswald.rstm.http.server.HttpServerConfig.get;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.getHtml;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.postHtml;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.route;
@@ -9,12 +8,8 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.equalTo;
 
-import java.nio.file.Path;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
-
-import com.github.phoswald.rstm.http.HttpResponse;
 
 class HttpServerHtmlTest {
 

@@ -1,0 +1,441 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "rstm",
+        "description": "OpenAPI for RSTM Unit Test",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080"
+        }
+    ],
+    "security": [
+        {
+            "BasicAuth": [
+            ]
+        },
+        {
+            "BearerAuth": [
+            ]
+        }
+    ],
+    "paths": {
+        "/dynamic": {
+            "get": {
+                "description": "((mandatory description))",
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))"
+                    }
+                }
+            },
+            "post": {
+                "description": "((mandatory description))",
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))"
+                    }
+                }
+            }
+        },
+        "/app/rest/sample/time": {
+            "get": {
+                "description": "((mandatory description))",
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "text/plain": {
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/app/rest/sample/config": {
+            "get": {
+                "description": "((mandatory description))",
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "text/plain": {
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/app/rest/sample/echo-xml": {
+            "post": {
+                "description": "((mandatory description))",
+                "requestBody": {
+                    "content": {
+                        "application/xml": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EchoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "application/xml": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EchoResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/app/rest/sample/echo-json": {
+            "post": {
+                "description": "((mandatory description))",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EchoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EchoResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/app/rest/sample/me": {
+            "get": {
+                "description": "((mandatory description))",
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "text/plain": {
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/app/rest/tasks": {
+            "get": {
+                "description": "((mandatory description))",
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaskList"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "((mandatory description))",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Task"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Task"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/app/rest/tasks/{id}": {
+            "get": {
+                "description": "((mandatory description))",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Task"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "((mandatory description))",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Task"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Task"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "((mandatory description))",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "((mandatory description))"
+                    }
+                }
+            }
+        },
+        "/app/pages/sample": {
+            "get": {
+                "description": "((mandatory description))",
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "text/html": {
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/app/pages/tasks": {
+            "get": {
+                "description": "((mandatory description))",
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "text/html": {
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "((mandatory description))",
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "text/html": {
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/app/pages/tasks/{id}": {
+            "get": {
+                "description": "((mandatory description))",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "text/html": {
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "((mandatory description))",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "text/html": {
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi": {
+            "get": {
+                "description": "((mandatory description))",
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "application/json": {
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi/ui": {
+            "get": {
+                "description": "((mandatory description))",
+                "responses": {
+                    "200": {
+                        "description": "((mandatory description))",
+                        "content": {
+                            "text/html": {
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "BasicAuth": {
+                "type": "http",
+                "scheme": "basic"
+            },
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        },
+        "schemas": {
+            "EchoRequest": {
+                "type": "object",
+                "properties": {
+                    "input": {
+                        "type": "string"
+                    }
+                },
+                "xml": {
+                    "name": "echoRequest"
+                }
+            },
+            "EchoResponse": {
+                "type": "object",
+                "properties": {
+                    "output": {
+                        "type": "string"
+                    }
+                },
+                "xml": {
+                    "name": "echoResponse"
+                }
+            },
+            "TaskList": {
+                "type": "object",
+                "properties": {
+                    "tasks": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Task"
+                        }
+                    }
+                }
+            },
+            "Task": {
+                "type": "object",
+                "properties": {
+                    "taskId": {
+                        "type": "string"
+                    },
+                    "userId": {
+                        "type": "string"
+                    },
+                    "timestamp": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "done": {
+                        "type": "boolean"
+                    }
+                }
+            }
+        }
+    }
+}

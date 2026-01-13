@@ -10,12 +10,16 @@ import static com.github.phoswald.rstm.http.server.HttpServerConfig.resources;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.route;
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Paths;
+import java.util.List;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,10 +41,10 @@ class HttpServerTest {
                     route("/static/files/",
                             filesystem(Paths.get("src/test/resources/html/"))),
                     route("/dynamic",
-                            get(request -> HttpResponse.text(200, "Response for GET")),
+                            get(_ -> HttpResponse.text(200, "Response for GET")),
                             post(request -> HttpResponse.text(200, "Response for POST of " + request.text())),
                             put(request -> HttpResponse.text(200, "Response for PUT of " + request.text())),
-                            delete(request -> HttpResponse.text(200, "Response for DELETE"))),
+                            delete(_ -> HttpResponse.text(200, "Response for DELETE"))),
                     route("/dynamic/param/{name}",
                             get(request -> HttpResponse.text(200, "Response for GET with name=" + request.pathParam("name").orElse(null)))),
                     route("/dynamic/query",
@@ -49,11 +53,11 @@ class HttpServerTest {
                             post(request -> HttpResponse.text(200, "Response for POST with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null) + " and f3=" + request.formParam("f3").orElse(null))),
                             put(request -> HttpResponse.text(200, "Response for PUT with f1=" + request.formParam("f1").orElse(null) + " and f2=" + request.formParam("f2").orElse(null) + " and f3=" + request.formParam("f3").orElse(null)))),
                     route("/dynamic/empty",
-                            get(request -> HttpResponse.empty(204))),
+                            get(_ -> HttpResponse.empty(204))),
                     route("/dynamic/text",
-                            get(request -> HttpResponse.text(200, "Response for GET"))),
+                            get(_ -> HttpResponse.text(200, "Response for GET"))),
                     route("/dynamic/html",
-                            get(request -> HttpResponse.html(200, "<!doctype html><html><head><title>T</title></head><body>B</body></html>"))),
+                            get(_ -> HttpResponse.html(200, "<!doctype html><html><head><title>T</title></head><body>B</body></html>"))),
                     route("/dynamic/redirecting",
                             get(_ -> HttpResponse.redirect(302, "/dynamic/other"))),
                     route("/dynamic/notexisting",
@@ -328,5 +332,14 @@ class HttpServerTest {
                 .get("/dynamic/failing")
                 .then()
                 .statusCode(500);
+    }
+
+    @Test
+    void createMetadata_valid_success() {
+        List<RouteMetadata> routes = config.filter().createMetadata();
+        assertThat(routes.size(), Matchers.greaterThanOrEqualTo(14));
+        assertTrue(routes.stream().allMatch(r -> r.route().startsWith("/dynamic")));
+        assertTrue(routes.stream().allMatch(r -> r.method() != null));
+        assertTrue(routes.stream().anyMatch(r -> r.pathParams().contains("name")));
     }
 }

@@ -3,22 +3,21 @@ package com.github.phoswald.rstm.http.server;
 import static com.github.phoswald.rstm.http.codec.JsonCodec.json;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.combine;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.deleteRest;
-import static com.github.phoswald.rstm.http.server.HttpServerConfig.get;
-import static com.github.phoswald.rstm.http.server.HttpServerConfig.getHtml;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.getRest;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.postRest;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.putRest;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.route;
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.nio.file.Path;
+import java.util.List;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
-
-import com.github.phoswald.rstm.http.HttpResponse;
 
 class HttpServerRestTest {
 
@@ -26,26 +25,26 @@ class HttpServerRestTest {
             .httpPort(8080)
             .filter(combine(
                     route("/dynamic",
-                            getRest(json(), _ -> new SampleResponse("Response for GET")),
-                            postRest(json(), SampleRequest.class, request -> new SampleResponse("Response for POST of " + request.message())),
-                            putRest(json(), SampleRequest.class, request -> new SampleResponse("Response for PUT of " + request.message())),
-                            deleteRest(json(), _ -> new SampleResponse("Response for DELETE"))),
+                            getRest(json(), SampleResponse.class, _ -> new SampleResponse("Response for GET")),
+                            postRest(json(), SampleRequest.class, SampleResponse.class, request -> new SampleResponse("Response for POST of " + request.message())),
+                            putRest(json(), SampleRequest.class, SampleResponse.class, request -> new SampleResponse("Response for PUT of " + request.message())),
+                            deleteRest(json(), SampleResponse.class, _ -> new SampleResponse("Response for DELETE"))),
                     route("/dynamic/param/{name}",
-                            getRest(json(), SampleParams.class, params -> new SampleResponse("Response for GET with name=" + params.name()))),
+                            getRest(json(), SampleParams.class, SampleResponse.class, params -> new SampleResponse("Response for GET with name=" + params.name()))),
                     route("/dynamic/query",
-                            getRest(json(), SampleParams.class, params -> new SampleResponse("Response for GET with q1=" + params.q1() + " and q2=" + params.q2())),
-                            postRest(json(), SampleParams.class, SampleRequest.class, (params, request) -> new SampleResponse("Response for POST with q1=" + params.q1() + " and q2=" + params.q2() + " of " + request.message())),
-                            putRest(json(), SampleParams.class, SampleRequest.class, (params, request) -> new SampleResponse("Response for PUT with q1=" + params.q1() + " and q2=" + params.q2() + " of " + request.message())),
-                            deleteRest(json(), SampleParams.class, params -> new SampleResponse("Response for DELETE with q1=" + params.q1() + " and q2=" + params.q2()))),
+                            getRest(json(), SampleParams.class, SampleResponse.class, params -> new SampleResponse("Response for GET with q1=" + params.q1() + " and q2=" + params.q2())),
+                            postRest(json(), SampleParams.class, SampleRequest.class, SampleResponse.class, (params, request) -> new SampleResponse("Response for POST with q1=" + params.q1() + " and q2=" + params.q2() + " of " + request.message())),
+                            putRest(json(), SampleParams.class, SampleRequest.class, SampleResponse.class, (params, request) -> new SampleResponse("Response for PUT with q1=" + params.q1() + " and q2=" + params.q2() + " of " + request.message())),
+                            deleteRest(json(), SampleParams.class, SampleResponse.class, params -> new SampleResponse("Response for DELETE with q1=" + params.q1() + " and q2=" + params.q2()))),
                     route("/dynamic/form",
-                            postRest(json(), SampleParams.class, SampleRequest.class, (params, _) -> new SampleResponse("Response for POST with f1=" + params.f1() + " and f2=" + params.f2())),
-                            putRest(json(), SampleParams.class, SampleRequest.class, (params, _) -> new SampleResponse("Response for PUT with f1=" + params.f1() + " and f2=" + params.f2()))),
+                            postRest(json(), SampleParams.class, SampleRequest.class, SampleResponse.class, (params, _) -> new SampleResponse("Response for POST with f1=" + params.f1() + " and f2=" + params.f2())),
+                            putRest(json(), SampleParams.class, SampleRequest.class, SampleResponse.class, (params, _) -> new SampleResponse("Response for PUT with f1=" + params.f1() + " and f2=" + params.f2()))),
                     route("/dynamic/empty",
-                            getRest(json(),  () -> "")),
+                            getRest(json(), String.class, () -> "")),
                     route("/dynamic/notexisting",
-                            getRest(json(), () -> null)),
+                            getRest(json(), SampleResponse.class, () -> null)),
                     route("/dynamic/failing",
-                            getRest(json(), ()-> { throw new IllegalStateException(""); }))
+                            getRest(json(), SampleResponse.class, ()-> { throw new IllegalStateException(""); }))
             ))
             .build();
 
@@ -224,6 +223,18 @@ class HttpServerRestTest {
                 .get("/dynamic/failing")
                 .then()
                 .statusCode(500);
+    }
+
+    @Test
+    void createMetadata_valid_success() {
+        List<RouteMetadata> routes = config.filter().createMetadata();
+        assertThat(routes.size(), Matchers.greaterThanOrEqualTo(14));
+        assertTrue(routes.stream().allMatch(r -> r.route().startsWith("/dynamic")));
+        assertTrue(routes.stream().allMatch(r -> r.method() != null));
+        assertTrue(routes.stream().anyMatch(r -> r.pathParams().contains("name")));
+        assertTrue(routes.stream().anyMatch(r -> r.contentType().equals("application/json")));
+        assertTrue(routes.stream().anyMatch(r -> r.requestClass() != null));
+        assertTrue(routes.stream().anyMatch(r -> r.responseClass() != null));
     }
 
     record SampleParams(int name, String q1, String q2, String f1, String f2) { }

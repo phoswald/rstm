@@ -3,6 +3,7 @@ package com.github.phoswald.rstm.http.server;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -46,5 +47,10 @@ class ResourcesFilter implements HttpFilter {
                     .body(buffer.toByteArray())
                     .build();
         }
+    }
+
+    @Override
+    public List<RouteMetadata> createMetadata() {
+        return List.of();
     }
 }

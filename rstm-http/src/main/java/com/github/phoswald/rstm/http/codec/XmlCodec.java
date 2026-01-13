@@ -1,5 +1,7 @@
 package com.github.phoswald.rstm.http.codec;
 
+import static com.github.phoswald.rstm.http.HttpConstants.CONTENT_TYPE_XML;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
@@ -15,8 +17,8 @@ public class XmlCodec implements HttpCodec {
     }
 
     @Override
-    public String getContentType() {
-        return "application/xml";
+    public String contentType() {
+        return CONTENT_TYPE_XML;
     }
 
     @Override
