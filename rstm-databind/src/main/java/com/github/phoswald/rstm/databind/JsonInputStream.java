@@ -31,36 +31,20 @@ class JsonInputStream extends DataInputStream {
             switch (event) {
                 case Event.START_OBJECT:
                     if (scope.fieldInfo != null) {
-                        if (scope.fieldInfo.type() instanceof RecordType(ClassInfo classInfo1)) {
-                            scope = stack.push(new Scope(classInfo1));
-                        } else if (scope.fieldInfo.type() instanceof ListType(ElementType elementType)) {
-                            if (elementType instanceof RecordType(ClassInfo info)) {
-                                scope = stack.push(new Scope(info));
-                            }
-                        } else if (scope.fieldInfo.type() instanceof MapType(ElementType elementType)) {
-//                          System.out.println("mapType: " + scope.fieldInfo.name());
-                            if (elementType instanceof RecordType(ClassInfo info)) {
-                                scope.startMap();
-                                scope = stack.push(new Scope(info));
-                            }
-                            if (elementType instanceof SimpleType) {
-                                scope.startMap();
-//                              scope = stack.push(new Scope(null));
+                        if (scope.fieldInfo.type() instanceof RecordType recordType) {
+                            scope = stack.push(new Scope(recordType.classInfo()));
+                        } else if (scope.fieldInfo.type() instanceof ListType listType) {
+                            if (listType.elementType() instanceof RecordType recordType) {
+                                scope = stack.push(new Scope(recordType.classInfo()));
                             }
                         }
-                    } else {
-                        System.out.println("??? no fi");
                     }
                     scope.level++;
                     break;
                 case Event.END_OBJECT:
                     scope.level--;
-                    if (scope.isMap()) {
-                        scope.endMap();
-                    }
                     if (scope.level == 0 && stack.size() > 1) {
                         Object instance = stack.pop().createInstance();
-                        System.out.println("pop " + instance);
                         stack.peek().addValue(instance);
                     }
                     break;
