@@ -1,6 +1,7 @@
 package com.github.phoswald.rstm.databind;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.function.Function.identity;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,12 +12,16 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Databinder {
 
@@ -51,6 +56,10 @@ public class Databinder {
 
     public <T> T createInstance(Class<T> clazz, Map<String, Object> map) {
         return clazz.cast(getClassInfo(clazz).createInstance(map));
+    }
+
+    public Map<String, FieldMetadata> createMetadata(Class<?> clazz) {
+        return (Map<String, FieldMetadata>) (Map<?,?>) getClassInfo(clazz).fields().access();
     }
 
     public String toXml(Object instance) {
@@ -145,12 +154,9 @@ public class Databinder {
     }
 
     private void createClassInfoFields(ClassInfo classInfo, Class<?> clazz) {
-        RecordComponent[] components = clazz.getRecordComponents();
-        Map<String, FieldInfo> fields = new LinkedHashMap<>();
-        for (RecordComponent component : components) {
-            FieldInfo fieldInfo = FieldInfo.create(component, createType(component.getGenericType()));
-            fields.put(fieldInfo.name(), fieldInfo);
-        }
+        Map<String, FieldInfo> fields = Stream.of(clazz.getRecordComponents())
+                .map(component -> FieldInfo.create(component, createType(component.getGenericType())))
+                .collect(toUniqueOrderedMap(FieldInfo::name, identity()));
         classInfo.fields().define(fields);
     }
 
@@ -173,7 +179,17 @@ public class Databinder {
             if (paramType.getRawType() == List.class && paramType.getActualTypeArguments().length == 1) {
                 return new ListType((ElementType) createType(paramType.getActualTypeArguments()[0]));
             }
+            if (paramType.getRawType() == Map.class && paramType.getActualTypeArguments().length == 2 && paramType.getActualTypeArguments()[0] == String.class) {
+                return new MapType((ElementType) createType(paramType.getActualTypeArguments()[1]));
+            }
         }
         throw new DatabinderException("Unsupported type: " + genericType);
+    }
+
+    private static <T, K, V> Collector<T, ?, Map<K, V>> toUniqueOrderedMap(Function<T, K> keyExtractor, Function<T, V> valueExtractor) {
+        BinaryOperator<V> mergeFunction = (_, _) -> {
+            throw new UnsupportedOperationException();
+        };
+        return Collectors.toMap(keyExtractor, valueExtractor, mergeFunction, LinkedHashMap::new);
     }
 }

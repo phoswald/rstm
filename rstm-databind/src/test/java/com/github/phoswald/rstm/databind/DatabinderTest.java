@@ -13,10 +13,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class DatabinderTest {
@@ -57,6 +59,18 @@ class DatabinderTest {
             .build();
 
     private static final Sample INSTANCE_EMPTY = Sample.builder().build();
+
+    private static final SampleMap INSTANCE_MAP = SampleMap.builder()
+            .stringMapField(new LinkedHashMap<>() {{
+                put("sampleStringKey1", "sampleStringValue1");
+                put("sampleStringKey2", "sampleStringValue2");
+            }})
+            .recordMapField(new LinkedHashMap<>() {{
+                put("sampleStringKey3", new SamplePair("sampleKey3", "sampleVal3"));
+                put("sampleStringKey4", new SamplePair("sampleKey4", "sampleVal4"));
+            }})
+            .stringField("sample")
+            .build();
 
     private static final Map<String, Object> MAP = Map.ofEntries(
             Map.entry("stringField", "sample"),
@@ -245,6 +259,26 @@ class DatabinderTest {
             }
             """;
 
+    private static final String JSON_MAP = """
+            {
+                "stringMapField": {
+                    "sampleStringKey1": "sampleStringValue1",
+                    "sampleStringKey2": "sampleStringValue2"
+                },
+                "recordMapField": {
+                    "sampleStringKey3": {
+                        "key": "sampleKey3",
+                        "val": "sampleVal3"
+                    },
+                    "sampleStringKey4": {
+                        "key": "sampleKey4",
+                        "val": "sampleVal4"
+                    }
+                },
+                "stringField": "sample"
+            }
+            """;
+
     private static final String JSON_UNKNOWN = """
             {
                 "unknown": "foo",
@@ -340,9 +374,19 @@ class DatabinderTest {
     void createInstance_validStrings_success() {
         Map<String, Object> map = MAP.entrySet().stream()
                 .map(this::toStringEntry)
-                .collect((Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         Sample instance = testee.createInstance(Sample.class, map);
         assertEquals(INSTANCE, instance);
+    }
+
+    @Test
+    void createMetadata_valid_success() {
+        Map<String, FieldMetadata> fields = testee.createMetadata(Sample.class);
+        assertEquals(MAP.size(), fields.size());
+        assertSame(Kind.SIMPLE, fields.get("stringField").kind());
+        assertSame(String.class, fields.get("stringField").clazz());
+        assertTrue(fields.values().stream().allMatch(fieldType -> fieldType.kind() != null));
+        assertTrue(fields.values().stream().allMatch(fieldType -> fieldType.clazz() != null));
     }
 
     private Map.Entry<String, ?> toStringEntry(Map.Entry<String, Object> e) {
@@ -401,7 +445,7 @@ class DatabinderTest {
     void toXml_validStream_success() {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         testee.toXml(INSTANCE, stream);
-        assertEquals(XML, new String(stream.toByteArray(), UTF_8));
+        assertEquals(XML, stream.toString(UTF_8));
     }
 
     @Test
@@ -430,10 +474,16 @@ class DatabinderTest {
     }
 
     @Test
+    void toJson_validMap_success() {
+        String json = testee.toJson(INSTANCE_MAP);
+        assertEquals(JSON_MAP, json);
+    }
+
+    @Test
     void toJson_validStream_success() {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         testee.toJson(INSTANCE, stream);
-        assertEquals(JSON, new String(stream.toByteArray(), UTF_8));
+        assertEquals(JSON, stream.toString(UTF_8));
     }
 
     @Test
@@ -498,6 +548,13 @@ class DatabinderTest {
         String json = "{}";
         Sample instance = testee.fromJson(json, Sample.class);
         assertEquals(INSTANCE_EMPTY, instance);
+    }
+
+    @Disabled // TODO (JSON): parse map!
+    @Test
+    void fromJson_validMap_success() {
+        SampleMap instance = testee.fromJson(JSON_MAP, SampleMap.class);
+        assertEquals(INSTANCE_MAP, instance);
     }
 
     @Test

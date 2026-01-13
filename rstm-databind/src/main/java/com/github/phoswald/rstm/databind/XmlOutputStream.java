@@ -58,12 +58,18 @@ class XmlOutputStream extends DataOutputStream {
     }
 
     @Override
-    void writeStartList(String name) {
+    void writeStartList(String name) { }
+
+    @Override
+    void writeEndList(String name) { }
+
+    @Override
+    void writeStartMap(String name) {
+        throw new UnsupportedOperationException("XML does not support type Map");
     }
 
     @Override
-    void writeEndList(String name) {
-    }
+    void writeEndMap(String name) { }
 
     @Override
     void writeValue(String name, Object value) throws XMLStreamException {

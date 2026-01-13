@@ -6,6 +6,16 @@ import java.util.List;
 record ListType(ElementType elementType) implements AnyType {
 
     @Override
+    public Kind kind() {
+        return Kind.LIST;
+    }
+
+    @Override
+    public Class<?> clazz() {
+        return elementType().clazz();
+    }
+
+    @Override
     public Object coerce(Object value) {
         if (value == null) {
             return null;

@@ -36,6 +36,11 @@ record SimpleType(
     }
 
     @Override
+    public Kind kind() {
+        return Kind.SIMPLE;
+    }
+
+    @Override
     public Object coerce(Object value) {
         return value == null ? null : clazz.isInstance(value) ? value : parseMethod.apply(value.toString());
     }

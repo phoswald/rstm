@@ -28,6 +28,11 @@ record PrimitiveType(
             .collect(toMap(PrimitiveType::clazz, identity()));
 
     @Override
+    public Kind kind() {
+        return Kind.PRIMITIVE;
+    }
+
+    @Override
     public Object coerce(Object value) {
         return value == null ? defaultValue : parseMethod.apply(value.toString());
     }

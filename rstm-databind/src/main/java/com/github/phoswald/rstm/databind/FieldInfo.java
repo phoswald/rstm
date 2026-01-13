@@ -8,7 +8,17 @@ record FieldInfo(
         String name,
         AnyType type,
         Function<Object, Object> getter
-) {
+) implements FieldMetadata {
+
+    @Override
+    public Kind kind() {
+        return type.kind();
+    }
+
+    @Override
+    public Class<?> clazz() {
+        return type.clazz();
+    }
 
     static FieldInfo create(RecordComponent component, AnyType type) {
         Method accessor = component.getAccessor();

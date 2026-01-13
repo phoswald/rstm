@@ -21,8 +21,11 @@ abstract class DataInputStream implements AutoCloseable {
         FieldInfo prevFieldInfo = null;
         FieldInfo fieldInfo = null;
         List<Object> listValue = null;
+        String mapKey = null;
+        Map<String, Object> mapValue = null;
 
         Scope(ClassInfo classInfo) {
+            System.out.println("scope " + (classInfo == null ? "MAP" : classInfo.name())); // XXX
             this.classInfo = classInfo;
         }
 
@@ -31,6 +34,12 @@ abstract class DataInputStream implements AutoCloseable {
         }
 
         boolean startField(String name, boolean tolerant) {
+            if(mapValue != null) {
+                System.out.println("start [" + name + "]");
+                mapKey = name;
+                return true;
+            }
+            System.out.println("start " + classInfo.name() + "." + name);
             prevFieldInfo = fieldInfo;
             fieldInfo = classInfo.fields().access().get(name);
             if (fieldInfo == null && !tolerant) {
@@ -50,9 +59,28 @@ abstract class DataInputStream implements AutoCloseable {
             listValue = null;
         }
 
+        boolean isMap() {
+            return mapValue != null;
+        }
+
+        void startMap() {
+            System.out.println("start map");
+            mapValue = new LinkedHashMap<>();
+            if(fieldInfo != null) {
+                map.put(fieldInfo.name(), mapValue);
+            }
+        }
+
+        void endMap() {
+            System.out.println("end map: " + mapValue);
+            mapValue = null;
+        }
+
         void addValue(Object value) {
             if (listValue != null) {
                 listValue.add(value);
+            } else if (mapValue != null) {
+                mapValue.put(mapKey, value);
             } else if (fieldInfo != null) {
                 map.put(fieldInfo.name(), value);
             }

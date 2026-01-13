@@ -38,7 +38,7 @@ class JsonOutputStream extends DataOutputStream {
     }
 
     @Override
-    void writeStartObject(String name) throws IOException {
+    void writeStartObject(String name) {
         if (stack.peek() == Scope.OBJECT) {
             generator.writeKey(name);
         }
@@ -47,13 +47,13 @@ class JsonOutputStream extends DataOutputStream {
     }
 
     @Override
-    void writeEndObject(String name) throws IOException {
+    void writeEndObject(String name) {
         stack.pop();
         generator.writeEnd();
     }
 
     @Override
-    void writeStartList(String name) throws Exception {
+    void writeStartList(String name) {
         if (stack.peek() == Scope.OBJECT) {
             generator.writeKey(name);
         }
@@ -62,13 +62,23 @@ class JsonOutputStream extends DataOutputStream {
     }
 
     @Override
-    void writeEndList(String name) throws Exception {
+    void writeEndList(String name) {
         stack.pop();
         generator.writeEnd();
     }
 
     @Override
-    void writeValue(String name, Object value) throws IOException {
+    void writeStartMap(String name) {
+        writeStartObject(name);
+    }
+
+    @Override
+    void writeEndMap(String name) {
+        writeEndObject(name);
+    }
+
+    @Override
+    void writeValue(String name, Object value) {
         if (stack.peek() == Scope.OBJECT) {
             generator.writeKey(name);
         }
