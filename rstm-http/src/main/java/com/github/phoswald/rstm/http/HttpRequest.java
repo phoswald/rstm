@@ -5,10 +5,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.github.phoswald.record.builder.RecordBuilder;
+import com.github.phoswald.rstm.http.server.HttpServerConfig;
 import com.github.phoswald.rstm.security.Principal;
 
 @RecordBuilder
 public record HttpRequest(
+        HttpServerConfig config,
         HttpMethod method,
         String path,
         Map<String, String> pathParams,

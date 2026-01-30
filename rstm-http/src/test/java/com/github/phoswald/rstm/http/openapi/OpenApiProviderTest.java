@@ -32,7 +32,7 @@ import com.github.phoswald.rstm.http.server.HttpFilter;
 import com.github.phoswald.rstm.http.server.HttpServer;
 import com.github.phoswald.rstm.http.server.HttpServerConfig;
 
-class OpenApiFilterTest {
+class OpenApiProviderTest {
 
     OpenApiConfig openApiConfig = new OpenApiConfigBuilder()
             .title("rstm")
@@ -40,16 +40,17 @@ class OpenApiFilterTest {
             .version("1.0.0")
             .urls(List.of("http://localhost:8080"))
             .build();
-    private final OpenApiFilter testee = new OpenApiFilter(openApiConfig, getRoutes());
+
+    private final OpenApiProvider testee = new OpenApiProvider(openApiConfig);
 
     private final HttpServerConfig serverConfig = HttpServerConfig.builder()
             .httpPort(8080)
-            .filter(testee)
+            .filter(getRoutes())
             .build();
 
     @Test
     void generateOpenApiSpecJson_valid_success() throws IOException {
-        String json = testee.generateOpenApiSpecJson();
+        String json = testee.generateOpenApiSpecJson(serverConfig);
         String expectedJson = Files.readString(Path.of("src/test/resources/openapi.json"));
         assertEquals(expectedJson, json);
     }
@@ -109,7 +110,8 @@ class OpenApiFilterTest {
                                 postHtml(PostParams.class, _ -> null)),
                         route("/tasks/{id}",
                                 getHtml(IdParams.class, _ -> null),
-                                postHtml(IdPostParams.class, _ -> null))))
+                                postHtml(IdPostParams.class, _ -> null)))),
+                testee.createRoutes()
         );
     }
 

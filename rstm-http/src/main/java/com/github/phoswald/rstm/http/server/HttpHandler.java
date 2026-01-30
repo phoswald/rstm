@@ -52,7 +52,7 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
             try (var input = exchange.getRequestBody()) {
                 var buffer = new ByteArrayOutputStream();
                 input.transferTo(buffer);
-                decodeQueryString(formParams, new String(buffer.toByteArray(), UTF_8));
+                decodeQueryString(formParams, buffer.toString(UTF_8));
             }
         } else {
             try (var input = exchange.getRequestBody()) {
@@ -62,6 +62,7 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
             }
         }
         return HttpRequest.builder()
+                .config(config)
                 .method(HttpMethod.valueOf(exchange.getRequestMethod()))
                 .path(exchange.getRequestURI().getPath())
                 .pathParams(pathParams)

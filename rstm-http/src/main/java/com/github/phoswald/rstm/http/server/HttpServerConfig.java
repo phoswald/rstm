@@ -12,8 +12,6 @@ import com.github.phoswald.record.builder.RecordBuilder;
 import com.github.phoswald.rstm.http.HttpCodec;
 import com.github.phoswald.rstm.http.HttpRequest;
 import com.github.phoswald.rstm.http.HttpResponse;
-import com.github.phoswald.rstm.http.openapi.OpenApiConfig;
-import com.github.phoswald.rstm.http.openapi.OpenApiFilter;
 import com.github.phoswald.rstm.security.IdentityProvider;
 
 @RecordBuilder
@@ -48,10 +46,6 @@ public record HttpServerConfig(
 
     public static HttpFilter oidc() {
         return new OidcFilter();
-    }
-
-    public static HttpFilter openapi(OpenApiConfig config, HttpFilter... filters) {
-        return new OpenApiFilter(config, combine(filters));
     }
 
     public static HttpFilter get(ThrowingFunction<HttpRequest, HttpResponse> handler) {
