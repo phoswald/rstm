@@ -41,11 +41,11 @@ public record HttpServerConfig(
     }
 
     public static HttpFilter login() {
-        return new LoginFilter();
+        return new LoginHandler().createRoute();
     }
 
     public static HttpFilter oidc() {
-        return new OidcFilter();
+        return new OidcHandler().createRoute();
     }
 
     public static HttpFilter get(ThrowingFunction<HttpRequest, HttpResponse> handler) {

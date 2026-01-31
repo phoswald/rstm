@@ -7,7 +7,7 @@ import com.github.phoswald.rstm.http.HttpResponse;
 
 public interface HttpFilter {
 
-    HttpResponse handle(String path, HttpRequest request, HttpServerConfig config) throws Exception;
+    HttpResponse handle(String path, HttpRequest request) throws Exception;
 
     List<RouteMetadata> createMetadata();
 }

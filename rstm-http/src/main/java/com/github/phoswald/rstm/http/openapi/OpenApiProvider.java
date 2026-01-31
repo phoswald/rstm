@@ -29,15 +29,15 @@ public class OpenApiProvider {
     }
 
     Object generateOpenApiSpec(HttpRequest request) {
-        return createFactory(request.config()).generateOpenApiSpec();
+        return createFactory(request.config().filter()).generateOpenApiSpec();
     }
 
     String generateOpenApiSpecJson(HttpServerConfig serverConfig) {
-        return createFactory(serverConfig).generateOpenApiSpecJson();
+        return createFactory(serverConfig.filter()).generateOpenApiSpecJson();
     }
 
-    private OpenApiSpecFactory createFactory(HttpServerConfig serverConfig) {
-        return new OpenApiSpecFactory(config, serverConfig.filter());
+    private OpenApiSpecFactory createFactory(HttpFilter filter) {
+        return new OpenApiSpecFactory(config, filter);
     }
 
     private String generateOpenApiUiPage() throws IOException {

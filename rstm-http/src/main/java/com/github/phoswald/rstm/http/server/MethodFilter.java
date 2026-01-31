@@ -31,7 +31,7 @@ class MethodFilter implements HttpFilter {
     }
 
     @Override
-    public HttpResponse handle(String path, HttpRequest request, HttpServerConfig config) throws Exception {
+    public HttpResponse handle(String path, HttpRequest request) throws Exception {
         if (request.method() == method && path.isEmpty()) {
             return handler.invoke(request);
         } else {

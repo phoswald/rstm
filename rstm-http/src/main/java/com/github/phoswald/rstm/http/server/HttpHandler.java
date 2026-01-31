@@ -105,7 +105,7 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
 
     private HttpResponse processRequest(HttpRequest request) {
         try {
-            return config.filter().handle(request.path(), request, config);
+            return config.filter().handle(request.path(), request);
         } catch (Exception e) {
             logger.warn("Processing {} {} failed:", request.method(), request.path(), e);
             return HttpResponse.empty(500);

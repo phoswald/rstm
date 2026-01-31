@@ -26,7 +26,7 @@ class RouteFilter implements HttpFilter {
     }
 
     @Override
-    public HttpResponse handle(String path, HttpRequest request, HttpServerConfig config) throws Exception {
+    public HttpResponse handle(String path, HttpRequest request) throws Exception {
         List<String> pathParts = parseParts(path);
         boolean pathIsDir = isDir(path);
         Map<String, String> params = new HashMap<>(request.pathParams());
@@ -47,7 +47,7 @@ class RouteFilter implements HttpFilter {
         if (params.size() > request.pathParams().size()) {
             request = request.toBuilder().pathParams(params).build();
         }
-        return filter.handle(joinParts(pathParts, pathIsDir), request, config);
+        return filter.handle(joinParts(pathParts, pathIsDir), request);
     }
 
     @Override

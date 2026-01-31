@@ -14,9 +14,9 @@ class CombineFilter implements HttpFilter {
     }
 
     @Override
-    public HttpResponse handle(String path, HttpRequest request, HttpServerConfig config) throws Exception {
+    public HttpResponse handle(String path, HttpRequest request) throws Exception {
         for (HttpFilter filter : filters) {
-            HttpResponse resoponse = filter.handle(path, request, config);
+            HttpResponse resoponse = filter.handle(path, request);
             if (resoponse != null) {
                 return resoponse;
             }
