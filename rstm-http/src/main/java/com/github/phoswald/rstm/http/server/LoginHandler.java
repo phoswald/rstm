@@ -1,5 +1,7 @@
 package com.github.phoswald.rstm.http.server;
 
+import static com.github.phoswald.rstm.http.server.HttpServerConfig.combine;
+import static com.github.phoswald.rstm.http.server.HttpServerConfig.get;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.post;
 
 import java.util.Optional;
@@ -14,7 +16,7 @@ import com.github.phoswald.rstm.security.Principal;
 class LoginHandler {
 
     HttpFilter createRoute() {
-        return post(this::handle);
+        return combine(get(this::handle), post(this::handle));
     }
 
     private HttpResponse handle(HttpRequest request) {
