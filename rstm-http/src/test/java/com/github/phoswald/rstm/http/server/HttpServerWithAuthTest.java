@@ -107,7 +107,7 @@ class HttpServerWithAuthTest {
                 .when()
                 .get("/secured/resource")
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test
@@ -140,7 +140,7 @@ class HttpServerWithAuthTest {
                 .when()
                 .get("/secured/resource")
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test
@@ -173,7 +173,7 @@ class HttpServerWithAuthTest {
                 .when()
                 .get("/secured/resource")
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test

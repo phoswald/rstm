@@ -31,7 +31,7 @@ class AuthFilter implements HttpFilter {
             return HttpResponse.builder().status(302).location(request.relativizePath("/login.html")).build();
         }
         if (!authorize(principal.get())) {
-            return HttpResponse.builder().status(401).build();
+            return HttpResponse.builder().status(403).build();
         }
         request = request.toBuilder().principal(principal.get()).build();
         return filter.handle(path, request);
