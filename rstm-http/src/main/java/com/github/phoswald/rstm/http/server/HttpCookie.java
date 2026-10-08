@@ -27,7 +27,7 @@ public record HttpCookie(
                 .name(NAME_SESSION)
                 .value(token)
                 .httpOnly(true)
-                .sameSite(HttpCookie.SameSite.STRICT)
+                .sameSite(HttpCookie.SameSite.LAX) // must be sent on the redirect back from the provider
                 .build();
     }
 
