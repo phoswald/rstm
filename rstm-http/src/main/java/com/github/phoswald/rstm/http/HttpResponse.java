@@ -4,19 +4,26 @@ import static com.github.phoswald.rstm.http.HttpConstants.CONTENT_TYPE_HTML;
 import static com.github.phoswald.rstm.http.HttpConstants.CONTENT_TYPE_TEXT;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import java.util.List;
+
 import com.github.phoswald.record.builder.RecordBuilder;
+import com.github.phoswald.rstm.http.server.HttpCookie;
 
 @RecordBuilder
 public record HttpResponse(
         int status,
         String contentType,
         String location,
-        String session,
+        List<HttpCookie> cookies,
         byte[] body
 ) {
 
     public static HttpResponseBuilder builder() {
         return new HttpResponseBuilder();
+    }
+
+    public HttpResponseBuilder toBuilder() {
+        return new HttpResponseBuilder(this);
     }
 
     public static HttpResponse empty(int status) {

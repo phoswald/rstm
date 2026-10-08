@@ -10,9 +10,11 @@ import static com.github.phoswald.rstm.http.server.HttpServerConfig.resources;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.route;
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
+import static io.restassured.matcher.RestAssuredMatchers.detailedCookie;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -63,7 +65,9 @@ class HttpServerTest {
                     route("/dynamic/notexisting",
                             get(_-> HttpResponse.empty(404))),
                     route("/dynamic/failing",
-                            get(_-> { throw new IllegalStateException(""); }))
+                            get(_-> { throw new IllegalStateException(""); })),
+                    route("/dynamic/cookies",
+                            get(request -> HttpResponse.text(200, "Response for GET with c1=" + request.cookie("c1").orElse(null)).toBuilder().cookies(createCookies()).build()))
             ))
             .build();
 
@@ -332,6 +336,47 @@ class HttpServerTest {
                 .get("/dynamic/failing")
                 .then()
                 .statusCode(500);
+    }
+
+    @Test
+    void get_dynamicCookies_success() {
+        given()
+                .cookie("c1", "v1")
+                .when()
+                .get("/dynamic/cookies")
+                .then()
+                .statusCode(200)
+                .cookie("name1", detailedCookie()
+                        .value("value1")
+                        //.domain("domain1")
+                        //.expiryDate(...)
+                        .httpOnly(true)
+                        //.maxAge(...)
+                        .path("/")
+                        .sameSite("strict")
+                        .secured(true))
+                .cookie("name2", detailedCookie()
+                        .value("value2")
+                        .httpOnly(false)
+                        .path("/")
+                        .sameSite(nullValue())
+                        .secured(false))
+                .body(equalTo("Response for GET with c1=v1"));
+    }
+
+    private static List<HttpCookie> createCookies() {
+        return List.of(
+                HttpCookie.builder()
+                        .name("name1")
+                        .value("value1")
+                        .httpOnly(true)
+                        .sameSite(HttpCookie.SameSite.STRICT)
+                        .secure(true)
+                        .build(),
+                HttpCookie.builder()
+                        .name("name2")
+                        .value("value2")
+                        .build());
     }
 
     @Test

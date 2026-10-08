@@ -57,8 +57,9 @@ class AuthFilter implements HttpFilter {
                 return identityProvider.authenticateWithToken(request.authorization().substring(6).trim());
             }
         }
-        if (request.session() != null) {
-            return identityProvider.authenticateWithToken(request.session());
+        Optional<String> session = request.cookie(HttpCookie.NAME_SESSION);
+        if (session.isPresent()) {
+            return identityProvider.authenticateWithToken(session.get());
         }
         return Optional.empty();
     }

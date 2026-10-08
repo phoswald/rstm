@@ -5,7 +5,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -41,11 +41,13 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
     }
 
     private HttpRequest readRequest(HttpExchange exchange) throws IOException {
-        Map<String, String> pathParams = new HashMap<>();
-        Map<String, String> queryParams = new HashMap<>();
-        Map<String, String> formParams = new HashMap<>();
+        Map<String, String> pathParams = new LinkedHashMap<>();
+        Map<String, String> queryParams = new LinkedHashMap<>();
+        Map<String, String> formParams = new LinkedHashMap<>();
+        Map<String, String> cookies = new LinkedHashMap<>();
         byte[] body = null;
         decodeQueryString(queryParams, exchange.getRequestURI().getRawQuery());
+        decodeCookies(cookies, exchange);
         String contentType = exchange.getRequestHeaders().getFirst("content-type");
         if (contentType != null && HttpHeaderValue.parse(contentType).valueOnly()
                 .equalsIgnoreCase("application/x-www-form-urlencoded")) {
@@ -68,8 +70,8 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
                 .pathParams(pathParams)
                 .queryParams(queryParams)
                 .formParams(formParams)
+                .cookies(cookies)
                 .authorization(exchange.getRequestHeaders().getFirst("authorization"))
-                .session(getSessionCookie(exchange))
                 .body(body)
                 .build();
     }
@@ -86,7 +88,7 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
         }
     }
 
-    private String getSessionCookie(HttpExchange exchange) {
+    private void decodeCookies(Map<String, String> cookies, HttpExchange exchange) {
         String cookieList = exchange.getRequestHeaders().getFirst("cookie");
         if (cookieList != null) {
             for (String cookiePair : cookieList.split("; ")) {
@@ -94,13 +96,10 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
                 if (separatorOffset != -1) {
                     String cookieName = cookiePair.substring(0, separatorOffset).trim();
                     String cookieValue = cookiePair.substring(separatorOffset + 1).trim();
-                    if (cookieName.equals("session")) {
-                        return cookieValue;
-                    }
+                    cookies.put(cookieName, cookieValue);
                 }
             }
         }
-        return null;
     }
 
     private HttpResponse processRequest(HttpRequest request) {
@@ -122,8 +121,10 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
         if (response.location() != null) {
             exchange.getResponseHeaders().add("location", response.location());
         }
-        if (response.session() != null) {
-            exchange.getResponseHeaders().add("set-cookie", "session=" + response.session() + "; path=/; httponly; samesite=strict");
+        if (response.cookies() != null) {
+            for (HttpCookie cookie : response.cookies()) {
+                exchange.getResponseHeaders().add("set-cookie", cookie.toSetCookieHeaderValue());
+            }
         }
         int responseStatus = response.status() != 0 ? response.status() : 200;
         if (response.body() != null) {

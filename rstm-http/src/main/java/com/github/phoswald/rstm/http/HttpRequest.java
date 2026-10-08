@@ -16,8 +16,8 @@ public record HttpRequest(
         Map<String, String> pathParams,
         Map<String, String> queryParams,
         Map<String, String> formParams,
+        Map<String, String> cookies,
         String authorization,
-        String session,
         Principal principal,
         byte[] body
 ) {
@@ -40,6 +40,10 @@ public record HttpRequest(
 
     public Optional<String> formParam(String name) {
         return Optional.ofNullable(formParams.get(name));
+    }
+
+    public Optional<String> cookie(String name) {
+        return Optional.ofNullable(cookies.get(name));
     }
 
     public <T> T body(HttpCodec codec, Class<T> clazz) {

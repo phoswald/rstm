@@ -2,6 +2,7 @@ package com.github.phoswald.rstm.http.server;
 
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.get;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.github.phoswald.rstm.http.HttpRequest;
@@ -22,8 +23,15 @@ class OidcHandler {
         String state = request.queryParam("state").orElse("");
         Optional<Principal> principal = request.config().identityProvider().authenticateWithOidcCallback(code, state);
         if (principal.isPresent()) {
-            return HttpResponse.builder().status(302).location(request.relativizePath("/")).session(principal.get().token()).build();
+            return HttpResponse.builder()
+                    .status(302)
+                    .location(request.relativizePath("/"))
+                    .cookies(List.of(HttpCookie.session(principal.get().token())))
+                    .build();
         }
-        return HttpResponse.builder().status(302).location(request.relativizePath("/login-error.html")).build();
+        return HttpResponse.builder()
+                .status(302)
+                .location(request.relativizePath("/login-error.html"))
+                .build();
     }
 }
