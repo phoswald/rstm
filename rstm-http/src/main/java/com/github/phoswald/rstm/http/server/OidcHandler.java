@@ -21,17 +21,23 @@ class OidcHandler {
     private HttpResponse handle(HttpRequest request) {
         String code = request.queryParam("code").orElse("");
         String state = request.queryParam("state").orElse("");
-        Optional<Principal> principal = request.config().identityProvider().authenticateWithOidcCallback(code, state);
+        String stateToken = request.cookie(HttpCookie.NAME_LOGIN_STATE).orElse(null);
+        Optional<Principal> principal = request.config().identityProvider().authenticateWithOidcCallback(code, state, stateToken);
         if (principal.isPresent()) {
             return HttpResponse.builder()
                     .status(302)
-                    .location(request.relativizePath("/"))
-                    .cookies(List.of(HttpCookie.session(principal.get().token())))
+                    .location(LoginReturn.location(request, LoginReturn.read(request).orElse(null)))
+                    .cookies(List.of(
+                            HttpCookie.session(principal.get().token()),
+                            HttpCookie.expired(HttpCookie.NAME_LOGIN_STATE),
+                            HttpCookie.expired(HttpCookie.NAME_LOGIN_RETURN)))
+                    .build();
+        } else {
+            return HttpResponse.builder()
+                    .status(302)
+                    .location(request.relativizePath("/login-error.html"))
+                    .cookies(List.of(HttpCookie.expired(HttpCookie.NAME_LOGIN_STATE)))
                     .build();
         }
-        return HttpResponse.builder()
-                .status(302)
-                .location(request.relativizePath("/login-error.html"))
-                .build();
     }
 }

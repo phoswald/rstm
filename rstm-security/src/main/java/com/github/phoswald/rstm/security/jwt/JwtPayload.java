@@ -54,7 +54,15 @@ public record JwtPayload(
         /**
          * the subject, optional, a string or URI, RSTM: username
          */
-        String sub
+        String sub,
+        /**
+         * Use by RSTM for the OIDC flow cookie: the provider id
+         */
+        String login_provider,
+        /**
+         * Set by RSTM for the OIDC flow cookie: the state passed to the IDP
+         */
+        String login_state
 ) {
 
     public static JwtPayloadBuilder builder() {

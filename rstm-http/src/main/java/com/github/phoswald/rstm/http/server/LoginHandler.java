@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import com.github.phoswald.rstm.http.HttpRequest;
 import com.github.phoswald.rstm.http.HttpResponse;
+import com.github.phoswald.rstm.security.OidcRedirect;
 import com.github.phoswald.rstm.security.Principal;
 
 /**
@@ -23,11 +24,12 @@ class LoginHandler {
     private HttpResponse handle(HttpRequest request) {
         String provider = request.queryParam("provider").orElse("");
         if (!provider.isEmpty()) {
-            Optional<String> location = request.config().identityProvider().authenticateWithOidcRedirect(provider);
-            if (location.isPresent()) {
+            Optional<OidcRedirect> redirect = request.config().identityProvider().authenticateWithOidcRedirect(provider);
+            if (redirect.isPresent()) {
                 return HttpResponse.builder()
                         .status(302)
-                        .location(location.get())
+                        .location(redirect.get().authorizationUrl())
+                        .cookies(List.of(HttpCookie.loginState(redirect.get().stateToken())))
                         .build();
             }
         } else {
@@ -37,8 +39,10 @@ class LoginHandler {
             if (principal.isPresent()) {
                 return HttpResponse.builder()
                         .status(302)
-                        .location(request.relativizePath("/"))
-                        .cookies(List.of(HttpCookie.session(principal.get().token())))
+                        .location(LoginReturn.location(request, LoginReturn.read(request).orElse(null)))
+                        .cookies(List.of(
+                                HttpCookie.session(principal.get().token()),
+                                HttpCookie.expired(HttpCookie.NAME_LOGIN_RETURN)))
                         .build();
             }
         }

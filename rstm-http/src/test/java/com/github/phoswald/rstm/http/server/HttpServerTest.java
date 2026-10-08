@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.List;
 
 import org.hamcrest.Matchers;
@@ -351,7 +352,7 @@ class HttpServerTest {
                         //.domain("domain1")
                         //.expiryDate(...)
                         .httpOnly(true)
-                        //.maxAge(...)
+                        .maxAge(300)
                         .path("/")
                         .sameSite("strict")
                         .secured(true))
@@ -370,6 +371,7 @@ class HttpServerTest {
                         .name("name1")
                         .value("value1")
                         .httpOnly(true)
+                        .maxAge(Duration.ofMinutes(5))
                         .sameSite(HttpCookie.SameSite.STRICT)
                         .secure(true)
                         .build(),

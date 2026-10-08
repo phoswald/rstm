@@ -2,6 +2,7 @@ package com.github.phoswald.rstm.security.jwt;
 
 import static com.github.phoswald.rstm.security.Principal.LOCAL_PROVIDER;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +12,8 @@ import com.github.phoswald.rstm.security.Principal;
 import com.github.phoswald.rstm.security.TokenProvider;
 
 public class JwtTokenProvider implements TokenProvider {
+
+    private static final Duration TOKEN_LIFESPAN = Duration.ofHours(2);
 
     private final String issuer;
     private final String secret;
@@ -28,7 +31,7 @@ public class JwtTokenProvider implements TokenProvider {
 
     @Override
     public Principal createPrincipal(String user, List<String> roles) {
-        String token = jwtUtil.createTokenWithHmac(JwtPayload.of(user, roles), issuer, secret);
+        String token = jwtUtil.createTokenWithHmac(JwtPayload.of(user, roles), issuer, secret, TOKEN_LIFESPAN);
         return new Principal(user, roles, LOCAL_PROVIDER, token);
     }
 

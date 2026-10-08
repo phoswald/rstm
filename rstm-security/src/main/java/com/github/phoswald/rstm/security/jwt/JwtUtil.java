@@ -44,18 +44,18 @@ public class JwtUtil {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final LongSupplier clock;
     private final long clockSkew = Duration.ofMinutes(1).toSeconds();
-    private final long lifespan = Duration.ofHours(2).toSeconds();
 
     public JwtUtil(Supplier<Instant> clock) {
         this.clock = () -> clock.get().toEpochMilli() / 1000;
     }
 
-    public String createTokenWithHmac(JwtPayload payload, String issuer, String secret) {
+    public String createTokenWithHmac(JwtPayload payload, String issuer, String secret, Duration lifespan) {
         Objects.requireNonNull(payload, "Parameter payload must not be null");
         Objects.requireNonNull(issuer, "Parameter issuer must not be null");
         Objects.requireNonNull(secret, "Parameter secret must not be null");
+        Objects.requireNonNull(lifespan, "Parameter lifespan must not be null");
         long now = clock.getAsLong();
-        long exp = now + lifespan;
+        long exp = now + lifespan.toSeconds();
         String payloadStr = BINDER.toJson(payload.toBuilder().iss(issuer).aud(issuer).iat(now).nbf(now).exp(exp).build());
         String headerStr = BINDER.toJson(JwtHeader.builder().typ(TYP_JWT).alg(ALG_HS256).build());
         byte[] signature = createHmacSha256(encodeBase64(headerStr) + "." + encodeBase64(payloadStr), secret);

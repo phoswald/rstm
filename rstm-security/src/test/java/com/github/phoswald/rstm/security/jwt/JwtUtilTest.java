@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,8 @@ import org.junit.jupiter.api.Test;
  * Tokens can be parsed AND created on https://jwt.io/
  */
 class JwtUtilTest {
+
+    private static final Duration TOKEN_LIFESPAN = Duration.ofHours(2);
 
     private static final String HMAC_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwczovL2V4YW1wbGUuY29tL3RlbmFudDEiLCJleHAiOjE3Mjc5NzU0MjAsImdyb3VwcyI6WyJyb2xlMSIsInJvbGUzIl0sImlhdCI6MTcyNzk2ODIyMCwiaXNzIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS90ZW5hbnQxIiwibmJmIjoxNzI3OTY4MjIwLCJzdWIiOiJ1c2VybmFtZTEifQ.XtC2gjDOLArHg1PP9-8GqR8xlP9AkWZ2-5B0eV4aJnA";
     private static final String HMAC_ISSUER = "https://example.com/tenant1";
@@ -40,7 +43,7 @@ class JwtUtilTest {
     @Test
     void createTokenWithHmac() {
         JwtPayload payload = JwtPayload.of("username1", List.of("role1", "role3"));
-        String token = testee.createTokenWithHmac(payload, HMAC_ISSUER, HMAC_SECRET);
+        String token = testee.createTokenWithHmac(payload, HMAC_ISSUER, HMAC_SECRET, TOKEN_LIFESPAN);
         assertEquals(HMAC_TOKEN, token);
     }
 
@@ -57,6 +60,11 @@ class JwtUtilTest {
     @Test
     void validateTokenWithHmac_invalidToken_failure() {
         assertFalse(testee.validateTokenWithHmac("bad", HMAC_ISSUER, HMAC_SECRET).isPresent());
+    }
+
+    @Test
+    void validateTokenWithHmac_invalidIssuer_failure() {
+        assertFalse(testee.validateTokenWithHmac(HMAC_TOKEN, "bad", HMAC_SECRET).isPresent());
     }
 
     @Test

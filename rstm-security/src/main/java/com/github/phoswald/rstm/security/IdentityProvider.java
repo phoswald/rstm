@@ -15,11 +15,11 @@ public interface IdentityProvider {
         return Optional.empty();
     }
 
-    public default Optional<String> authenticateWithOidcRedirect(String provider) {
+    public default Optional<OidcRedirect> authenticateWithOidcRedirect(String provider) {
         return Optional.empty();
     }
 
-    public default Optional<Principal> authenticateWithOidcCallback(String code, String state) {
+    public default Optional<Principal> authenticateWithOidcCallback(String code, String state, String stateToken) {
         return Optional.empty();
     }
 }

@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.phoswald.rstm.security.IdentityProvider;
+import com.github.phoswald.rstm.security.OidcRedirect;
 import com.github.phoswald.rstm.security.Principal;
 import com.github.phoswald.rstm.security.jwt.JwtValidToken;
 
@@ -23,12 +24,12 @@ public class OidcIdentityProvider implements IdentityProvider {
     private final OidcUtil oidcUtil;
     private final IdentityProvider upstream;
 
-    public OidcIdentityProvider(String redirectUri, IdentityProvider upstream) {
-        this(redirectUri, upstream, Instant::now, new SecureRandom());
+    public OidcIdentityProvider(String redirectUri, String secret, IdentityProvider upstream) {
+        this(redirectUri, secret, upstream, Instant::now, new SecureRandom());
     }
 
-    OidcIdentityProvider(String redirectUri, IdentityProvider upstream, Supplier<Instant> clock, RandomGenerator random) {
-        this.oidcUtil = new OidcUtil(redirectUri, clock, random);
+    OidcIdentityProvider(String redirectUri, String secret, IdentityProvider upstream, Supplier<Instant> clock, RandomGenerator random) {
+        this.oidcUtil = new OidcUtil(redirectUri, secret, clock, random);
         this.upstream = upstream != null ? upstream : new IdentityProvider() { };
     }
 
@@ -82,18 +83,13 @@ public class OidcIdentityProvider implements IdentityProvider {
     }
 
     @Override
-    public Optional<String> authenticateWithOidcRedirect(String provider) {
+    public Optional<OidcRedirect> authenticateWithOidcRedirect(String provider) {
         return oidcUtil.authenticateWithRedirect(provider);
     }
 
     @Override
-    public Optional<Principal> authenticateWithOidcCallback(String code, String state) {
-        Optional<JwtValidToken> validToken = oidcUtil.authenticateWithCallback(code, state);
-        if (validToken.isPresent()) {
-            return Optional.of(createPrincipal(validToken.get()));
-        } else {
-            return Optional.empty();
-        }
+    public Optional<Principal> authenticateWithOidcCallback(String code, String state, String stateToken) {
+        return oidcUtil.authenticateWithCallback(code, state, stateToken).map(this::createPrincipal);
     }
 
     @Override
