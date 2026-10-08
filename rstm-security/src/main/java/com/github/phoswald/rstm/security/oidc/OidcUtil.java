@@ -78,11 +78,13 @@ class OidcUtil {
     }
 
     Optional<JwtValidToken> authenticateWithCallback(String code, String state) {
-        logger.info("Completing authentication with callback with code={}, state={}", code, state);
+        logger.info("Completing authentication with callback.");
+        logger.debug("code={}, state={}", code, state);
 
         State stateObj = stateManager.consume(state);
         if (stateObj == null) {
-            logger.warn("State invalid or already consumed: {}", state);
+            logger.warn("State invalid or already consumed.");
+            logger.debug("state={}", state);
             return Optional.empty();
         }
 
