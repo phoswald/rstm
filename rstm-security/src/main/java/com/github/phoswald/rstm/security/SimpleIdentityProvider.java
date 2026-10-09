@@ -41,10 +41,10 @@ public class SimpleIdentityProvider implements IdentityProvider {
         Objects.requireNonNull(username);
         Objects.requireNonNull(password);
         if (Arrays.equals(password, passwords.get(username))) {
-            logger.info("Login successful for username={}", username);
+            logger.info("Login successful for {}", username);
             return Optional.of(principals.get(username));
         } else {
-            logger.warn("Login failed for username={}", username);
+            logger.warn("Login failed for {}", username);
             return Optional.empty();
         }
     }

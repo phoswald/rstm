@@ -9,11 +9,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A simple token provider that generates random opaque tokens.
  */
 public class SimpleTokenProvider implements TokenProvider {
 
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private final SecureRandom random = new SecureRandom();
     private final Map<String, Principal> tokens = new HashMap<>();
 
@@ -35,6 +39,7 @@ public class SimpleTokenProvider implements TokenProvider {
     public Optional<Principal> authenticateWithToken(String token) {
         Principal principal = tokens.get(token);
         if (principal != null) {
+            logger.debug("Authentication successful for {}", principal.name());
             return Optional.of(principal);
         } else {
             return Optional.empty();

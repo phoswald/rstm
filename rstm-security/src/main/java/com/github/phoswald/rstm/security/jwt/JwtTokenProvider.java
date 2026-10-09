@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.phoswald.rstm.security.Principal;
 import com.github.phoswald.rstm.security.TokenProvider;
 
@@ -15,6 +18,7 @@ public class JwtTokenProvider implements TokenProvider {
 
     private static final Duration TOKEN_LIFESPAN = Duration.ofHours(2);
 
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private final String issuer;
     private final String secret;
     private final JwtUtil jwtUtil;
@@ -39,9 +43,10 @@ public class JwtTokenProvider implements TokenProvider {
     public Optional<Principal> authenticateWithToken(String token) {
         Optional<JwtValidToken> validToken = jwtUtil.validateTokenWithHmac(token, issuer, secret);
         if (validToken.isPresent()) {
-            String user = validToken.get().payload().determineUser();
+            String username = validToken.get().payload().determineUser();
             List<String> roles = validToken.get().payload().determineRoles();
-            return Optional.of(new Principal(user, roles, LOCAL_PROVIDER, token));
+            logger.debug("Authentication successful for {}", username);
+            return Optional.of(new Principal(username, roles, LOCAL_PROVIDER, token));
         } else {
             return Optional.empty();
         }

@@ -103,8 +103,8 @@ public class OidcIdentityProvider implements IdentityProvider {
     }
 
     private Principal createPrincipal(JwtValidToken token) {
-        Principal principal = new Principal(token.payload().determineUser(), List.of("user"), token.provider(), token.token());
-        logger.info("Authentication successful for {}", principal.name());
-        return principal;
+        String username = token.payload().determineUser();
+        logger.debug("Authentication successful for {}", username);
+        return new Principal(username, List.of("user"), token.provider(), token.token());
     }
 }

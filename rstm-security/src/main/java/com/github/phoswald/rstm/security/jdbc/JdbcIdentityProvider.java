@@ -36,10 +36,10 @@ public class JdbcIdentityProvider implements IdentityProvider {
         Objects.requireNonNull(password);
         JdbcUser userEntity = selectUser(username);
         if (userEntity != null && PasswordUtility.verifyPassword(password, userEntity.hashedPassword())) {
-            logger.info("Login successful for username={}", username);
+            logger.info("Login successful for {}", username);
             return Optional.of(tokenProvider.createPrincipal(userEntity.username(), userEntity.rolesAsList()));
         } else {
-            logger.warn("Login failed for username={}", username);
+            logger.warn("Login failed for {}", username);
             return Optional.empty();
         }
     }
