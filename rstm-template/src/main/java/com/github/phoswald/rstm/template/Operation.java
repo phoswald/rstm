@@ -27,6 +27,12 @@ record Operation(TemplateCompilation<?> nestedCompilation, Function<HtmlElement,
                 htmlElement -> new ExprAttr(property.toStringProperty(), attributeName, htmlElement));
     }
 
+    static Operation raw(TemplateCompilation<?> compilation, String propertyName) {
+        Property<?> property = Property.create(compilation, propertyName);
+        return new Operation(compilation,
+                htmlElement -> new ExprRaw(property.toStringProperty()));
+    }
+
     static Operation iff(TemplateCompilation<?> compilation, String propertyName) {
         Property<?> property = Property.create(compilation, propertyName);
         return new Operation(compilation,

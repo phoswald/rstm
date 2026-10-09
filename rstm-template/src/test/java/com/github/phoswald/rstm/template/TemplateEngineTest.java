@@ -20,7 +20,7 @@ class TemplateEngineTest {
 
     @Test
     void compileAndExecute_validObject_success() {
-        SampleArguments arguments = new SampleArguments("world", LocalDate.of(2023, 2, 16), "message");
+        SampleArguments arguments = new SampleArguments("world", LocalDate.of(2023, 2, 16), "message", "<hello/>");
 
         Template<SampleArguments> template = testee.compile(SampleArguments.class, "sample");
         String html = template.evaluate(arguments);
@@ -30,6 +30,7 @@ class TemplateEngineTest {
         assertThat(html, containsString("\n    <h1>Hello, <span>world</span>!</h1>\n"));
         assertThat(html, containsString("\n    <p>The current date is <span>2023-02-16</span>.</p>\n"));
         assertThat(html, containsString("\n    <p>Optional: <span>message</span>.</p>\n"));
+        assertThat(html, containsString("\n    <p>Raw: <hello/>.</p>\n"));
         assertThat(html, containsString("\n    <!-- comment -->\n"));
         assertThat(html, endsWith("\n</html>\n"));
         assertThat(html, not(containsString("???")));
@@ -37,7 +38,7 @@ class TemplateEngineTest {
 
     @Test
     void compileAndExecute_validObjectEmpty_success() {
-        SampleArguments arguments = new SampleArguments("", null, null);
+        SampleArguments arguments = new SampleArguments("", null, null, null);
 
         Template<SampleArguments> template = testee.compile(SampleArguments.class, "sample");
         String html = template.evaluate(arguments);
@@ -49,12 +50,13 @@ class TemplateEngineTest {
         assertThat(html, containsString("\n    <!-- comment -->\n"));
         assertThat(html, endsWith("\n</html>\n"));
         assertThat(html, not(containsString("<p>Optional:")));
+        assertThat(html, containsString("\n    <p>Raw: .</p>\n"));
         assertThat(html, not(containsString("???")));
     }
 
     @Test
     void compileAndExecute_validObjectWithLocale_success() {
-        SampleArguments arguments = new SampleArguments("", null, null);
+        SampleArguments arguments = new SampleArguments("", null, null, null);
 
         Template<SampleArguments> template = testee.compile(SampleArguments.class, "sample");
         String html = template.evaluate(arguments, Locale.GERMANY);

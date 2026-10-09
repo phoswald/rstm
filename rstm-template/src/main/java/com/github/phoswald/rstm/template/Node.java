@@ -31,6 +31,14 @@ record ExprAttr(Property<String> property, String attribute, HtmlElement nestedN
     }
 }
 
+record ExprRaw(Property<String> property) implements Node {
+
+    @Override
+    public void evaluateNode(HtmlGenerator generator, TemplateArgument<?> argument) {
+        generator.generateRaw(property.getValue(argument));
+    }
+}
+
 record ExprIf(Property<Boolean> property, HtmlElement nestedNode) implements Node {
 
     @Override

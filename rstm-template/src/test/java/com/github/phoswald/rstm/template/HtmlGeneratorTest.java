@@ -77,6 +77,14 @@ class HtmlGeneratorTest {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = {"text", "<hello/>", "a < b > c & d \" e ' f"})
+    @NullSource
+    void generateRaw_valid_successUnescaped(String input) {
+        testee.generateRaw(input);
+        assertEquals(input == null ? "" : input, testee.getOutput());
+    }
+
+    @ParameterizedTest
     @ValueSource(strings = {"comment", " comment ", " multi \n line ", "<!- -", "- ->", ""})
     @NullSource
     void generateComment_valid_success(String input) {

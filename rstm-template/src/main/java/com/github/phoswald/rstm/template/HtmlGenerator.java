@@ -81,6 +81,12 @@ class HtmlGenerator {
         }
     }
 
+    void generateRaw(String raw) {
+        if (raw != null) {
+            buffer.append(raw);
+        }
+    }
+
     void generateComment(String comment) {
         buffer.append("<!--");
         if (comment != null) {

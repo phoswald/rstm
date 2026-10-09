@@ -91,6 +91,8 @@ class XHtmlParser {
                 } else {
                     throw new IllegalArgumentException("Invalid attribute value: " + attributeValue);
                 }
+            case "raw":
+                return Operation.raw(compilation, attributeValue);
             case "if":
                 return Operation.iff(compilation, attributeValue);
             case "each":
