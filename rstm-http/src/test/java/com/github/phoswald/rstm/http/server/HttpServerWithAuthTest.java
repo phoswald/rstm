@@ -27,41 +27,9 @@ import com.github.phoswald.rstm.security.SimpleIdentityProvider;
 
 class HttpServerWithAuthTest {
 
-    private static final IdentityProvider localIdentityProvider = new SimpleIdentityProvider()
+    private static final IdentityProvider identityProvider = new TestOidcIdentityProvider()
             .withUser("username1", "password1", List.of("role1", "role3"))
             .withUser("username2", "password2", List.of("role2"));
-
-    /**
-     * Local users plus a fake OIDC provider "idp1" whose state token simply echoes the state.
-     */
-    private static final IdentityProvider identityProvider = new IdentityProvider() {
-
-        @Override
-        public Optional<Principal> authenticateWithPassword(String username, char[] password) {
-            return localIdentityProvider.authenticateWithPassword(username, password);
-        }
-
-        @Override
-        public Optional<Principal> authenticateWithToken(String token) {
-            return localIdentityProvider.authenticateWithToken(token);
-        }
-
-        @Override
-        public Optional<OidcRedirect> authenticateWithOidcRedirect(String provider) {
-            if (!provider.equals("idp1")) {
-                return Optional.empty();
-            }
-            return Optional.of(new OidcRedirect("https://idp1.example.com/auth?state=state1", "token-state1"));
-        }
-
-        @Override
-        public Optional<Principal> authenticateWithOidcCallback(String code, String state, String stateToken) {
-            if (!code.equals("code1") || !("token-" + state).equals(stateToken)) {
-                return Optional.empty();
-            }
-            return localIdentityProvider.authenticateWithPassword("username1", "password1".toCharArray());
-        }
-    };
 
     private final Principal username1 = identityProvider.authenticateWithPassword("username1", "password1".toCharArray()).get();
     private final Principal username2 = identityProvider.authenticateWithPassword("username2", "password2".toCharArray()).get();
@@ -321,5 +289,27 @@ class HttpServerWithAuthTest {
                 .then()
                 .statusCode(302)
                 .header("location", "../login.html");
+    }
+
+    /**
+     * Local users plus a fake OIDC provider "idp1" whose state token simply echoes the state.
+     */
+    private static class TestOidcIdentityProvider extends SimpleIdentityProvider {
+
+        @Override
+        public Optional<OidcRedirect> authenticateWithOidcRedirect(String provider) {
+            if (!provider.equals("idp1")) {
+                return Optional.empty();
+            }
+            return Optional.of(new OidcRedirect("https://idp1.example.com/auth?state=state1", "token-state1"));
+        }
+
+        @Override
+        public Optional<Principal> authenticateWithOidcCallback(String code, String state, String stateToken) {
+            if (!code.equals("code1") || !("token-" + state).equals(stateToken)) {
+                return Optional.empty();
+            }
+            return authenticateWithPassword("username1", "password1".toCharArray());
+        }
     }
 }
