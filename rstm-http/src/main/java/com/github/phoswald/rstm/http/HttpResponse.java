@@ -53,8 +53,4 @@ public record HttpResponse(
                 .body(codec.encode(body))
                 .build();
     }
-
-    public static HttpResponse redirect(int status, String location) {
-        return builder().status(status).location(location).build();
-    }
 }

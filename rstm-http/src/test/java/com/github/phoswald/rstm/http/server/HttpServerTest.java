@@ -62,7 +62,7 @@ class HttpServerTest {
                     route("/dynamic/html",
                             get(_ -> HttpResponse.html(200, "<!doctype html><html><head><title>T</title></head><body>B</body></html>"))),
                     route("/dynamic/redirecting",
-                            get(_ -> HttpResponse.redirect(302, "/dynamic/other"))),
+                            get(_ -> HttpResponse.builder().status(302).location("/dynamic/other").build())),
                     route("/dynamic/notexisting",
                             get(_-> HttpResponse.empty(404))),
                     route("/dynamic/failing",

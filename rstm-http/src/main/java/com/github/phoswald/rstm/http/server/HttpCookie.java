@@ -1,5 +1,9 @@
 package com.github.phoswald.rstm.http.server;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.time.Duration;
 
 import com.github.phoswald.record.builder.RecordBuilder;
@@ -44,7 +48,7 @@ public record HttpCookie(
     public static HttpCookie loginReturn(String path) {
         return HttpCookie.builder()
                 .name(NAME_LOGIN_RETURN)
-                .value(path)
+                .value(encodeValue(path))
                 .httpOnly(true)
                 .sameSite(HttpCookie.SameSite.LAX) // must be sent on the redirect back from the provider
                 .build();
@@ -57,6 +61,14 @@ public record HttpCookie(
                 .httpOnly(true)
                 .maxAge(Duration.ZERO)
                 .build();
+    }
+
+    public static String encodeValue(String value) {
+        return URLEncoder.encode(value, UTF_8); // Uses form encoding (application/x-www-form-urlencoded)
+    }
+
+    public static String decodeValue(String value) {
+        return URLDecoder.decode(value, UTF_8); // Uses form encoding (application/x-www-form-urlencoded)
     }
 
     public String toSetCookieHeaderValue() {

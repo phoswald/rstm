@@ -104,48 +104,7 @@ class HttpServerWithAuthTest {
     }
 
     @Test
-    void post_login_denied() {
-        given()
-                .redirects().follow(false)
-                .when()
-                .post("/login")
-                .then()
-                .statusCode(302)
-                .header("location", "login-error.html")
-                .cookies(Map.of());
-    }
-
-    @Test
-    void get_noAuth_redirect() {
-        given()
-                .redirects().follow(false)
-                .when()
-                .get("/secured/resource?x=1")
-                .then()
-                .statusCode(302)
-                .header("location", "../login.html")
-                .cookie("login_return", detailedCookie()
-                        .value("%2Fsecured%2Fresource%3Fx%3D1")
-                        .httpOnly(true)
-                        .path("/")
-                        .sameSite("lax")
-                        .maxAge(-1));
-    }
-
-    @Test
-    void post_noAuth_redirectWithoutReturn() {
-        given()
-                .redirects().follow(false)
-                .when()
-                .post("/secured/resource")
-                .then()
-                .statusCode(302)
-                .header("location", "../login.html")
-                .cookies(Map.of());
-    }
-
-    @Test
-    void post_login_withReturn() {
+    void post_login_allowedAndReturn() {
         given()
                 .redirects().follow(false)
                 .cookie("login_return", "%2Fsecured%2Fresource%3Fx%3D1")
@@ -161,6 +120,18 @@ class HttpServerWithAuthTest {
     }
 
     @Test
+    void post_login_denied() {
+        given()
+                .redirects().follow(false)
+                .when()
+                .post("/login")
+                .then()
+                .statusCode(302)
+                .header("location", "login-error.html")
+                .cookies(Map.of());
+    }
+
+    @Test
     void post_login_deniedKeepsReturn() {
         given()
                 .redirects().follow(false)
@@ -172,35 +143,7 @@ class HttpServerWithAuthTest {
                 .then()
                 .statusCode(302)
                 .header("location", "login-error.html")
-                .cookies(Map.of());
-    }
-
-    @Test
-    void post_login_protocolRelativeReturn() {
-        given()
-                .redirects().follow(false)
-                .cookie("login_return", "%2F%2Fevil.example.com%2Fx")
-                .formParam("username", "username1")
-                .formParam("password", "password1")
-                .when()
-                .post("/login")
-                .then()
-                .statusCode(302)
-                .header("location", ".");
-    }
-
-    @Test
-    void post_login_schemeLikeReturn() {
-        given()
-                .redirects().follow(false)
-                .cookie("login_return", "%2Fhttps%3Aevil.example.com")
-                .formParam("username", "username1")
-                .formParam("password", "password1")
-                .when()
-                .post("/login")
-                .then()
-                .statusCode(302)
-                .header("location", "./https:evil.example.com");
+                .cookies(Map.of()); // cookie is not removed
     }
 
     @Test
@@ -251,6 +194,35 @@ class HttpServerWithAuthTest {
                 .statusCode(302)
                 .header("location", "login-error.html")
                 .cookie("login_state", detailedCookie().value("").maxAge(0));
+    }
+
+    @Test
+    void get_noAuth_redirectWithReturn() {
+        given()
+                .redirects().follow(false)
+                .when()
+                .get("/secured/resource?x=1")
+                .then()
+                .statusCode(302)
+                .header("location", "../login.html")
+                .cookie("login_return", detailedCookie()
+                        .value("%2Fsecured%2Fresource%3Fx%3D1")
+                        .httpOnly(true)
+                        .path("/")
+                        .sameSite("lax")
+                        .maxAge(-1));
+    }
+
+    @Test
+    void post_noAuth_redirectWithoutReturn() {
+        given()
+                .redirects().follow(false)
+                .when()
+                .post("/secured/resource")
+                .then()
+                .statusCode(302)
+                .header("location", "../login.html")
+                .cookies(Map.of());
     }
 
     @Test

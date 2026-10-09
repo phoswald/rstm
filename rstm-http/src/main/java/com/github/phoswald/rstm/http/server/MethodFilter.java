@@ -109,7 +109,10 @@ class MethodFilter implements HttpFilter {
         } else if (response.isEmpty()) {
             return HttpResponse.empty(204);
         } else if (response.startsWith("redirect=")) {
-            return HttpResponse.redirect(302, request.relativizePath(response.substring(9)));
+            return HttpResponse.builder()
+                    .status(302)
+                    .location(request.relativizePath(response.substring(9)))
+                    .build();
         } else {
             return HttpResponse.html(200, response);
         }

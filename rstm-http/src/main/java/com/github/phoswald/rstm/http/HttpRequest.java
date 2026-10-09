@@ -1,5 +1,8 @@
 package com.github.phoswald.rstm.http;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
@@ -54,8 +57,23 @@ public record HttpRequest(
         return body == null ? null : new String(body, StandardCharsets.UTF_8); // TODO (correctness): use correct charset
     }
 
+    public String pathAndQuery() {
+        StringBuilder builder = new StringBuilder();
+        if(!queryParams.isEmpty()) {
+            char separator = '?';
+            for(var param : queryParams.entrySet()) {
+                builder.append(separator);
+                builder.append(param.getKey());
+                builder.append('=');
+                builder.append(URLEncoder.encode(param.getValue(), UTF_8));
+                separator = '&';
+            }
+        }
+        return path + builder.toString();
+    }
+
     public String relativizePath(String otherPath) {
-        if (!otherPath.startsWith("/")) {
+        if (otherPath == null || !otherPath.startsWith("/") || otherPath.contains("//") || otherPath.contains(":")) {
             throw new IllegalArgumentException(otherPath);
         }
         int index = 0;

@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
+import com.github.phoswald.rstm.http.HttpMethod;
 import com.github.phoswald.rstm.http.HttpRequest;
 import com.github.phoswald.rstm.http.HttpResponse;
 import com.github.phoswald.rstm.security.IdentityProvider;
@@ -28,10 +29,14 @@ class AuthFilter implements HttpFilter {
     public HttpResponse handle(String path, HttpRequest request) throws Exception {
         Optional<Principal> principal = authenticate(request, request.config().identityProvider());
         if (principal.isEmpty()) {
+            List<HttpCookie> cookies = null;
+            if(request.method() == HttpMethod.GET) {
+                cookies = List.of(HttpCookie.loginReturn(request.pathAndQuery()));
+            }
             return HttpResponse.builder()
                     .status(302)
                     .location(request.relativizePath("/login.html"))
-                    .cookies(LoginReturn.create(request).stream().toList())
+                    .cookies(cookies)
                     .build();
         }
         if (!authorize(principal.get())) {

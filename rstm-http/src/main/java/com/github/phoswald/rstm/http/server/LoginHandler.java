@@ -37,9 +37,10 @@ class LoginHandler {
             char[] password = request.formParam("password").orElse("").toCharArray();
             Optional<Principal> principal = request.config().identityProvider().authenticateWithPassword(username, password);
             if (principal.isPresent()) {
+                String returnLocation = request.cookie(HttpCookie.NAME_LOGIN_RETURN).map(HttpCookie::decodeValue).orElse("/");
                 return HttpResponse.builder()
                         .status(302)
-                        .location(LoginReturn.location(request, LoginReturn.read(request).orElse(null)))
+                        .location(request.relativizePath(returnLocation))
                         .cookies(List.of(
                                 HttpCookie.session(principal.get().token()),
                                 HttpCookie.expired(HttpCookie.NAME_LOGIN_RETURN)))

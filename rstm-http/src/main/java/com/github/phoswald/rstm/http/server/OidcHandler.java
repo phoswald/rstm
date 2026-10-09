@@ -22,11 +22,12 @@ class OidcHandler {
         String code = request.queryParam("code").orElse("");
         String state = request.queryParam("state").orElse("");
         String stateToken = request.cookie(HttpCookie.NAME_LOGIN_STATE).orElse(null);
+        String returnLocation = request.cookie(HttpCookie.NAME_LOGIN_RETURN).map(HttpCookie::decodeValue).orElse("/");
         Optional<Principal> principal = request.config().identityProvider().authenticateWithOidcCallback(code, state, stateToken);
         if (principal.isPresent()) {
             return HttpResponse.builder()
                     .status(302)
-                    .location(LoginReturn.location(request, LoginReturn.read(request).orElse(null)))
+                    .location(request.relativizePath(returnLocation))
                     .cookies(List.of(
                             HttpCookie.session(principal.get().token()),
                             HttpCookie.expired(HttpCookie.NAME_LOGIN_STATE),
