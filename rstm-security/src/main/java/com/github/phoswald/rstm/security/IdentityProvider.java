@@ -7,23 +7,17 @@ import java.util.Optional;
  */
 public interface IdentityProvider {
 
-    public default Optional<Principal> authenticateWithPassword(String username, char[] password) {
+    Optional<Principal> authenticateWithPassword(String username, char[] password);
+
+    Optional<Principal> authenticateWithToken(String token);
+
+    Principal exchangeToken(Principal principal);
+
+    default Optional<OidcRedirect> authenticateWithOidcRedirect(String provider) {
         return Optional.empty();
     }
 
-    public default Optional<Principal> authenticateWithToken(String token) {
+    default Optional<Principal> authenticateWithOidcCallback(String code, String state, String stateToken) {
         return Optional.empty();
-    }
-
-    public default Optional<OidcRedirect> authenticateWithOidcRedirect(String provider) {
-        return Optional.empty();
-    }
-
-    public default Optional<Principal> authenticateWithOidcCallback(String code, String state, String stateToken) {
-        return Optional.empty();
-    }
-
-    public default Principal exchangeToken(Principal principal) {
-        throw new UnsupportedOperationException();
     }
 }

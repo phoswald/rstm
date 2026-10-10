@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.github.phoswald.rstm.security.IdentityProvider;
 import com.github.phoswald.rstm.security.OidcRedirect;
 import com.github.phoswald.rstm.security.Principal;
+import com.github.phoswald.rstm.security.SimpleIdentityProvider;
 import com.github.phoswald.rstm.security.jwt.JwtValidToken;
 
 /**
@@ -30,7 +31,7 @@ public class OidcIdentityProvider implements IdentityProvider {
 
     OidcIdentityProvider(String redirectUri, String secret, IdentityProvider upstream, Supplier<Instant> clock, RandomGenerator random) {
         this.oidcUtil = new OidcUtil(redirectUri, secret, clock, random);
-        this.upstream = upstream != null ? upstream : new IdentityProvider() { };
+        this.upstream = upstream != null ? upstream : new SimpleIdentityProvider();
     }
 
     public OidcIdentityProvider withDex(String clientId, String clientSecret, String baseUri) {
@@ -93,6 +94,11 @@ public class OidcIdentityProvider implements IdentityProvider {
     }
 
     @Override
+    public Principal exchangeToken(Principal principal) {
+        return upstream.exchangeToken(principal);
+    }
+
+    @Override
     public Optional<OidcRedirect> authenticateWithOidcRedirect(String provider) {
         return oidcUtil.authenticateWithRedirect(provider);
     }
@@ -100,11 +106,6 @@ public class OidcIdentityProvider implements IdentityProvider {
     @Override
     public Optional<Principal> authenticateWithOidcCallback(String code, String state, String stateToken) {
         return oidcUtil.authenticateWithCallback(code, state, stateToken).map(this::createPrincipal);
-    }
-
-    @Override
-    public Principal exchangeToken(Principal principal) {
-        return upstream.exchangeToken(principal);
     }
 
     private Principal createPrincipal(JwtValidToken token) {

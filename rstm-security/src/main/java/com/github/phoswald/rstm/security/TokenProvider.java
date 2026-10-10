@@ -10,7 +10,7 @@ import java.util.Optional;
  */
 public interface TokenProvider {
 
-    public Principal createPrincipal(String username, List<String> roles);
+    Principal createPrincipal(String username, List<String> roles);
 
-    public Optional<Principal> authenticateWithToken(String token);
+    Optional<Principal> authenticateWithToken(String token);
 }

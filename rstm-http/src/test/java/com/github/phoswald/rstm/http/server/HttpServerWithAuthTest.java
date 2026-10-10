@@ -331,22 +331,6 @@ class HttpServerWithAuthTest {
     private static class TestOidcIdentityProvider extends SimpleIdentityProvider {
 
         @Override
-        public Optional<OidcRedirect> authenticateWithOidcRedirect(String provider) {
-            if (!provider.equals("idp1")) {
-                return Optional.empty();
-            }
-            return Optional.of(new OidcRedirect("https://idp1.example.com/auth?state=state1", "token-state1"));
-        }
-
-        @Override
-        public Optional<Principal> authenticateWithOidcCallback(String code, String state, String stateToken) {
-            if (!code.equals("code1") || !("token-" + state).equals(stateToken)) {
-                return Optional.empty();
-            }
-            return authenticateWithPassword("username1", "password1".toCharArray());
-        }
-
-        @Override
         public Optional<Principal> authenticateWithToken(String token) {
             if(token.equals("externaltoken1")) {
                 return Optional.of(new Principal("username1", List.of(), "external", token));
@@ -360,6 +344,22 @@ class HttpServerWithAuthTest {
                 return new Principal("username1", List.of(), "internal", "internaltoken1");
             }
             return super.exchangeToken(principal);
+        }
+
+        @Override
+        public Optional<OidcRedirect> authenticateWithOidcRedirect(String provider) {
+            if (!provider.equals("idp1")) {
+                return Optional.empty();
+            }
+            return Optional.of(new OidcRedirect("https://idp1.example.com/auth?state=state1", "token-state1"));
+        }
+
+        @Override
+        public Optional<Principal> authenticateWithOidcCallback(String code, String state, String stateToken) {
+            if (!code.equals("code1") || !("token-" + state).equals(stateToken)) {
+                return Optional.empty();
+            }
+            return authenticateWithPassword("username1", "password1".toCharArray());
         }
     }
 }
