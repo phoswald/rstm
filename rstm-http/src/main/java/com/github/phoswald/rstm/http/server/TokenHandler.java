@@ -30,14 +30,14 @@ public class TokenHandler {
         String grantType = request.formParam("grant_type").orElse(null);
         String subjectToken = request.formParam("subject_token").orElse(null);
         String subjectTokenType = request.formParam("subject_token_type").orElse(null);
-        String requestedTokenType = request.formParam("requested_token_type").orElse(null);
+        // String requestedTokenType = request.formParam("requested_token_type").orElse(null);
         // String requestedAudience = request.formParam("audience").orElse(null);
         // String requestedScope = request.formParam("scope").orElse(null);
 
         Token token;
         if(Objects.equals(grantType, URN_EXCHANGE)
                 && Objects.equals(subjectTokenType, URN_ID_TOKEN)
-                && Objects.equals(requestedTokenType, URN_ACCESS_TOKEN)) {
+                /* && Objects.equals(requestedTokenType, URN_ACCESS_TOKEN) */) {
 
             Optional<String> internalToken = exchangeToken(request.config(), subjectToken);
             if(internalToken.isPresent()) {
@@ -57,7 +57,7 @@ public class TokenHandler {
         } else {
             token = new TokenBuilder()
                     .error("invalid_request")
-                    .error_description("Invalid parameters grant_type, subject_token_type, requested_token_type")
+                    .error_description("Invalid parameters grant_type, subject_token_type") /* requested_token_type */
                     .build();
         }
 
