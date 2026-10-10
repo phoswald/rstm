@@ -50,4 +50,13 @@ class SimpleIdentityProviderTest {
     void authenticateWithToken_invalid_failure() {
         assertFalse(testee.authenticateWithToken("bad").isPresent());
     }
+
+    @Test
+    void exchangeToken_valid_success() {
+        Principal principal = testee.exchangeToken(new Principal("usernameX", List.of("user"), "extern", "token"));
+        assertEquals("usernameX", principal.name());
+        assertEquals(List.of("user"), principal.roles());
+        assertEquals(LOCAL_PROVIDER, principal.provider());
+        assertThat(principal.token(), matchesRegex("[0-9a-f]{32}"));
+    }
 }

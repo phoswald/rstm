@@ -53,4 +53,10 @@ public class SimpleIdentityProvider implements IdentityProvider {
     public Optional<Principal> authenticateWithToken(String token) {
         return tokenProvider.authenticateWithToken(token);
     }
+
+    @Override
+    public Principal exchangeToken(Principal principal) {
+        logger.info("Exchanging token for {} from {}", principal.name(), principal.provider());
+        return tokenProvider.createPrincipal(principal.name(), principal.roles());
+    }
 }

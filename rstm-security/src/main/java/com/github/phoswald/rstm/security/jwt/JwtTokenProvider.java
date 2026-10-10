@@ -23,8 +23,8 @@ public class JwtTokenProvider implements TokenProvider {
     private final String secret;
     private final JwtUtil jwtUtil;
 
-    public JwtTokenProvider(String site, String secret) {
-        this(site, secret, Instant::now);
+    public JwtTokenProvider(String issuer, String secret) {
+        this(issuer, secret, Instant::now);
     }
 
     JwtTokenProvider(String issuer, String secret, Supplier<Instant> clock) {

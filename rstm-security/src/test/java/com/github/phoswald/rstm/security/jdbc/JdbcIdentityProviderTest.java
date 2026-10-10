@@ -54,6 +54,15 @@ class JdbcIdentityProviderTest {
         assertFalse(testee.authenticateWithToken("bad").isPresent());
     }
 
+    @Test
+    void exchangeToken_valid_success() {
+        Principal principal = testee.exchangeToken(new Principal("usernameX", List.of("user"), "extern", "token"));
+        assertEquals("usernameX", principal.name());
+        assertEquals(List.of("user"), principal.roles());
+        assertEquals(LOCAL_PROVIDER, principal.provider());
+        assertThat(principal.token(), matchesRegex("[0-9a-f]{32}"));
+    }
+
     private Connection getConnection() {
         try {
             String url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'src/test/resources/schema.h2.sql'";

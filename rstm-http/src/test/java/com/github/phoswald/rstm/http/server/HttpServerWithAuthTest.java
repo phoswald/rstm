@@ -6,11 +6,13 @@ import static com.github.phoswald.rstm.http.server.HttpServerConfig.get;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.login;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.oidc;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.route;
+import static com.github.phoswald.rstm.http.server.HttpServerConfig.token;
 import static io.restassured.RestAssured.given;
 import static io.restassured.matcher.RestAssuredMatchers.detailedCookie;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.matchesRegex;
+import static org.hamcrest.Matchers.nullValue;
 
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,7 @@ class HttpServerWithAuthTest {
             .filter(combine(
                     route("/login", login()),
                     route("/oidc", oidc()),
+                    route("/token", token()),
                     route("/secured", auth("role1",
                             route("/resource", get(request ->
                                     HttpResponse.text(200, "Hello, " + request.principal().name() + "!")))))
@@ -291,6 +294,37 @@ class HttpServerWithAuthTest {
                 .header("location", "../login.html");
     }
 
+    @Test
+    void post_token_allowed() {
+        given()
+                .formParam("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange")
+                .formParam("subject_token", "externaltoken1")
+                .formParam("subject_token_type", "urn:ietf:params:oauth:token-type:id_token")
+                .formParam("requested_token_type", "urn:ietf:params:oauth:token-type:access_token")
+                .when()
+                .post("/token")
+                .then()
+                .statusCode(200)
+                .contentType("application/json")
+                .body("access_token", equalTo("internaltoken1"));
+    }
+
+    @Test
+    void post_token_denied() {
+        given()
+                .formParam("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange")
+                .formParam("subject_token", "externaltoken2")
+                .formParam("subject_token_type", "urn:ietf:params:oauth:token-type:id_token")
+                .formParam("requested_token_type", "urn:ietf:params:oauth:token-type:access_token")
+                .when()
+                .post("/token")
+                .then()
+                .statusCode(400)
+                .contentType("application/json")
+                .body("error", equalTo("invalid_grant"))
+                .body("access_token", nullValue());
+    }
+
     /**
      * Local users plus a fake OIDC provider "idp1" whose state token simply echoes the state.
      */
@@ -310,6 +344,22 @@ class HttpServerWithAuthTest {
                 return Optional.empty();
             }
             return authenticateWithPassword("username1", "password1".toCharArray());
+        }
+
+        @Override
+        public Optional<Principal> authenticateWithToken(String token) {
+            if(token.equals("externaltoken1")) {
+                return Optional.of(new Principal("username1", List.of(), "external", token));
+            }
+            return super.authenticateWithToken(token);
+        }
+
+        @Override
+        public Principal exchangeToken(Principal principal) {
+            if(principal.token().equals("externaltoken1")) {
+                return new Principal("username1", List.of(), "internal", "internaltoken1");
+            }
+            return super.exchangeToken(principal);
         }
     }
 }

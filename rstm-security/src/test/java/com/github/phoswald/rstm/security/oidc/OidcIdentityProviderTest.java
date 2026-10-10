@@ -179,6 +179,19 @@ class OidcIdentityProviderTest {
         assertThat(principal.token(), matchesRegex("[0-9a-f]{32}"));
     }
 
+    @Test
+    void exchangeToken_valid_success() {
+        Principal principalExtern = testee.authenticateWithToken(TOKEN).get();
+        assertEquals("kilgore@kilgore.trout", principalExtern.name());
+        assertEquals(DEX_PROVIDER, principalExtern.provider());
+
+        Principal principal = testee.exchangeToken(principalExtern);
+        assertEquals("kilgore@kilgore.trout", principal.name());
+        assertEquals(List.of("user"), principal.roles());
+        assertEquals(LOCAL_PROVIDER, principal.provider());
+        assertThat(principal.token(), matchesRegex("[0-9a-f]{32}"));
+    }
+
     private void mockDexConfig() throws IOException {
         mockServer.when(request()
                 .withMethod("GET")

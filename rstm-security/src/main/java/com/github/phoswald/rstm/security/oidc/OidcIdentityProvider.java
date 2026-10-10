@@ -83,6 +83,16 @@ public class OidcIdentityProvider implements IdentityProvider {
     }
 
     @Override
+    public Optional<Principal> authenticateWithToken(String token) {
+        Optional<JwtValidToken> validToken = oidcUtil.validateToken(token);
+        if (validToken.isPresent()) {
+            return Optional.of(createPrincipal(validToken.get()));
+        } else {
+            return upstream.authenticateWithToken(token);
+        }
+    }
+
+    @Override
     public Optional<OidcRedirect> authenticateWithOidcRedirect(String provider) {
         return oidcUtil.authenticateWithRedirect(provider);
     }
@@ -93,13 +103,8 @@ public class OidcIdentityProvider implements IdentityProvider {
     }
 
     @Override
-    public Optional<Principal> authenticateWithToken(String token) {
-        Optional<JwtValidToken> validToken = oidcUtil.validateToken(token);
-        if (validToken.isPresent()) {
-            return Optional.of(createPrincipal(validToken.get()));
-        } else {
-            return upstream.authenticateWithToken(token);
-        }
+    public Principal exchangeToken(Principal principal) {
+        return upstream.exchangeToken(principal);
     }
 
     private Principal createPrincipal(JwtValidToken token) {

@@ -48,6 +48,10 @@ public record HttpServerConfig(
         return new OidcHandler().createRoute();
     }
 
+    public static HttpFilter token() {
+        return new TokenHandler().createRoute();
+    }
+
     public static HttpFilter get(ThrowingFunction<HttpRequest, HttpResponse> handler) {
         return MethodFilter.of(GET, handler);
     }

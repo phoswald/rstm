@@ -49,6 +49,12 @@ public class JdbcIdentityProvider implements IdentityProvider {
         return tokenProvider.authenticateWithToken(token);
     }
 
+    @Override
+    public Principal exchangeToken(Principal principal) {
+        logger.info("Exchanging token for {} from {}", principal.name(), principal.provider());
+        return tokenProvider.createPrincipal(principal.name(), principal.roles());
+    }
+
     private JdbcUser selectUser(String username) {
         try (Connection connection = connectionFactory.get()) {
             PreparedStatement statement = connection.prepareStatement("""

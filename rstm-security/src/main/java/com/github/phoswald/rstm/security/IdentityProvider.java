@@ -22,4 +22,8 @@ public interface IdentityProvider {
     public default Optional<Principal> authenticateWithOidcCallback(String code, String state, String stateToken) {
         return Optional.empty();
     }
+
+    public default Principal exchangeToken(Principal principal) {
+        throw new UnsupportedOperationException();
+    }
 }
