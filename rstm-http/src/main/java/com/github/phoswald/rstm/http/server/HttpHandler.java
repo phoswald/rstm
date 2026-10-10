@@ -29,12 +29,12 @@ class HttpHandler implements com.sun.net.httpserver.HttpHandler {
     @Override
     public void handle(HttpExchange exchange) {
         try {
-            logger.info("Handling {} {}", exchange.getRequestMethod(), exchange.getRequestURI());
+            logger.info("Handling {} {}", exchange.getRequestMethod(), exchange.getRequestURI().getPath());
             HttpRequest request = readRequest(exchange);
             HttpResponse response = processRequest(request);
             writeResponse(exchange, response);
         } catch (Exception e) {
-            logger.error("Handling {} {} failed:", exchange.getRequestMethod(), exchange.getRequestURI(), e);
+            logger.error("Handling {} {} failed:", exchange.getRequestMethod(), exchange.getRequestURI().getPath(), e);
         } finally {
             exchange.close();
         }
