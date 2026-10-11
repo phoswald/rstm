@@ -6,7 +6,6 @@ import static com.github.phoswald.rstm.http.server.HttpServerConfig.get;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.login;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.oidc;
 import static com.github.phoswald.rstm.http.server.HttpServerConfig.route;
-import static com.github.phoswald.rstm.http.server.HttpServerConfig.token;
 import static io.restassured.RestAssured.given;
 import static io.restassured.matcher.RestAssuredMatchers.detailedCookie;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -39,9 +38,8 @@ class HttpServerWithAuthTest {
     private static final HttpServerConfig config = HttpServerConfig.builder()
             .httpPort(8080)
             .filter(combine(
-                    route("/login", login()),
-                    route("/oidc", oidc()),
-                    route("/token", token()),
+                    login(),
+                    oidc(),
                     route("/secured", auth("role1",
                             route("/resource", get(request ->
                                     HttpResponse.text(200, "Hello, " + request.principal().name() + "!")))))
@@ -118,12 +116,12 @@ class HttpServerWithAuthTest {
     }
 
     @Test
-    void get_login_oidcRedirect() {
+    void get_oidc_redirectlogin_oidcRedirect() {
         given()
                 .redirects().follow(false)
                 .queryParam("provider", "idp1")
                 .when()
-                .get("/login")
+                .get("/oauth/redirect")
                 .then()
                 .statusCode(302)
                 .header("location", "https://idp1.example.com/auth?state=state1")
@@ -144,10 +142,10 @@ class HttpServerWithAuthTest {
                 .queryParam("code", "code1")
                 .queryParam("state", "state1")
                 .when()
-                .get("/oidc")
+                .get("/oauth/callback")
                 .then()
                 .statusCode(302)
-                .header("location", "secured/resource")
+                .header("location", "../secured/resource")
                 .cookie("session", username1.token())
                 .cookie("login_state", detailedCookie().value("").maxAge(0))
                 .cookie("login_return", detailedCookie().value("").maxAge(0));
@@ -160,10 +158,10 @@ class HttpServerWithAuthTest {
                 .queryParam("code", "code1")
                 .queryParam("state", "state1")
                 .when()
-                .get("/oidc")
+                .get("/oauth/callback")
                 .then()
                 .statusCode(302)
-                .header("location", "login-error.html")
+                .header("location", "../login-error.html")
                 .cookie("login_state", detailedCookie().value("").maxAge(0));
     }
 
@@ -301,7 +299,7 @@ class HttpServerWithAuthTest {
                 .formParam("subject_token", "externaltoken1")
                 .formParam("subject_token_type", "urn:ietf:params:oauth:token-type:id_token")
                 .when()
-                .post("/token")
+                .post("/oauth/token")
                 .then()
                 .statusCode(200)
                 .contentType("application/json")
@@ -315,7 +313,7 @@ class HttpServerWithAuthTest {
                 .formParam("subject_token", "externaltoken2")
                 .formParam("subject_token_type", "urn:ietf:params:oauth:token-type:id_token")
                 .when()
-                .post("/token")
+                .post("/oauth/token")
                 .then()
                 .statusCode(400)
                 .contentType("application/json")
