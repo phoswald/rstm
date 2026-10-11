@@ -16,26 +16,26 @@ import com.github.phoswald.rstm.security.TokenProvider;
 
 public class JwtTokenProvider implements TokenProvider {
 
-    private static final Duration TOKEN_LIFESPAN = Duration.ofHours(2);
-
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final String issuer;
     private final String secret;
+    private final Duration lifespan;
     private final JwtUtil jwtUtil;
 
-    public JwtTokenProvider(String issuer, String secret) {
-        this(issuer, secret, Instant::now);
+    public JwtTokenProvider(String issuer, String secret, Duration lifespan) {
+        this(issuer, secret, lifespan, Instant::now);
     }
 
-    JwtTokenProvider(String issuer, String secret, Supplier<Instant> clock) {
+    JwtTokenProvider(String issuer, String secret, Duration lifespan, Supplier<Instant> clock) {
         this.issuer = issuer;
         this.secret = secret;
+        this.lifespan = lifespan;
         this.jwtUtil = new JwtUtil(clock);
     }
 
     @Override
     public Principal createPrincipal(String user, List<String> roles) {
-        String token = jwtUtil.createTokenWithHmac(JwtPayload.of(user, roles), issuer, secret, TOKEN_LIFESPAN);
+        String token = jwtUtil.createTokenWithHmac(JwtPayload.of(user, roles), issuer, secret, lifespan);
         return new Principal(user, roles, LOCAL_PROVIDER, token);
     }
 
