@@ -4,6 +4,7 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.random.RandomGenerator;
 
@@ -24,6 +25,7 @@ public class OidcIdentityProvider implements IdentityProvider {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final OidcUtil oidcUtil;
     private final IdentityProvider upstream;
+    private boolean autoExchange;
 
     public OidcIdentityProvider(String redirectUri, String secret, IdentityProvider upstream) {
         this(redirectUri, secret, upstream, Instant::now, new SecureRandom());
@@ -32,6 +34,11 @@ public class OidcIdentityProvider implements IdentityProvider {
     OidcIdentityProvider(String redirectUri, String secret, IdentityProvider upstream, Supplier<Instant> clock, RandomGenerator random) {
         this.oidcUtil = new OidcUtil(redirectUri, secret, clock, random);
         this.upstream = upstream != null ? upstream : new SimpleIdentityProvider();
+    }
+
+    public OidcIdentityProvider withAutoExchange(boolean autoExchange) {
+        this.autoExchange = autoExchange;
+        return this;
     }
 
     public OidcIdentityProvider withDex(String clientId, String clientSecret, String baseUri) {
@@ -105,7 +112,9 @@ public class OidcIdentityProvider implements IdentityProvider {
 
     @Override
     public Optional<Principal> authenticateWithOidcCallback(String code, String state, String stateToken) {
-        return oidcUtil.authenticateWithCallback(code, state, stateToken).map(this::createPrincipal);
+        return oidcUtil.authenticateWithCallback(code, state, stateToken)
+                .map(this::createPrincipal)
+                .map(autoExchange ? this::exchangeToken : Function.identity());
     }
 
     private Principal createPrincipal(JwtValidToken token) {
