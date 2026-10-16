@@ -28,9 +28,11 @@ class TemplateEngineTest {
         assertThat(html, startsWith("<!doctype html>\n<html lang=\"en\">\n"));
         assertThat(html, containsString("\n    <title>Sample Page</title>\n"));
         assertThat(html, containsString("\n    <h1>Hello, <span>world</span>!</h1>\n"));
-        assertThat(html, containsString("\n    <p>The current date is <span>2023-02-16</span>.</p>\n"));
+        assertThat(html, containsString("\n    <p>The current date is <span>2023-02-16</span> (a).</p>\n"));
+        assertThat(html, containsString("\n    <p>The current date is 2023-02-16 (b).</p>\n"));
         assertThat(html, containsString("\n    <p>Optional: <span>message</span>.</p>\n"));
-        assertThat(html, containsString("\n    <p>Raw: <hello/>.</p>\n"));
+        assertThat(html, containsString("\n    <p>Raw: <script><hello/></script> (a).</p>\n"));
+        assertThat(html, containsString("\n    <p>Raw: <hello/> (b).</p>\n"));
         assertThat(html, containsString("\n    <!-- comment -->\n"));
         assertThat(html, endsWith("\n</html>\n"));
         assertThat(html, not(containsString("???")));
@@ -46,11 +48,13 @@ class TemplateEngineTest {
         assertThat(html, startsWith("<!doctype html>\n<html lang=\"en\">\n"));
         assertThat(html, containsString("\n    <title>Sample Page</title>\n"));
         assertThat(html, containsString("\n    <h1>Hello, <span></span>!</h1>\n"));
-        assertThat(html, containsString("\n    <p>The current date is <span></span>.</p>\n"));
+        assertThat(html, containsString("\n    <p>The current date is <span></span> (a).</p>\n"));
+        assertThat(html, containsString("\n    <p>The current date is  (b).</p>\n"));
         assertThat(html, containsString("\n    <!-- comment -->\n"));
         assertThat(html, endsWith("\n</html>\n"));
         assertThat(html, not(containsString("<p>Optional:")));
-        assertThat(html, containsString("\n    <p>Raw: .</p>\n"));
+        assertThat(html, containsString("\n    <p>Raw: <script></script> (a).</p>\n"));
+        assertThat(html, containsString("\n    <p>Raw:  (b).</p>\n"));
         assertThat(html, not(containsString("???")));
     }
 
@@ -130,6 +134,22 @@ class TemplateEngineTest {
         String html = template.evaluate(arguments);
 
         assertHtmlCollectionEmpty(html);
+    }
+
+    @Test
+    void compileAndExecute_validMultiListObject_success() {
+        SampleMultiArguments arguments = new SampleMultiArguments(
+                List.of(new SampleOption("foo", "bar", null), new SampleOption("bar", "baz", true)));
+
+        Template<SampleMultiArguments> template = testee.compile(SampleMultiArguments.class, "sample-multi");
+        String html = template.evaluate(arguments);
+
+        assertThat(html, startsWith("<!doctype html>\n<html lang=\"en\">\n"));
+        assertThat(html, containsString("\n    <select name=\"one\">\n"));
+        assertThat(html, containsString("<option value=\"foo\">bar</option>"));
+        assertThat(html, containsString("<option value=\"bar\" selected=\"true\">baz</option>"));
+        assertThat(html, endsWith("\n</html>\n"));
+        assertThat(html, not(containsString("???")));
     }
 
     private void assertHtmlCollection(String html) {

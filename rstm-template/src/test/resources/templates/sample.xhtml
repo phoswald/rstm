@@ -5,9 +5,11 @@
   </head>
   <body>
     <h1>Hello, <span t:text="name">???</span>!</h1>
-    <p>The current date is <span t:text="today">???</span>.</p>
+    <p>The current date is <span t:text="today">???</span> (a).</p>
+    <p>The current date is <t:do t:text="today">???</t:do> (b).</p>
     <p t:if="optional">Optional: <span t:text="optional">???</span>.</p>
-    <p>Raw: <span t:raw="rawHtml">???</span>.</p>
+    <p>Raw: <script t:raw="rawHtml">???</script> (a).</p>
+    <p>Raw: <t:do t:raw="rawHtml">???</t:do> (b).</p>
     <!-- comment -->
     <input type="text" name="date" t:attr="value=today"/>
   </body>

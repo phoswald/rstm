@@ -79,8 +79,8 @@ class HtmlGeneratorTest {
     @ParameterizedTest
     @ValueSource(strings = {"text", "<hello/>", "a < b > c & d \" e ' f"})
     @NullSource
-    void generateRaw_valid_successUnescaped(String input) {
-        testee.generateRaw(input);
+    void generateTextRaw_valid_successUnescaped(String input) {
+        testee.generateTextRaw(input);
         assertEquals(input == null ? "" : input, testee.getOutput());
     }
 

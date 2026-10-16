@@ -12,8 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.function.Function;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -22,7 +21,6 @@ import javax.xml.stream.XMLStreamReader;
 class XHtmlParser {
 
     private static final String NAMESPACE = "https://github.com/phoswald/rstm/rstm-template";
-    private static final Pattern ATTR_PATTERN = Pattern.compile("([a-z][a-z0-9-]*)=([a-zA-Z][a-zA-Z0-9-]*)");
     private static final XMLInputFactory FACTORY = XMLInputFactory.newInstance();
 
     private final XMLStreamReader reader;
@@ -43,23 +41,7 @@ class XHtmlParser {
             int xmlEvent = reader.next();
             switch (xmlEvent) {
                 case START_ELEMENT:
-                    Map<String, String> attributes = new LinkedHashMap<>();
-                    Operation operation = Operation.nop(compilation);
-                    for (int i = 0; i < reader.getAttributeCount(); i++) {
-                        String attributeNamespace = reader.getAttributeNamespace(i);
-                        String attributeName = reader.getAttributeLocalName(i);
-                        String attributeValue = reader.getAttributeValue(i);
-                        if (Objects.equals(attributeNamespace, NAMESPACE)) {
-                            operation = processAttribute(compilation, attributeName, attributeValue);
-                        } else if (reader.getAttributeNamespace(i) == null) {
-                            attributes.put(attributeName, attributeValue);
-                        } else {
-                            throw new IllegalArgumentException("Unsupported namespace: " + attributeNamespace);
-                        }
-                    }
-                    List<Node> children = parseNodes(operation.nestedCompilation());
-                    HtmlElement element = new HtmlElement(reader.getLocalName(), attributes, children);
-                    nodes.add(operation.processHtmlElement(element));
+                    nodes.add(processElement(compilation));
                     break;
                 case END_ELEMENT:
                     exit = true;
@@ -80,25 +62,52 @@ class XHtmlParser {
         return nodes;
     }
 
-    private Operation processAttribute(TemplateCompilation<?> compilation, String attributeName, String attributeValue) {
-        switch (attributeName) {
-            case "text":
-                return Operation.text(compilation, attributeValue);
-            case "attr":
-                Matcher matcher = ATTR_PATTERN.matcher(attributeValue);
-                if (matcher.matches()) {
-                    return Operation.attr(compilation, matcher.group(1), matcher.group(2));
-                } else {
-                    throw new IllegalArgumentException("Invalid attribute value: " + attributeValue);
-                }
-            case "raw":
-                return Operation.raw(compilation, attributeValue);
-            case "if":
-                return Operation.iff(compilation, attributeValue);
-            case "each":
-                return Operation.each(compilation, attributeValue);
-            default:
-                throw new IllegalArgumentException("Unsupported attribute: " + attributeName);
+    private Node processElement(TemplateCompilation<?> compilation) throws XMLStreamException {
+        Map<String, String> attributes = new LinkedHashMap<>();
+        TemplateCompilation<?> nestedCompilation = compilation;
+        List<Function<Node, Node>> transformations = new ArrayList<>();
+        for (int i = 0; i < reader.getAttributeCount(); i++) {
+            String attributeNamespace = reader.getAttributeNamespace(i);
+            String attributeName = reader.getAttributeLocalName(i);
+            String attributeValue = reader.getAttributeValue(i);
+            if (Objects.equals(attributeNamespace, NAMESPACE)) {
+                TemplateOperation operation = processAttribute(nestedCompilation, attributeName, attributeValue);
+                nestedCompilation = operation.nestedCompilation();
+                transformations.add(operation.transformation());
+            } else if (reader.getAttributeNamespace(i) == null) {
+                attributes.put(attributeName, attributeValue);
+            } else {
+                throw new IllegalArgumentException("Unsupported namespace: " + attributeNamespace);
+            }
         }
+        List<Node> children = parseNodes(nestedCompilation);
+        Node node;
+        if(Objects.equals(reader.getNamespaceURI(), NAMESPACE)) {
+            node = processElement(reader.getLocalName(), children) ;
+        } else {
+            node = new HtmlElement(reader.getLocalName(), attributes, children);
+        }
+        for(Function<Node, Node> transformation : transformations.reversed()) {
+            node = transformation.apply(node);
+        }
+        return node;
+    }
+
+    private TemplateOperation processAttribute(TemplateCompilation<?> compilation, String attributeName, String attributeValue) {
+        return switch (attributeName) {
+            case "text" -> TemplateOperation.text(compilation, attributeValue);
+            case "raw" -> TemplateOperation.raw(compilation, attributeValue);
+            case "attr" -> TemplateOperation.attr(compilation, attributeValue);
+            case "if" -> TemplateOperation.iff(compilation, attributeValue);
+            case "each" -> TemplateOperation.each(compilation, attributeValue);
+            default -> throw new IllegalArgumentException("Unsupported attribute: " + attributeName);
+        };
+    }
+
+    private Node processElement(String elementName, List<Node> children) {
+        return switch(elementName) {
+            case "do" -> TemplateOperation.doo(children);
+            default ->  throw new IllegalArgumentException("Unsupported element: " + elementName);
+        };
     }
 }

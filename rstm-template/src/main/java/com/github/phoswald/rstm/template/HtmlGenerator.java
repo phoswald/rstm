@@ -81,7 +81,7 @@ class HtmlGenerator {
         }
     }
 
-    void generateRaw(String raw) {
+    void generateTextRaw(String raw) {
         if (raw != null) {
             buffer.append(raw);
         }

@@ -18,28 +18,32 @@ record ExprText(Property<String> property) implements Node {
     }
 }
 
-record ExprAttr(Property<String> property, String attribute, HtmlElement nestedNode) implements Node {
+record ExprTextRaw(Property<String> property) implements Node {
 
     @Override
     public void evaluateNode(HtmlGenerator generator, TemplateArgument<?> argument) {
-        String value = property.getValue(argument);
+        generator.generateTextRaw(property.getValue(argument));
+    }
+}
+
+record ExprAttr(List<Attribute> attributes, HtmlElement nestedNode) implements Node {
+
+    @Override
+    public void evaluateNode(HtmlGenerator generator, TemplateArgument<?> argument) {
         HtmlElement node = nestedNode;
-        if (value != null) {
-            node = nestedNode.addAttribute(attribute, value);
+        for(Attribute attribute : attributes) {
+            String value = attribute.property().getValue(argument);
+            if (value != null) {
+                node = node.addAttribute(attribute.name(), value);
+            }
         }
         node.evaluateNode(generator, argument);
     }
+
+    record Attribute(String name, Property<String> property) { }
 }
 
-record ExprRaw(Property<String> property) implements Node {
-
-    @Override
-    public void evaluateNode(HtmlGenerator generator, TemplateArgument<?> argument) {
-        generator.generateRaw(property.getValue(argument));
-    }
-}
-
-record ExprIf(Property<Boolean> property, HtmlElement nestedNode) implements Node {
+record ExprIf(Property<Boolean> property, Node nestedNode) implements Node {
 
     @Override
     public void evaluateNode(HtmlGenerator generator, TemplateArgument<?> argument) {
@@ -49,12 +53,22 @@ record ExprIf(Property<Boolean> property, HtmlElement nestedNode) implements Nod
     }
 }
 
-record ExprEach(Property<Collection<?>> property, HtmlElement nestedNode) implements Node {
+record ExprEach(Property<Collection<?>> property, Node nestedNode) implements Node {
 
     @Override
     public void evaluateNode(HtmlGenerator generator, TemplateArgument<?> argument) {
         for (Object nestedArgument : property.getValue(argument)) {
             nestedNode.evaluateNode(generator, argument.nestedArgument(nestedArgument));
+        }
+    }
+}
+
+record ExprDo(List<Node> children) implements Node {
+
+    @Override
+    public void evaluateNode(HtmlGenerator generator, TemplateArgument<?> argument) {
+        for (Node child : children) {
+            child.evaluateNode(generator, argument);
         }
     }
 }
